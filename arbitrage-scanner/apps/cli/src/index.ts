@@ -171,6 +171,80 @@ program
     }
   });
 
+// Match markets command
+program
+  .command('match-markets')
+  .description('Find matching market pairs using intelligent matching')
+  .option('--min-confidence <n>', 'Minimum confidence score', '40')
+  .option('--include-low', 'Include low confidence matches', false)
+  .option('--include-uncertain', 'Include uncertain matches', false)
+  .option('--save <file>', 'Save results to JSON file')
+  .action(async (options) => {
+    const spinner = ora('Finding market pairs...').start();
+
+    try {
+      const exchanges = await createExchanges('live');
+      const [kalshi, polymarket] = exchanges;
+
+      await kalshi.connect();
+      await polymarket.connect();
+
+      const { MarketMatcher } = await import('@arb/scanner');
+      const matcher = new MarketMatcher({
+        minConfidence: parseFloat(options.minConfidence),
+        includeLowConfidence: options.includeLow,
+        includeUncertain: options.includeUncertain
+      });
+
+      spinner.text = 'Analyzing matches...';
+      const pairs = await matcher.matchMarkets(kalshi, polymarket);
+
+      await kalshi.disconnect();
+      await polymarket.disconnect();
+
+      spinner.succeed(`Found ${pairs.length} market pairs`);
+
+      // Save if requested
+      if (options.save) {
+        const fs = require('fs');
+        const savePath = path.resolve(options.save);
+        fs.writeFileSync(savePath, JSON.stringify(pairs, null, 2));
+        console.log(chalk.green(`\n💾 Saved to: ${savePath}`));
+      }
+
+      // Display summary
+      console.log(chalk.cyan('\n📊 Match Summary:\n'));
+      const byLevel = {
+        high: pairs.filter(p => (p.correlationScore ?? 0) >= 0.8),
+        medium: pairs.filter(p => (p.correlationScore ?? 0) >= 0.6 && (p.correlationScore ?? 0) < 0.8),
+        low: pairs.filter(p => (p.correlationScore ?? 0) >= 0.4 && (p.correlationScore ?? 0) < 0.6),
+        uncertain: pairs.filter(p => (p.correlationScore ?? 0) < 0.4)
+      };
+
+      console.log(`  ${chalk.green('High confidence (80+):')}     ${byLevel.high.length} pairs`);
+      console.log(`  ${chalk.yellow('Medium confidence (60-79):')} ${byLevel.medium.length} pairs`);
+      console.log(`  ${chalk.blue('Low confidence (40-59):')}    ${byLevel.low.length} pairs`);
+      console.log(`  ${chalk.gray('Uncertain (<40):')}          ${byLevel.uncertain.length} pairs\n`);
+
+      // Show top high-confidence matches
+      if (byLevel.high.length > 0) {
+        console.log(chalk.green('Top High-Confidence Matches:\n'));
+        byLevel.high.slice(0, 10).forEach(pair => {
+          const score = ((pair.correlationScore ?? 0) * 100).toFixed(0);
+          console.log(`  ${chalk.bold(pair.description)}`);
+          console.log(`    → ${pair.polymarketMarket.title}`);
+          console.log(`    Confidence: ${chalk.green(score + '%')}\n`);
+        });
+      }
+
+      console.log('');
+    } catch (error) {
+      spinner.fail('Failed to match markets');
+      console.error(chalk.red(error));
+      process.exit(1);
+    }
+  });
+
 // Analyze command
 program
   .command('analyze')

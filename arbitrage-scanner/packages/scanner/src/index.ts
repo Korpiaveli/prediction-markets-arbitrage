@@ -1,5 +1,9 @@
 export { Scanner } from './Scanner.js';
-export { MarketMatcher } from './MarketMatcher.js';
+export {
+  MarketMatcher,
+  type MatchAnalysis,
+  type MatcherConfig
+} from './MarketMatcher.js';
 export { OpportunityRanker, type RankingCriteria } from './OpportunityRanker.js';
 
 // Factory function
