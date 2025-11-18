@@ -138,7 +138,7 @@ export class MarketMatcher {
   /**
    * Load market mappings from configuration
    */
-  async loadMappings(filePath?: string): Promise<MarketPair[]> {
+  async loadMappings(_filePath?: string): Promise<MarketPair[]> {
     // In production, this would load from a JSON file
     // For now, return empty array
     return [];

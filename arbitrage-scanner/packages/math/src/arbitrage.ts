@@ -12,8 +12,6 @@ import { SafeDecimal } from './decimal.js';
 export class ArbitrageCalculator implements IArbitrageCalculator {
 
   calculate(quotes: QuotePair, fees: FeeStructure): ArbitrageResult[] {
-    const results: ArbitrageResult[] = [];
-
     // Calculate Combo A: KALSHI YES + POLY NO
     const comboA = this.calculateCombo(
       quotes.kalshi.yes.ask,

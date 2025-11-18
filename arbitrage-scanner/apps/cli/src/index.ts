@@ -183,10 +183,13 @@ program
 async function createExchanges(mode: string) {
   switch (mode) {
     case 'mock':
-      return [
-        new MockExchange({ testMode: true }),
-        new MockExchange({ testMode: true })
-      ];
+      // Create two mock exchanges with different names
+      const mockKalshi = new MockExchange({ testMode: true });
+      const mockPoly = new MockExchange({ testMode: true });
+      // Override names for testing
+      (mockKalshi as any).name = 'KALSHI';
+      (mockPoly as any).name = 'POLYMARKET';
+      return [mockKalshi, mockPoly];
 
     case 'test':
       return [

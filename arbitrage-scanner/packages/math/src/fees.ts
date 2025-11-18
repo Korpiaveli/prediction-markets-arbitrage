@@ -3,7 +3,7 @@ import { SafeDecimal } from './decimal.js';
 
 export class FeeCalculator implements IFeeCalculator {
 
-  calculateKalshiFee(contracts: number, price: number): number {
+  calculateKalshiFee(contracts: number, _price: number): number {
     // Kalshi charges per contract fee
     const baseFee = 0.01; // $0.01 per contract
     const totalFee = SafeDecimal.from(baseFee).mul(contracts);

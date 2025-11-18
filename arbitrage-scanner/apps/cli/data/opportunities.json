@@ -1,0 +1,74 @@
+[
+  {
+    "id": "NFL_GAME_1_1763437025107",
+    "timestamp": "2025-11-18T03:37:05.107Z",
+    "marketPair": {
+      "id": "NFL_GAME_1",
+      "description": "NFL: Raiders beat Cowboys",
+      "kalshiMarket": {},
+      "polymarketMarket": {},
+      "kalshiId": "KALSHI_NFL_1",
+      "polymarketId": "POLY_NFL_1",
+      "correlationScore": 0.95
+    },
+    "quotePair": {
+      "kalshi": {
+        "marketId": "KALSHI_NFL_1",
+        "exchange": "KALSHI",
+        "timestamp": "2025-11-18T03:37:05.106Z",
+        "yes": {
+          "bid": 0.36253167411814535,
+          "ask": 0.3972830881174785,
+          "mid": 0.3799073811178119,
+          "liquidity": 6832.78299021459
+        },
+        "no": {
+          "bid": 0.6027169118825215,
+          "ask": 0.6374683258818545,
+          "mid": 0.620092618882188,
+          "liquidity": 2234.5391053238773
+        },
+        "lastUpdate": "2025-11-18T03:37:05.106Z"
+      },
+      "polymarket": {
+        "marketId": "POLY_NFL_1",
+        "exchange": "POLYMARKET",
+        "timestamp": "2025-11-18T03:37:05.106Z",
+        "yes": {
+          "bid": 0.460352406142683,
+          "ask": 0.48035240614268304,
+          "mid": 0.47035240614268303,
+          "liquidity": 9367.280493157054
+        },
+        "no": {
+          "bid": 0.47227225943636764,
+          "ask": 0.49227225943636765,
+          "mid": 0.48227225943636765,
+          "liquidity": 7521.162036635984
+        },
+        "lastUpdate": "2025-11-18T03:37:05.106Z"
+      },
+      "timestamp": "2025-11-18T03:37:05.106Z"
+    },
+    "direction": "KALSHI_YES_POLY_NO",
+    "profitPercent": 9.02900977,
+    "profitDollars": 61686.19474864,
+    "totalCost": 0.9097099023,
+    "maxSize": 6832,
+    "confidence": 90,
+    "ttl": 30,
+    "fees": {
+      "kalshiFee": 0.01,
+      "polymarketFee": 0.01015455481,
+      "totalFees": 0.02015455481,
+      "feePercent": 2.015455481
+    },
+    "liquidity": {
+      "kalshiAvailable": 6832.78299021459,
+      "polymarketAvailable": 7521.162036635984,
+      "maxExecutable": 6832,
+      "depthQuality": "DEEP"
+    },
+    "valid": true
+  }
+]

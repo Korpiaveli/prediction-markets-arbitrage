@@ -50,17 +50,31 @@ export class MockExchange extends BaseExchange {
   async getQuote(marketId: string): Promise<Quote> {
     await this.delay(50);
 
-    // Generate mock prices with some randomness
-    const yesBase = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
-    const spread = 0.01 + Math.random() * 0.02; // 0.01 to 0.03
+    // 30% chance of generating an arbitrage opportunity for testing
+    const generateArb = Math.random() < 0.3;
 
-    const yesBid = this.normalizePrice(yesBase - spread);
-    const yesAsk = this.normalizePrice(yesBase + spread);
+    let yesBid: number, yesAsk: number, noBid: number, noAsk: number;
 
-    // NO prices should roughly complement YES prices
-    const noBase = 1 - yesBase;
-    const noBid = this.normalizePrice(noBase - spread);
-    const noAsk = this.normalizePrice(noBase + spread);
+    if (generateArb) {
+      // Create prices that allow arbitrage
+      // For example: YES ask + NO ask < 1.0
+      yesAsk = 0.45 + Math.random() * 0.05; // 0.45-0.50
+      noAsk = 0.45 + Math.random() * 0.05;  // 0.45-0.50
+      yesBid = yesAsk - 0.02;
+      noBid = noAsk - 0.02;
+    } else {
+      // Normal market prices
+      const yesBase = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
+      const spread = 0.01 + Math.random() * 0.02; // 0.01 to 0.03
+
+      yesBid = this.normalizePrice(yesBase - spread);
+      yesAsk = this.normalizePrice(yesBase + spread);
+
+      // NO prices should roughly complement YES prices
+      const noBase = 1 - yesBase;
+      noBid = this.normalizePrice(noBase - spread);
+      noAsk = this.normalizePrice(noBase + spread);
+    }
 
     return {
       marketId,

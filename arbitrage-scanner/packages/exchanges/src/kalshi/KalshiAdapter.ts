@@ -49,6 +49,7 @@ export class KalshiAdapter extends BaseExchange {
 
   constructor(config: ExchangeConfig = {}) {
     super(config);
+    this.setBaseURL(this.apiUrl);
   }
 
   async getMarkets(): Promise<Market[]> {
@@ -64,9 +65,13 @@ export class KalshiAdapter extends BaseExchange {
         return data;
       });
 
+      if (!response) {
+        return [];
+      }
+
       const markets = response.markets
-        .filter(m => m.status === 'active')
-        .map(m => this.transformMarket(m));
+        .filter((m: any) => m.status === 'active')
+        .map((m: any) => this.transformMarket(m));
 
       this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
       return markets;
@@ -144,6 +149,10 @@ export class KalshiAdapter extends BaseExchange {
         return data;
       });
 
+      if (!response) {
+        throw new Error('No orderbook data received');
+      }
+
       return response;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch orderbook for ${marketId}:`, error);
@@ -166,12 +175,12 @@ export class KalshiAdapter extends BaseExchange {
   }
 
   // WebSocket subscription for real-time updates
-  subscribe(marketId: string, callback: (quote: Quote) => void): void {
+  subscribe(_marketId: string, _callback: (quote: Quote) => void): void {
     // TODO: Implement WebSocket subscription
     console.log(`[${this.name}] WebSocket subscription not yet implemented`);
   }
 
-  unsubscribe(marketId: string): void {
+  unsubscribe(_marketId: string): void {
     // TODO: Implement WebSocket unsubscription
     console.log(`[${this.name}] WebSocket unsubscription not yet implemented`);
   }

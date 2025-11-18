@@ -34,18 +34,19 @@ interface PolymarketOrderbook {
   }>;
 }
 
-interface PolymarketClob {
-  id: string;
-  condition_id: string;
-  question: string;
-  description: string;
-  tokens: Array<{
-    token_id: string;
-    outcome: string;
-    price: number;
-    winner: boolean;
-  }>;
-}
+// Interface for future CLOB API integration
+// interface PolymarketClob {
+//   id: string;
+//   condition_id: string;
+//   question: string;
+//   description: string;
+//   tokens: Array<{
+//     token_id: string;
+//     outcome: string;
+//     price: number;
+//     winner: boolean;
+//   }>;
+// }
 
 export class PolymarketAdapter extends BaseExchange {
   readonly name: ExchangeName = 'POLYMARKET';
@@ -58,8 +59,11 @@ export class PolymarketAdapter extends BaseExchange {
     burstLimit: 30
   };
 
+  private dataClient: AxiosInstance;
+
   constructor(config: ExchangeConfig = {}) {
     super(config);
+    this.setBaseURL(this.apiUrl);
 
     // Create separate client for data API
     this.dataClient = axios.create({
@@ -67,8 +71,6 @@ export class PolymarketAdapter extends BaseExchange {
       timeout: config.timeout || 5000
     });
   }
-
-  private dataClient: AxiosInstance;
 
   async getMarkets(): Promise<Market[]> {
     const cacheKey = this.getCacheKey('markets');
@@ -162,7 +164,7 @@ export class PolymarketAdapter extends BaseExchange {
   private buildQuoteFromOrderbook(
     marketId: string,
     orderbook: PolymarketOrderbook,
-    marketData: any
+    _marketData: any
   ): Quote {
     // Parse best bid/ask from orderbook
     const bestBid = orderbook.bids[0] ? parseFloat(orderbook.bids[0].price) : 0;
@@ -217,12 +219,12 @@ export class PolymarketAdapter extends BaseExchange {
   }
 
   // WebSocket subscription for real-time updates
-  subscribe(marketId: string, callback: (quote: Quote) => void): void {
+  subscribe(_marketId: string, _callback: (quote: Quote) => void): void {
     // TODO: Implement WebSocket subscription to Polymarket
     console.log(`[${this.name}] WebSocket subscription not yet implemented`);
   }
 
-  unsubscribe(marketId: string): void {
+  unsubscribe(_marketId: string): void {
     // TODO: Implement WebSocket unsubscription
     console.log(`[${this.name}] WebSocket unsubscription not yet implemented`);
   }

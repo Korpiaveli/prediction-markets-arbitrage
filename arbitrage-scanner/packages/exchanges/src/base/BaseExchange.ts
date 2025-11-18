@@ -26,9 +26,8 @@ export abstract class BaseExchange implements IExchange {
   constructor(config: ExchangeConfig = {}) {
     this.config = config;
 
-    // Initialize HTTP client
+    // Initialize HTTP client (apiUrl will be set by subclass)
     this.client = axios.create({
-      baseURL: this.apiUrl,
       timeout: config.timeout || 5000,
       headers: this.getHeaders()
     });
@@ -48,6 +47,10 @@ export abstract class BaseExchange implements IExchange {
     });
 
     this.setupInterceptors();
+  }
+
+  protected setBaseURL(url: string): void {
+    this.client.defaults.baseURL = url;
   }
 
   protected getHeaders(): Record<string, string> {

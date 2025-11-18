@@ -6,6 +6,9 @@ export { ValidationService } from './validation.js';
 // Convenience exports
 export { ArbitrageCalculator as Calculator } from './arbitrage.js';
 
+// Re-import for factory function
+import { ArbitrageCalculator } from './arbitrage.js';
+
 // Factory function for easy instantiation
 export function createCalculator() {
   return new ArbitrageCalculator();
