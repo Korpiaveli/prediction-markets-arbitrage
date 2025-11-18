@@ -8,23 +8,42 @@ import {
 import { BaseExchange } from '../base/BaseExchange.js';
 
 interface KalshiMarketResponse {
+  cursor?: string;
   markets: Array<{
     ticker: string;
+    event_ticker: string;
     title: string;
-    subtitle: string;
+    yes_sub_title?: string;
+    no_sub_title?: string;
     close_time: string;
+    expiration_time: string;
     status: string;
+    market_type: string;
+
+    // Prices in cents (1-99)
     yes_bid: number;
     yes_ask: number;
     no_bid: number;
     no_ask: number;
-    volume_24h: number;
-    open_interest: number;
+
+    // Prices in dollar format
+    yes_bid_dollars: string;
+    yes_ask_dollars: string;
+    no_bid_dollars: string;
+    no_ask_dollars: string;
+
     last_price: number;
-    previous_yes_bid: number;
-    previous_yes_ask: number;
-    previous_no_bid: number;
-    previous_no_ask: number;
+    previous_price: number;
+    volume: number;
+    volume_24h: number;
+    liquidity: number;
+    liquidity_dollars: string;
+    open_interest?: number;
+
+    // Resolution criteria (often empty)
+    rules_primary?: string;
+    rules_secondary?: string;
+    result?: string | null;
   }>;
 }
 
@@ -60,18 +79,18 @@ export class KalshiAdapter extends BaseExchange {
     try {
       const response = await this.queue.add(async () => {
         const { data } = await this.client.get<KalshiMarketResponse>('/markets', {
-          params: { limit: 200, status: 'active' }
+          params: { limit: 200, status: 'open' }
         });
         return data;
       });
 
-      if (!response) {
+      if (!response || !response.markets) {
         return [];
       }
 
       const markets = response.markets
-        .filter((m: any) => m.status === 'active')
-        .map((m: any) => this.transformMarket(m));
+        .filter((m) => m.status === 'open' || m.status === 'active')
+        .map((m) => this.transformMarket(m));
 
       this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
       return markets;
@@ -122,12 +141,12 @@ export class KalshiAdapter extends BaseExchange {
         exchange: this.name,
         timestamp: new Date(),
         yes: this.normalizePriceLevel(
-          response.yes_bid / 100,
-          response.yes_ask / 100
+          parseFloat(response.yes_bid_dollars || '0'),
+          parseFloat(response.yes_ask_dollars || '0')
         ),
         no: this.normalizePriceLevel(
-          response.no_bid / 100,
-          response.no_ask / 100
+          parseFloat(response.no_bid_dollars || '0'),
+          parseFloat(response.no_ask_dollars || '0')
         ),
         lastUpdate: new Date()
       };
@@ -166,11 +185,18 @@ export class KalshiAdapter extends BaseExchange {
       exchangeId: data.ticker,
       exchange: this.name,
       title: data.title,
-      description: data.subtitle || data.title,
+      description: data.yes_sub_title || data.title,
       closeTime: data.close_time ? new Date(data.close_time) : undefined,
-      volume24h: data.volume_24h,
+      volume24h: data.volume_24h || data.volume,
       openInterest: data.open_interest,
-      active: data.status === 'active'
+      active: data.status === 'open' || data.status === 'active',
+      metadata: {
+        eventTicker: data.event_ticker,
+        marketType: data.market_type,
+        rulesPrimary: data.rules_primary || '',
+        rulesSecondary: data.rules_secondary || '',
+        liquidity: parseFloat(data.liquidity_dollars || '0')
+      }
     };
   }
 

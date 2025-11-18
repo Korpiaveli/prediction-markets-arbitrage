@@ -8,17 +8,44 @@ import {
 import { BaseExchange } from '../base/BaseExchange.js';
 
 interface PolymarketMarket {
-  id: string;
+  condition_id: string;
+  question_id: string;
   question: string;
   description: string;
-  end_date_iso: string;
   market_slug: string;
-  volume_num: number;
-  liquidity_num: number;
-  outcomes: string[];
-  outcome_prices: number[];
+  end_date_iso: string;
+  game_start_time?: string;
+
+  // Status
+  active: boolean;
   closed: boolean;
+  archived: boolean;
   accepting_orders: boolean;
+  accepting_order_timestamp?: string;
+
+  // Trading
+  minimum_order_size: number;
+  minimum_tick_size: number;
+  enable_order_book: boolean;
+  maker_base_fee: number;
+  taker_base_fee: number;
+
+  // Outcomes and prices
+  tokens: Array<{
+    token_id: string;
+    outcome: string;
+    price: number;
+    winner: boolean;
+  }>;
+
+  // Resolution
+  is_50_50_outcome?: boolean;
+  seconds_delay?: number;
+
+  // Metadata
+  tags?: string[];
+  icon?: string;
+  image?: string;
 }
 
 interface PolymarketOrderbook {
@@ -80,17 +107,23 @@ export class PolymarketAdapter extends BaseExchange {
     try {
       // Fetch from Polymarket's CLOB API
       const response = await this.queue.add(async () => {
-        const { data } = await this.dataClient.get('/markets', {
+        const { data } = await this.client.get('/markets', {
           params: {
             closed: false,
-            limit: 100
+            limit: 200,
+            active: true
           }
         });
         return data;
       });
 
+      if (!Array.isArray(response)) {
+        console.warn(`[${this.name}] Unexpected response format, expected array`);
+        return [];
+      }
+
       const markets = response
-        .filter((m: PolymarketMarket) => m.accepting_orders)
+        .filter((m: PolymarketMarket) => m.active && m.accepting_orders && !m.archived)
         .map((m: PolymarketMarket) => this.transformMarket(m));
 
       this.cache.set(cacheKey, markets, 30);
@@ -205,16 +238,35 @@ export class PolymarketAdapter extends BaseExchange {
   }
 
   private transformMarket(data: PolymarketMarket): Market {
+    // Calculate volume from tokens if available
+    const volume = data.tokens?.reduce((sum, t) => sum + (t.price || 0), 0) || 0;
+
     return {
-      id: data.id,
-      exchangeId: data.id,
+      id: data.condition_id,
+      exchangeId: data.condition_id,
       exchange: this.name,
       title: data.question,
       description: data.description || data.question,
       closeTime: data.end_date_iso ? new Date(data.end_date_iso) : undefined,
-      volume24h: data.volume_num,
-      openInterest: data.liquidity_num,
-      active: !data.closed && data.accepting_orders
+      volume24h: volume,
+      openInterest: 0, // Not provided by CLOB API
+      active: data.active && data.accepting_orders && !data.closed && !data.archived,
+      metadata: {
+        questionId: data.question_id,
+        marketSlug: data.market_slug,
+        resolutionRules: data.description || '',
+        tokens: data.tokens?.map(t => ({
+          tokenId: t.token_id,
+          outcome: t.outcome,
+          price: t.price
+        })),
+        tags: data.tags || [],
+        minimumOrderSize: data.minimum_order_size,
+        fees: {
+          maker: data.maker_base_fee,
+          taker: data.taker_base_fee
+        }
+      }
     };
   }
 

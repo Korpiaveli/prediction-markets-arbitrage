@@ -12,6 +12,7 @@ export interface Market {
   volume24h?: number;
   openInterest?: number;
   active: boolean;
+  metadata?: Record<string, any>; // Exchange-specific data (resolution criteria, fees, etc.)
 }
 
 export interface Quote {
