@@ -1,7 +1,7 @@
 [
   {
-    "id": "NFL_GAME_1_1763437025107",
-    "timestamp": "2025-11-18T03:37:05.107Z",
+    "id": "NFL_GAME_1_1763440541831",
+    "timestamp": "2025-11-18T04:35:41.831Z",
     "marketPair": {
       "id": "NFL_GAME_1",
       "description": "NFL: Raiders beat Cowboys",
@@ -15,58 +15,58 @@
       "kalshi": {
         "marketId": "KALSHI_NFL_1",
         "exchange": "KALSHI",
-        "timestamp": "2025-11-18T03:37:05.106Z",
+        "timestamp": "2025-11-18T04:35:41.831Z",
         "yes": {
-          "bid": 0.36253167411814535,
-          "ask": 0.3972830881174785,
-          "mid": 0.3799073811178119,
-          "liquidity": 6832.78299021459
+          "bid": 0.6766345218706561,
+          "ask": 0.7143137846077644,
+          "mid": 0.6954741532392102,
+          "liquidity": 9576.95394664312
         },
         "no": {
-          "bid": 0.6027169118825215,
-          "ask": 0.6374683258818545,
-          "mid": 0.620092618882188,
-          "liquidity": 2234.5391053238773
+          "bid": 0.2856862153922356,
+          "ask": 0.3233654781293439,
+          "mid": 0.30452584676078975,
+          "liquidity": 3801.1068373373596
         },
-        "lastUpdate": "2025-11-18T03:37:05.106Z"
+        "lastUpdate": "2025-11-18T04:35:41.831Z"
       },
       "polymarket": {
         "marketId": "POLY_NFL_1",
         "exchange": "POLYMARKET",
-        "timestamp": "2025-11-18T03:37:05.106Z",
+        "timestamp": "2025-11-18T04:35:41.831Z",
         "yes": {
-          "bid": 0.460352406142683,
-          "ask": 0.48035240614268304,
-          "mid": 0.47035240614268303,
-          "liquidity": 9367.280493157054
+          "bid": 0.44958174054419653,
+          "ask": 0.476357500043577,
+          "mid": 0.4629696202938868,
+          "liquidity": 1324.2278822933897
         },
         "no": {
-          "bid": 0.47227225943636764,
-          "ask": 0.49227225943636765,
-          "mid": 0.48227225943636765,
-          "liquidity": 7521.162036635984
+          "bid": 0.523642499956423,
+          "ask": 0.5504182594558035,
+          "mid": 0.5370303797061132,
+          "liquidity": 5950.387613838822
         },
-        "lastUpdate": "2025-11-18T03:37:05.106Z"
+        "lastUpdate": "2025-11-18T04:35:41.831Z"
       },
-      "timestamp": "2025-11-18T03:37:05.106Z"
+      "timestamp": "2025-11-18T04:35:41.831Z"
     },
-    "direction": "KALSHI_YES_POLY_NO",
-    "profitPercent": 9.02900977,
-    "profitDollars": 61686.19474864,
-    "totalCost": 0.9097099023,
-    "maxSize": 6832,
-    "confidence": 90,
+    "direction": "KALSHI_NO_POLY_YES",
+    "profitPercent": 17.9804172,
+    "profitDollars": 106983.48234,
+    "totalCost": 0.820195828,
+    "maxSize": 5950,
+    "confidence": 70,
     "ttl": 30,
     "fees": {
       "kalshiFee": 0.01,
-      "polymarketFee": 0.01015455481,
-      "totalFees": 0.02015455481,
-      "feePercent": 2.015455481
+      "polymarketFee": 0.01047284999,
+      "totalFees": 0.02047284999,
+      "feePercent": 2.047284999
     },
     "liquidity": {
-      "kalshiAvailable": 6832.78299021459,
-      "polymarketAvailable": 7521.162036635984,
-      "maxExecutable": 6832,
+      "kalshiAvailable": 9576.95394664312,
+      "polymarketAvailable": 5950.387613838822,
+      "maxExecutable": 5950,
       "depthQuality": "DEEP"
     },
     "valid": true

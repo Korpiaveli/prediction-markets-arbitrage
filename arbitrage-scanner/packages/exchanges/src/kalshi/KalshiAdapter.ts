@@ -79,7 +79,7 @@ export class KalshiAdapter extends BaseExchange {
     try {
       const response = await this.queue.add(async () => {
         const { data } = await this.client.get<KalshiMarketResponse>('/markets', {
-          params: { limit: 200, status: 'open' }
+          params: { limit: 1000, status: 'open' }  // Increased limit to get more markets
         });
         return data;
       });
@@ -88,9 +88,33 @@ export class KalshiAdapter extends BaseExchange {
         return [];
       }
 
+      // Apply filtering to focus on non-sports markets
       const markets = response.markets
-        .filter((m) => m.status === 'open' || m.status === 'active')
+        .filter((m) => {
+          // Status filter
+          if (m.status !== 'open' && m.status !== 'active') {
+            return false;
+          }
+
+          // Filter out pure NFL/sports prop bets (commentator mentions, player stats)
+          const title = m.title.toLowerCase();
+          const ticker = m.ticker.toLowerCase();
+
+          // Exclude NFL commentator mentions and detailed game props
+          if (ticker.includes('kxmvementions') || ticker.includes('nflsinglegame') || ticker.includes('nflmultigame')) {
+            return false;
+          }
+
+          // Exclude detailed player stat props
+          if (/\d+\+/.test(title) || /yards|points scored|touchdowns|completions/i.test(title)) {
+            return false;
+          }
+
+          return true;
+        })
         .map((m) => this.transformMarket(m));
+
+      console.log(`[${this.name}] Filtered ${response.markets.length} → ${markets.length} markets (removed ${response.markets.length - markets.length} sports props)`);
 
       this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
       return markets;

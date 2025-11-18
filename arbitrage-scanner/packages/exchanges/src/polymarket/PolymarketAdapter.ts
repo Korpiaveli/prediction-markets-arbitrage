@@ -105,12 +105,12 @@ export class PolymarketAdapter extends BaseExchange {
     if (cached) return cached;
 
     try {
-      // Fetch from Polymarket's CLOB API
+      // Fetch from Polymarket's CLOB API with higher limit
       const response = await this.queue.add(async () => {
         const { data } = await this.client.get('/markets', {
           params: {
             closed: false,
-            limit: 200,
+            limit: 1000,  // Increased to get more markets
             active: true
           }
         });
@@ -125,9 +125,41 @@ export class PolymarketAdapter extends BaseExchange {
         return [];
       }
 
+      // Apply data quality filtering
+      const now = new Date();
+
       const markets = marketsArray
-        .filter((m: PolymarketMarket) => m.active && m.accepting_orders && !m.archived)
+        .filter((m: PolymarketMarket) => {
+          // Basic status checks
+          if (!m.active || !m.accepting_orders || m.archived || m.closed) {
+            return false;
+          }
+
+          // Date-based filtering: remove markets with past end dates
+          if (m.end_date_iso) {
+            const endDate = new Date(m.end_date_iso);
+            if (endDate < now) {
+              return false; // Market already closed/expired
+            }
+          }
+
+          // Freshness check: remove markets created more than 6 months ago with no recent activity
+          // (This helps filter stale 2022-2024 markets)
+          if (m.end_date_iso) {
+            const endDate = new Date(m.end_date_iso);
+            // If end date is in far future (>1 year) and creation was long ago, it's likely stale
+            const oneYearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+            if (endDate > oneYearFromNow) {
+              // Far future markets are likely test/abandoned markets
+              return false;
+            }
+          }
+
+          return true;
+        })
         .map((m: PolymarketMarket) => this.transformMarket(m));
+
+      console.log(`[${this.name}] Filtered ${marketsArray.length} → ${markets.length} markets (removed ${marketsArray.length - markets.length} stale/expired)`);
 
       this.cache.set(cacheKey, markets, 30);
       return markets;
