@@ -117,12 +117,15 @@ export class PolymarketAdapter extends BaseExchange {
         return data;
       });
 
-      if (!Array.isArray(response)) {
+      // Handle wrapped response format { data: [...] }
+      const marketsArray = Array.isArray(response) ? response : response?.data || [];
+
+      if (!Array.isArray(marketsArray)) {
         console.warn(`[${this.name}] Unexpected response format, expected array`);
         return [];
       }
 
-      const markets = response
+      const markets = marketsArray
         .filter((m: PolymarketMarket) => m.active && m.accepting_orders && !m.archived)
         .map((m: PolymarketMarket) => this.transformMarket(m));
 

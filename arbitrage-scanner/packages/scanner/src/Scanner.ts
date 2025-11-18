@@ -196,14 +196,31 @@ export class Scanner extends EventEmitter implements IScanner {
       const resolutionAlignment = this.resolutionAnalyzer.analyzeMarketPair(pair);
       opportunity.resolutionAlignment = resolutionAlignment;
 
-      // Filter based on resolution risk
-      if (!resolutionAlignment.tradeable) {
+      // Filter based on resolution risk (unless filtering is disabled)
+      if (!this.config.disableResolutionFiltering && !resolutionAlignment.tradeable) {
         console.warn(
           `[Scanner] Filtering opportunity due to resolution risk (score: ${resolutionAlignment.score}):\n` +
           `  Market: ${pair.description}\n` +
           `  Risks: ${resolutionAlignment.risks.join(', ')}`
         );
         return null;
+      }
+
+      // Log resolution data if filtering is disabled (data collection mode)
+      if (this.config.disableResolutionFiltering) {
+        console.log(
+          `[Resolution Analysis] ${pair.description}:\n` +
+          `  Score: ${resolutionAlignment.score}/100 | Level: ${resolutionAlignment.level}\n` +
+          `  Tradeable: ${resolutionAlignment.tradeable} | Requires Review: ${resolutionAlignment.requiresReview}\n` +
+          `  Sources Match: ${resolutionAlignment.sourcesMatch} | Timing Match: ${resolutionAlignment.timingMatch}\n` +
+          `  Conditions Match: ${resolutionAlignment.conditionsMatch}`
+        );
+        if (resolutionAlignment.risks.length > 0) {
+          console.log(`  Risks: ${resolutionAlignment.risks.join(', ')}`);
+        }
+        if (resolutionAlignment.warnings.length > 0) {
+          console.log(`  Warnings: ${resolutionAlignment.warnings.join(', ')}`);
+        }
       }
 
       // Add resolution warnings to execution notes

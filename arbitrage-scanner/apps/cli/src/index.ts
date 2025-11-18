@@ -27,6 +27,7 @@ program
   .option('-o, --once', 'Run single scan and exit')
   .option('--min-profit <percent>', 'Minimum profit percentage', '0.5')
   .option('--data-dir <path>', 'Data directory for storage', './data')
+  .option('--collect-resolution-data', 'Collect resolution analysis data (disables filtering)')
   .action(async (options) => {
     const spinner = ora('Initializing scanner...').start();
 
@@ -46,8 +47,15 @@ program
         exchanges,
         calculator: new ArbitrageCalculator(),
         storage,
-        scanInterval: parseInt(options.interval)
+        scanInterval: parseInt(options.interval),
+        disableResolutionFiltering: options.collectResolutionData
       });
+
+      // Notify if in data collection mode
+      if (options.collectResolutionData) {
+        console.log(chalk.yellow('\n⚠️  Data Collection Mode: Resolution filtering disabled'));
+        console.log(chalk.yellow('   All opportunities will be shown regardless of resolution risk\n'));
+      }
 
       // Connect exchanges
       spinner.text = 'Connecting to exchanges...';
@@ -68,6 +76,11 @@ program
 
       scanner.on('scan:complete', (opportunities) => {
         displayResults(opportunities, parseFloat(options.minProfit));
+
+        // Save resolution data if in collection mode
+        if (options.collectResolutionData && opportunities.length > 0) {
+          saveResolutionData(opportunities, options.dataDir);
+        }
       });
 
       // Start scanning
@@ -91,6 +104,68 @@ program
 
     } catch (error) {
       spinner.fail('Failed to initialize scanner');
+      console.error(chalk.red(error));
+      process.exit(1);
+    }
+  });
+
+// List markets command
+program
+  .command('list-markets')
+  .description('List available markets from exchanges')
+  .option('-e, --exchange <name>', 'Exchange name: kalshi, polymarket, both', 'both')
+  .option('-l, --limit <n>', 'Number of markets to show', '20')
+  .action(async (options) => {
+    const spinner = ora('Fetching markets...').start();
+
+    try {
+      const exchanges = await createExchanges('live');
+      const results: any[] = [];
+
+      for (const exchange of exchanges) {
+        if (options.exchange !== 'both' && exchange.name.toLowerCase() !== options.exchange.toLowerCase()) {
+          continue;
+        }
+
+        await exchange.connect();
+        const markets = await exchange.getMarkets();
+        const limited = markets.slice(0, parseInt(options.limit));
+
+        results.push({
+          exchange: exchange.name,
+          count: markets.length,
+          markets: limited
+        });
+
+        await exchange.disconnect();
+      }
+
+      spinner.succeed('Markets fetched');
+
+      for (const result of results) {
+        console.log(chalk.cyan(`\n${'='.repeat(60)}`));
+        console.log(chalk.cyan.bold(`  ${result.exchange} - ${result.count} markets found`));
+        console.log(chalk.cyan(`${'='.repeat(60)}\n`));
+
+        const table = new Table({
+          head: [chalk.bold('ID'), chalk.bold('Title'), chalk.bold('Volume')],
+          colWidths: [30, 50, 15]
+        });
+
+        for (const market of result.markets) {
+          table.push([
+            market.id.substring(0, 28),
+            market.title.substring(0, 48),
+            market.volume24h ? `$${market.volume24h.toFixed(0)}` : 'N/A'
+          ]);
+        }
+
+        console.log(table.toString());
+      }
+
+      console.log('');
+    } catch (error) {
+      spinner.fail('Failed to fetch markets');
       console.error(chalk.red(error));
       process.exit(1);
     }
@@ -321,6 +396,32 @@ function displayAnalysis(kalshiQuote: any, polyQuote: any, results: any[]) {
   }
 
   console.log('');
+}
+
+function saveResolutionData(opportunities: any[], dataDir: string) {
+  const fs = require('fs');
+  const resolutionData = opportunities.map(opp => ({
+    market: opp.marketPair.description,
+    kalshiMarket: {
+      id: opp.marketPair.kalshiMarket.id,
+      title: opp.marketPair.kalshiMarket.title,
+      description: opp.marketPair.kalshiMarket.description,
+      metadata: opp.marketPair.kalshiMarket.metadata
+    },
+    polymarketMarket: {
+      id: opp.marketPair.polymarketMarket.id,
+      title: opp.marketPair.polymarketMarket.title,
+      description: opp.marketPair.polymarketMarket.description,
+      metadata: opp.marketPair.polymarketMarket.metadata
+    },
+    resolutionAlignment: opp.resolutionAlignment,
+    profitPercent: opp.profitPercent,
+    timestamp: opp.timestamp
+  }));
+
+  const filename = path.join(dataDir, `resolution-data-${Date.now()}.json`);
+  fs.writeFileSync(filename, JSON.stringify(resolutionData, null, 2));
+  console.log(chalk.green(`\n💾 Resolution data saved to: ${filename}`));
 }
 
 // Parse and run
