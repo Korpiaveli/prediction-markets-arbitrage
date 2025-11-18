@@ -1,0 +1,69 @@
+{
+  "markets": [
+    {
+      "id": "NFL_RAIDERS_COWBOYS_2024",
+      "description": "NFL: Will the Raiders beat the Cowboys?",
+      "kalshi_id": "NFLGAME-24-RAID-COWB",
+      "polymarket_id": "0x1234567890abcdef",
+      "outcome_mapping": {
+        "yes": "yes",
+        "no": "no"
+      },
+      "active": true,
+      "notes": "Regular season game"
+    },
+    {
+      "id": "SUPERBOWL_2024_WINNER",
+      "description": "Which team will win Super Bowl 2024?",
+      "kalshi_id": "SUPERBOWL-2024-WINNER",
+      "polymarket_id": "0xabcdef1234567890",
+      "outcome_mapping": {
+        "yes": "yes",
+        "no": "no"
+      },
+      "active": true,
+      "notes": "Championship game"
+    },
+    {
+      "id": "BITCOIN_100K_2024",
+      "description": "Will Bitcoin reach $100,000 in 2024?",
+      "kalshi_id": "BTC-100K-2024",
+      "polymarket_id": "0x9876543210fedcba",
+      "outcome_mapping": {
+        "yes": "yes",
+        "no": "no"
+      },
+      "active": true,
+      "notes": "Crypto price prediction"
+    },
+    {
+      "id": "FED_RATE_CUT_Q1_2024",
+      "description": "Will the Fed cut rates in Q1 2024?",
+      "kalshi_id": "FED-RATE-Q1-2024",
+      "polymarket_id": "0xfedcba9876543210",
+      "outcome_mapping": {
+        "yes": "yes",
+        "no": "no"
+      },
+      "active": true,
+      "notes": "Monetary policy"
+    },
+    {
+      "id": "ELECTION_2024_PRESIDENT",
+      "description": "Who will win the 2024 Presidential Election?",
+      "kalshi_id": "PRES-2024",
+      "polymarket_id": "0x0123456789abcdef",
+      "outcome_mapping": {
+        "yes": "yes",
+        "no": "no"
+      },
+      "active": false,
+      "notes": "Multiple outcomes - needs special handling"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2024-11-17T12:00:00Z",
+    "version": "1.0.0",
+    "notes": "Example market mappings - replace with real IDs in production"
+  }
+}

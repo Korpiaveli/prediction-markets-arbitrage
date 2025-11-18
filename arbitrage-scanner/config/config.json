@@ -1,0 +1,52 @@
+{
+  "scanner": {
+    "scanInterval": 5000,
+    "maxConcurrent": 5,
+    "timeout": 10000
+  },
+  "fees": {
+    "kalshiFeePerContract": 0.01,
+    "kalshiFeePercent": 0,
+    "polymarketFeeRate": 0.02,
+    "polymarketMinFee": 0,
+    "safetyMarginPercent": 0.005
+  },
+  "thresholds": {
+    "minProfitPercent": 0.5,
+    "minConfidence": 70,
+    "minLiquidity": 100,
+    "maxExposurePerMarket": 10000
+  },
+  "exchanges": {
+    "kalshi": {
+      "apiUrl": "https://api.elections.kalshi.com/trade-api/v2",
+      "wsUrl": "wss://api.elections.kalshi.com/trade-api/ws/v2",
+      "rateLimits": {
+        "requestsPerSecond": 10,
+        "requestsPerMinute": 200
+      }
+    },
+    "polymarket": {
+      "apiUrl": "https://clob.polymarket.com",
+      "dataApiUrl": "https://api.polymarket.com",
+      "wsUrl": "wss://ws.polymarket.com",
+      "rateLimits": {
+        "requestsPerSecond": 20,
+        "requestsPerMinute": 300
+      }
+    }
+  },
+  "storage": {
+    "dataDir": "./data",
+    "maxRecords": 10000,
+    "retentionDays": 30
+  },
+  "alerts": {
+    "enabled": false,
+    "minProfitForAlert": 2.0,
+    "webhooks": {
+      "discord": "",
+      "telegram": ""
+    }
+  }
+}
