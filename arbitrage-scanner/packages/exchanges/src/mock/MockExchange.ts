@@ -1,0 +1,131 @@
+import {
+  Market,
+  Quote,
+  ExchangeName,
+  ExchangeConfig
+} from '@arb/core';
+import { BaseExchange } from '../base/BaseExchange.js';
+
+export class MockExchange extends BaseExchange {
+  readonly name: ExchangeName = 'MOCK';
+  readonly apiUrl = 'https://mock.exchange.com';
+
+  private mockMarkets: Market[] = [
+    {
+      id: 'MOCK_NFL_GAME',
+      exchangeId: 'MOCK_NFL_GAME',
+      exchange: 'MOCK',
+      title: 'Raiders beat Cowboys',
+      description: 'Will the Raiders beat the Cowboys in the upcoming game?',
+      active: true,
+      volume24h: 50000,
+      openInterest: 10000
+    },
+    {
+      id: 'MOCK_ELECTION',
+      exchangeId: 'MOCK_ELECTION',
+      exchange: 'MOCK',
+      title: 'Presidential Election 2024',
+      description: 'Who will win the 2024 presidential election?',
+      active: true,
+      volume24h: 100000,
+      openInterest: 50000
+    }
+  ];
+
+  constructor(config: ExchangeConfig = {}) {
+    super(config);
+  }
+
+  async getMarkets(): Promise<Market[]> {
+    await this.delay(100); // Simulate network delay
+    return this.mockMarkets;
+  }
+
+  async getMarket(marketId: string): Promise<Market | null> {
+    await this.delay(50);
+    return this.mockMarkets.find(m => m.id === marketId) || null;
+  }
+
+  async getQuote(marketId: string): Promise<Quote> {
+    await this.delay(50);
+
+    // Generate mock prices with some randomness
+    const yesBase = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
+    const spread = 0.01 + Math.random() * 0.02; // 0.01 to 0.03
+
+    const yesBid = this.normalizePrice(yesBase - spread);
+    const yesAsk = this.normalizePrice(yesBase + spread);
+
+    // NO prices should roughly complement YES prices
+    const noBase = 1 - yesBase;
+    const noBid = this.normalizePrice(noBase - spread);
+    const noAsk = this.normalizePrice(noBase + spread);
+
+    return {
+      marketId,
+      exchange: this.name,
+      timestamp: new Date(),
+      yes: {
+        bid: yesBid,
+        ask: yesAsk,
+        mid: (yesBid + yesAsk) / 2,
+        liquidity: 1000 + Math.random() * 9000
+      },
+      no: {
+        bid: noBid,
+        ask: noAsk,
+        mid: (noBid + noAsk) / 2,
+        liquidity: 1000 + Math.random() * 9000
+      },
+      lastUpdate: new Date()
+    };
+  }
+
+  // Generate quote with arbitrage opportunity
+  async getArbitrageQuote(profitable: boolean = true): Promise<Quote> {
+    await this.delay(10);
+
+    if (profitable) {
+      // Create prices that sum to less than 1 (arbitrage opportunity)
+      return {
+        marketId: 'MOCK_ARB',
+        exchange: this.name,
+        timestamp: new Date(),
+        yes: {
+          bid: 0.44,
+          ask: 0.45,
+          mid: 0.445,
+          liquidity: 5000
+        },
+        no: {
+          bid: 0.49,
+          ask: 0.50,
+          mid: 0.495,
+          liquidity: 5000
+        },
+        lastUpdate: new Date()
+      };
+    } else {
+      // Normal market (no arbitrage)
+      return {
+        marketId: 'MOCK_NORMAL',
+        exchange: this.name,
+        timestamp: new Date(),
+        yes: {
+          bid: 0.59,
+          ask: 0.60,
+          mid: 0.595,
+          liquidity: 3000
+        },
+        no: {
+          bid: 0.39,
+          ask: 0.40,
+          mid: 0.395,
+          liquidity: 3000
+        },
+        lastUpdate: new Date()
+      };
+    }
+  }
+}

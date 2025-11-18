@@ -1,0 +1,23 @@
+{
+  "name": "@arb/scanner",
+  "version": "1.0.0",
+  "description": "Orchestration engine for cross-exchange arbitrage scanning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@arb/core": "^1.0.0",
+    "@arb/math": "^1.0.0",
+    "@arb/exchanges": "^1.0.0",
+    "p-limit": "^4.0.0",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "vitest": "^1.1.0"
+  }
+}
