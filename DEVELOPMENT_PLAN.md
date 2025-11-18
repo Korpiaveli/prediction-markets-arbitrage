@@ -192,21 +192,38 @@ Building a modular, production-ready cross-exchange arbitrage detection system f
   - `/sampling-simplified-markets` → 1000 historical
   - All tested endpoints return only past markets
 
-**Next Steps** (Blocked State):
-1. **Immediate**: Research alternative Polymarket data sources
-   - Check if different API endpoints exist for active markets
-   - Investigate third-party data providers (FinFeedAPI, Dune Analytics)
-   - Contact Polymarket support for active markets endpoint
-2. **Alternative**: Use historical data for algorithm testing/calibration
-   - Test matching on 2024 election markets (known overlaps)
-   - Calibrate resolution scoring with historical pairs
-   - Prepare system for when active markets return
-3. **Decision Point**: Determine project viability
-   - If no active markets API exists → May need to pivot strategy
-   - If temporary issue → Wait and monitor
-   - If alternative source exists → Integrate new data source
+**Next Steps** (Proceeding with Historical Data - Option B):
 
-**Target Completion**: After resolving Polymarket active markets access
+**Priority 1: Historical Data Testing & Calibration** 🎯 NEXT SESSION
+1. **Obtain Historical Market Data**
+   - Research 2024 Presidential Election markets from both platforms
+   - Identify specific overlapping market pairs (Trump win, state outcomes, etc.)
+   - Create sample dataset of known matching markets
+   - Document market pairs with resolution outcomes
+
+2. **Test Matching Algorithm on Historical Data**
+   - Run intelligent matcher on 2024 election market pairs
+   - Validate confidence scoring accuracy on known matches
+   - Identify false positives/negatives
+   - Tune matching thresholds based on results
+
+3. **Calibrate Resolution Scoring**
+   - Analyze resolution criteria for historical matched pairs
+   - Measure alignment scores on markets that resolved identically
+   - Identify common resolution risk patterns
+   - Adjust scoring weights to improve accuracy (target: 80+ for valid pairs)
+
+4. **Document Findings & Prepare for Live Data**
+   - Create calibration report with before/after metrics
+   - Document optimal matching thresholds
+   - Prepare system to switch to live data when Polymarket API resolves
+   - Build monitoring system to detect when active markets become available
+
+**Future Priority**: Research alternative Polymarket access (if historical testing successful)
+
+**Current Blocker**: Polymarket CLOB API only returns historical markets
+**Workaround**: Use historical data for algorithm validation and calibration
+**Target Completion**: Next session - historical data acquisition and testing
 
 ### Phase 2: Real-Time Enhancement (Week 2)
 
