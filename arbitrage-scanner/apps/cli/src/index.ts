@@ -239,9 +239,10 @@ function displayResults(opportunities: any[], minProfit: number) {
       chalk.bold('Max Size'),
       chalk.bold('Cost'),
       chalk.bold('Confidence'),
+      chalk.bold('Res.'),
       chalk.bold('Depth')
     ],
-    colWidths: [30, 20, 10, 10, 10, 12, 10]
+    colWidths: [25, 15, 10, 10, 10, 12, 8, 10]
   });
 
   for (const opp of ranked.slice(0, 10)) {
@@ -249,18 +250,48 @@ function displayResults(opportunities: any[], minProfit: number) {
                        opp.profitPercent >= 1 ? chalk.yellow :
                        chalk.white;
 
+    // Resolution score color
+    const resScore = opp.resolutionAlignment?.score ?? 100;
+    const resColor = resScore >= 85 ? chalk.green :
+                     resScore >= 70 ? chalk.yellow :
+                     resScore >= 50 ? chalk.red :
+                     chalk.red.bold;
+
     table.push([
-      opp.marketPair.description.substring(0, 28),
-      opp.direction === 'KALSHI_YES_POLY_NO' ? 'K:YES P:NO' : 'K:NO P:YES',
+      opp.marketPair.description.substring(0, 23),
+      opp.direction === 'KALSHI_YES_POLY_NO' ? 'K:Y P:N' : 'K:N P:Y',
       profitColor(`${opp.profitPercent.toFixed(2)}%`),
       opp.maxSize.toString(),
       `$${opp.totalCost.toFixed(3)}`,
       `${opp.confidence}%`,
+      resColor(resScore.toString()),
       opp.liquidity.depthQuality
     ]);
   }
 
   console.log(table.toString());
+
+  // Display resolution warnings if any
+  for (const opp of ranked.slice(0, 10)) {
+    if (opp.resolutionAlignment && (opp.resolutionAlignment.warnings.length > 0 || opp.resolutionAlignment.risks.length > 0)) {
+      console.log(chalk.yellow(`\n⚠️  ${opp.marketPair.description}:`));
+
+      if (opp.resolutionAlignment.risks.length > 0) {
+        console.log(chalk.red('  Risks:'));
+        opp.resolutionAlignment.risks.forEach((risk: string) => {
+          console.log(chalk.red(`    • ${risk}`));
+        });
+      }
+
+      if (opp.resolutionAlignment.warnings.length > 0) {
+        console.log(chalk.yellow('  Warnings:'));
+        opp.resolutionAlignment.warnings.forEach((warning: string) => {
+          console.log(chalk.yellow(`    • ${warning}`));
+        });
+      }
+    }
+  }
+
   console.log('');
 }
 

@@ -1,4 +1,5 @@
 import { ArbitrageDirection, MarketPair, QuotePair } from './market.js';
+import { ResolutionAlignment } from '@arb/math';
 
 export interface ArbitrageOpportunity {
   id: string;
@@ -14,6 +15,7 @@ export interface ArbitrageOpportunity {
   ttl: number;
   fees: FeeBreakdown;
   liquidity: LiquidityInfo;
+  resolutionAlignment?: ResolutionAlignment;
   valid: boolean;
   executionNotes?: string[];
 }

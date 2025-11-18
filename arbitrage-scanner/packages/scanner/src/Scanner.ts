@@ -10,6 +10,7 @@ import {
   QuotePair,
   DEFAULT_FEE_STRUCTURE
 } from '@arb/core';
+import { ResolutionAnalyzer } from '@arb/math';
 import { EventEmitter } from 'eventemitter3';
 import pLimit from 'p-limit';
 
@@ -23,6 +24,7 @@ export class Scanner extends EventEmitter implements IScanner {
   private running: boolean = false;
   private scanInterval?: NodeJS.Timeout;
   private limit: any;
+  private resolutionAnalyzer: ResolutionAnalyzer;
 
   constructor(config: ScannerConfig) {
     super();
@@ -31,6 +33,7 @@ export class Scanner extends EventEmitter implements IScanner {
     this.calculator = config.calculator;
     this.storage = config.storage;
     this.plugins = config.plugins || [];
+    this.resolutionAnalyzer = new ResolutionAnalyzer();
 
     // Add exchanges
     for (const exchange of config.exchanges) {
@@ -188,6 +191,28 @@ export class Scanner extends EventEmitter implements IScanner {
         },
         valid: true
       };
+
+      // Analyze resolution criteria alignment
+      const resolutionAlignment = this.resolutionAnalyzer.analyzeMarketPair(pair);
+      opportunity.resolutionAlignment = resolutionAlignment;
+
+      // Filter based on resolution risk
+      if (!resolutionAlignment.tradeable) {
+        console.warn(
+          `[Scanner] Filtering opportunity due to resolution risk (score: ${resolutionAlignment.score}):\n` +
+          `  Market: ${pair.description}\n` +
+          `  Risks: ${resolutionAlignment.risks.join(', ')}`
+        );
+        return null;
+      }
+
+      // Add resolution warnings to execution notes
+      if (resolutionAlignment.warnings.length > 0) {
+        opportunity.executionNotes = [
+          ...(opportunity.executionNotes || []),
+          ...resolutionAlignment.warnings.map(w => `⚠️ ${w}`)
+        ];
+      }
 
       // Process through plugins
       for (const plugin of this.plugins) {
