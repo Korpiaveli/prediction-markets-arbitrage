@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@arb/core": "^1.0.0",
@@ -15,6 +17,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@vitest/coverage-v8": "^1.1.0",
     "vitest": "^1.1.0"
   }
 }
