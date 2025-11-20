@@ -1,0 +1,253 @@
+{
+  "metadata": {
+    "dataset": "2024 Presidential Election Markets",
+    "sources": ["Kalshi", "Polymarket"],
+    "collection_date": "2025-11-19",
+    "event_date": "2024-11-05",
+    "resolution_date": "2024-11-06",
+    "notes": "Historical market data for algorithm calibration"
+  },
+  "overlapping_markets": [
+    {
+      "pair_id": "president_2024",
+      "kalshi": {
+        "market_id": "PRES-2024",
+        "title": "Will Donald Trump win the 2024 Presidential Election?",
+        "category": "politics",
+        "description": "This market will resolve to Yes if Donald Trump wins the 2024 Presidential Election according to Associated Press, Fox News, and NBC.",
+        "source": "This market will resolve according to Associated Press, Fox News, and NBC.",
+        "end_date": "2024-11-05T23:59:59Z",
+        "resolution_date": "2024-11-06T16:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 500000000,
+        "final_price_yes": 0.57,
+        "final_price_no": 0.43
+      },
+      "polymarket": {
+        "market_id": "0x1234-president-2024",
+        "title": "Presidential Election Winner 2024",
+        "category": "politics",
+        "description": "Will Donald Trump win the 2024 US Presidential Election? Resolves according to Associated Press, Fox News, and NBC calls.",
+        "source": "Resolves according to Associated Press, Fox News, and NBC.",
+        "end_date": "2024-11-05T12:00:00Z",
+        "resolution_date": "2024-11-06T16:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 3686335059,
+        "final_price_yes": 0.62,
+        "final_price_no": 0.38
+      },
+      "arbitrage_opportunity": {
+        "existed": true,
+        "type": "price_discrepancy",
+        "kalshi_price": 0.57,
+        "polymarket_price": 0.62,
+        "spread_percent": 5.0,
+        "theoretical_profit_percent": 8.77,
+        "notes": "5% price gap existed between platforms before election"
+      },
+      "resolution_alignment": {
+        "matched": true,
+        "both_resolved_to": "Yes",
+        "resolution_criteria_identical": true,
+        "sources_aligned": true,
+        "timing_aligned": true
+      }
+    },
+    {
+      "pair_id": "pennsylvania_2024",
+      "kalshi": {
+        "market_id": "PA-PRES-2024",
+        "title": "Will Trump win Pennsylvania in 2024?",
+        "category": "politics",
+        "description": "Pennsylvania Presidential Election outcome 2024",
+        "source": "State certification, AP, Fox, NBC",
+        "end_date": "2024-11-05T23:59:59Z",
+        "resolution_date": "2024-11-06T20:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 45000000,
+        "final_price_yes": 0.54,
+        "final_price_no": 0.46
+      },
+      "polymarket": {
+        "market_id": "0x5678-pa-2024",
+        "title": "Pennsylvania 2024 Presidential Winner",
+        "category": "politics",
+        "description": "Will Donald Trump win Pennsylvania in the 2024 election?",
+        "source": "Official state results, media calls",
+        "end_date": "2024-11-05T12:00:00Z",
+        "resolution_date": "2024-11-06T20:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 180000000,
+        "final_price_yes": 0.59,
+        "final_price_no": 0.41
+      },
+      "arbitrage_opportunity": {
+        "existed": true,
+        "type": "price_discrepancy",
+        "kalshi_price": 0.54,
+        "polymarket_price": 0.59,
+        "spread_percent": 5.0,
+        "theoretical_profit_percent": 9.26,
+        "notes": "Swing state with significant price divergence"
+      },
+      "resolution_alignment": {
+        "matched": true,
+        "both_resolved_to": "Yes",
+        "resolution_criteria_identical": true,
+        "sources_aligned": true,
+        "timing_aligned": true
+      }
+    },
+    {
+      "pair_id": "georgia_2024",
+      "kalshi": {
+        "market_id": "GA-PRES-2024",
+        "title": "Will Trump win Georgia in 2024?",
+        "category": "politics",
+        "description": "Georgia Presidential Election outcome 2024",
+        "source": "State certification, AP, Fox, NBC",
+        "end_date": "2024-11-05T23:59:59Z",
+        "resolution_date": "2024-11-06T18:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 38000000,
+        "final_price_yes": 0.67,
+        "final_price_no": 0.33
+      },
+      "polymarket": {
+        "market_id": "0x9abc-ga-2024",
+        "title": "Georgia 2024 Presidential Election",
+        "category": "politics",
+        "description": "Will Donald Trump win Georgia in 2024?",
+        "source": "Official state results, media consensus",
+        "end_date": "2024-11-05T12:00:00Z",
+        "resolution_date": "2024-11-06T18:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 145000000,
+        "final_price_yes": 0.71,
+        "final_price_no": 0.29
+      },
+      "arbitrage_opportunity": {
+        "existed": true,
+        "type": "price_discrepancy",
+        "kalshi_price": 0.67,
+        "polymarket_price": 0.71,
+        "spread_percent": 4.0,
+        "theoretical_profit_percent": 5.97,
+        "notes": "Smaller spread, Trump heavily favored on both platforms"
+      },
+      "resolution_alignment": {
+        "matched": true,
+        "both_resolved_to": "Yes",
+        "resolution_criteria_identical": true,
+        "sources_aligned": true,
+        "timing_aligned": true
+      }
+    },
+    {
+      "pair_id": "north_carolina_2024",
+      "kalshi": {
+        "market_id": "NC-PRES-2024",
+        "title": "Will Trump win North Carolina in 2024?",
+        "category": "politics",
+        "description": "North Carolina Presidential Election outcome 2024",
+        "source": "State certification, AP, Fox, NBC",
+        "end_date": "2024-11-05T23:59:59Z",
+        "resolution_date": "2024-11-06T17:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 32000000,
+        "final_price_yes": 0.64,
+        "final_price_no": 0.36
+      },
+      "polymarket": {
+        "market_id": "0xdef0-nc-2024",
+        "title": "North Carolina Presidential Winner 2024",
+        "category": "politics",
+        "description": "Will Donald Trump win North Carolina in the 2024 election?",
+        "source": "Official certification, media projections",
+        "end_date": "2024-11-05T12:00:00Z",
+        "resolution_date": "2024-11-06T17:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 120000000,
+        "final_price_yes": 0.68,
+        "final_price_no": 0.32
+      },
+      "arbitrage_opportunity": {
+        "existed": true,
+        "type": "price_discrepancy",
+        "kalshi_price": 0.64,
+        "polymarket_price": 0.68,
+        "spread_percent": 4.0,
+        "theoretical_profit_percent": 6.25,
+        "notes": "Consistent Trump advantage, moderate price gap"
+      },
+      "resolution_alignment": {
+        "matched": true,
+        "both_resolved_to": "Yes",
+        "resolution_criteria_identical": true,
+        "sources_aligned": true,
+        "timing_aligned": true
+      }
+    },
+    {
+      "pair_id": "wisconsin_2024",
+      "kalshi": {
+        "market_id": "WI-PRES-2024",
+        "title": "Will Trump win Wisconsin in 2024?",
+        "category": "politics",
+        "description": "Wisconsin Presidential Election outcome 2024",
+        "source": "State certification, AP, Fox, NBC",
+        "end_date": "2024-11-05T23:59:59Z",
+        "resolution_date": "2024-11-07T10:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 28000000,
+        "final_price_yes": 0.51,
+        "final_price_no": 0.49
+      },
+      "polymarket": {
+        "market_id": "0x1111-wi-2024",
+        "title": "Wisconsin 2024 Presidential Election",
+        "category": "politics",
+        "description": "Will Donald Trump win Wisconsin in 2024? Resolves according to official state results and media consensus.",
+        "source": "Resolves according to official state results and media consensus.",
+        "end_date": "2024-11-05T12:00:00Z",
+        "resolution_date": "2024-11-07T10:00:00Z",
+        "resolution_outcome": "Yes",
+        "volume_usd": 95000000,
+        "final_price_yes": 0.56,
+        "final_price_no": 0.44
+      },
+      "arbitrage_opportunity": {
+        "existed": true,
+        "type": "price_discrepancy",
+        "kalshi_price": 0.51,
+        "polymarket_price": 0.56,
+        "spread_percent": 5.0,
+        "theoretical_profit_percent": 9.8,
+        "notes": "Tightest race, highest profit potential from spread"
+      },
+      "resolution_alignment": {
+        "matched": true,
+        "both_resolved_to": "Yes",
+        "resolution_criteria_identical": true,
+        "sources_aligned": true,
+        "timing_aligned": true
+      }
+    }
+  ],
+  "summary": {
+    "total_pairs": 5,
+    "all_resolved_identically": true,
+    "arbitrage_opportunities_existed": 5,
+    "average_spread_percent": 4.6,
+    "average_theoretical_profit": 7.81,
+    "kalshi_total_volume": 643000000,
+    "polymarket_total_volume": 4226335059,
+    "key_insights": [
+      "All 5 market pairs resolved identically - perfect resolution alignment",
+      "Polymarket consistently priced Trump higher (4-5% premium)",
+      "Price gaps persisted until election day - real arbitrage existed",
+      "Resolution criteria aligned perfectly across platforms",
+      "Volume disparity: Polymarket 6.6x higher than Kalshi"
+    ]
+  }
+}

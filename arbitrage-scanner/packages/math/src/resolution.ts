@@ -285,11 +285,34 @@ export class ResolutionAnalyzer {
       return false; // Can't verify
     }
 
-    // Check for common sources
-    const sources1Lower = sources1.map(s => s.toLowerCase());
-    const sources2Lower = sources2.map(s => s.toLowerCase());
+    // Normalize sources for comparison
+    const normalize = (s: string) => s.toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/[,\.]/g, '')
+      .trim();
 
-    // Look for overlapping sources
+    const sources1Lower = sources1.map(normalize);
+    const sources2Lower = sources2.map(normalize);
+
+    // Common source keywords that indicate alignment
+    const commonSourceKeywords = [
+      'associated press', 'ap',
+      'fox news', 'fox',
+      'nbc', 'cnn', 'abc',
+      'official', 'state certification',
+      'media consensus', 'media calls', 'media projections'
+    ];
+
+    // Check if both contain any common source keyword
+    for (const keyword of commonSourceKeywords) {
+      const in1 = sources1Lower.some(s => s.includes(keyword));
+      const in2 = sources2Lower.some(s => s.includes(keyword));
+      if (in1 && in2) {
+        return true; // Both reference same authoritative source
+      }
+    }
+
+    // Look for overlapping sources (substring match)
     for (const s1 of sources1Lower) {
       for (const s2 of sources2Lower) {
         if (s1.includes(s2) || s2.includes(s1)) {

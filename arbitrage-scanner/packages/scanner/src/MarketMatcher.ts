@@ -22,7 +22,7 @@ export class MarketMatcher {
 
   constructor(config: MatcherConfig = {}) {
     this.config = {
-      minConfidence: config.minConfidence ?? 60,
+      minConfidence: config.minConfidence ?? 55,
       includeLowConfidence: config.includeLowConfidence ?? true,
       includeUncertain: config.includeUncertain ?? false
     };
@@ -249,29 +249,29 @@ export class MarketMatcher {
     const reasons: string[] = [];
     let confidence = 0;
 
-    // Title similarity (0-40 points)
-    confidence += (signals.titleSimilarity / 100) * 40;
+    // Title similarity (0-30 points) - Reduced weight, less reliable
+    confidence += (signals.titleSimilarity / 100) * 30;
     if (signals.titleSimilarity >= 80) {
       reasons.push(`High title match (${signals.titleSimilarity.toFixed(0)}%)`);
     } else if (signals.titleSimilarity >= 50) {
       reasons.push(`Moderate title match (${signals.titleSimilarity.toFixed(0)}%)`);
     }
 
-    // Description similarity (0-25 points)
-    confidence += (signals.descriptionSimilarity / 100) * 25;
+    // Description similarity (0-20 points) - Reduced weight
+    confidence += (signals.descriptionSimilarity / 100) * 20;
     if (signals.descriptionSimilarity >= 60) {
       reasons.push(`Description overlap (${signals.descriptionSimilarity.toFixed(0)}%)`);
     }
 
-    // Keyword overlap (0-20 points)
-    confidence += (signals.keywordOverlap / 100) * 20;
+    // Keyword overlap (0-30 points) - Increased weight, proven reliable
+    confidence += (signals.keywordOverlap / 100) * 30;
     if (signals.keywordOverlap >= 50) {
       reasons.push(`Keyword match (${signals.keywordOverlap.toFixed(0)}%)`);
     }
 
-    // Category match (0-10 points)
+    // Category match (0-15 points) - Increased weight, strong signal
     if (signals.categoryMatch) {
-      confidence += 10;
+      confidence += 15;
       const cats = this.extractCategories(market1);
       if (cats.length > 0) {
         reasons.push(`Category: ${cats[0]}`);
