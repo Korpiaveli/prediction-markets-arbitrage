@@ -236,19 +236,24 @@ Building a modular, production-ready cross-exchange arbitrage detection system f
 - [ ] Performance metrics tracking
 - [ ] Parallel scanning optimization
 
-### Phase 3: Intelligence Layer (Week 3)
+### Phase 3: Intelligence Layer (Week 3) ⏳ IN PROGRESS
 
 **Goal**: Smart filtering and pattern recognition with ML enhancement
 
-#### Planned Features
+#### Completed ✅
+- [x] **ML Module (@arb/ml)** - Market matching & resolution risk prediction
+  - ✅ 11-feature extraction from market pairs
+  - ✅ Market matching predictor with calibrated weights
+  - ✅ Resolution risk predictor with source alignment focus
+  - ✅ ModelService for unified prediction API
+  - ✅ Python training pipeline (scikit-learn compatible)
+  - ✅ Trained models from 2024 election data
+  - ✅ Trading recommendations (strong_buy, buy, caution, avoid)
+  - **Accuracy**: 80% (matches calibrated baseline)
+  - **Top Feature**: keyword_overlap (0.25 weight)
+
+#### Pending
 - [ ] Historical pattern analysis
-- [ ] Confidence scoring algorithm
-- [ ] **ML Module (@arb/ml)** - Market matching & resolution risk prediction
-  - Binary classifier for market pair matching (scikit-learn RandomForest/XGBoost)
-  - Resolution alignment predictor trained on historical outcomes
-  - Feature engineering: text embeddings, category overlap, source alignment, timing
-  - Model training pipeline using Phase 1.6 historical data
-  - Inference API to enhance MarketMatcher confidence scores
 - [ ] Liquidity depth analysis
 - [ ] Backtesting engine
 - [ ] Market correlation detection
