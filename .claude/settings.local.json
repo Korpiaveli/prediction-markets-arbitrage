@@ -25,7 +25,8 @@
       "Bash(find:*)",
       "Bash(git restore:*)",
       "Bash(npm run match-markets:*)",
-      "Bash(npx tsc)"
+      "Bash(npx tsc)",
+      "Bash(python train_models.py:*)"
     ],
     "deny": [],
     "ask": []

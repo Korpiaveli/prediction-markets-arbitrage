@@ -1,0 +1,22 @@
+{
+  "name": "@arb/ml",
+  "version": "1.0.0",
+  "description": "Machine learning module for market matching and resolution risk prediction",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@arb/core": "^1.0.0",
+    "@arb/math": "^1.0.0",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}

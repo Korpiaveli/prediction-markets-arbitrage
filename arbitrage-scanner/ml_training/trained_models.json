@@ -1,0 +1,64 @@
+{
+  "matching_model": {
+    "weights": [
+      0.12,
+      0.08,
+      0.25,
+      0.15,
+      0.1,
+      0.12,
+      0.08,
+      0.03,
+      0.03,
+      0.02,
+      0.02
+    ],
+    "intercept": -0.3,
+    "metrics": {
+      "accuracy": 100.0,
+      "precision": 100.0,
+      "recall": 100.0,
+      "f1_score": 100.0,
+      "confusion_matrix": {
+        "tp": 5,
+        "fp": 0,
+        "fn": 0,
+        "tn": 0
+      }
+    }
+  },
+  "resolution_model": {
+    "feature_importances": [
+      0.12,
+      0.08,
+      0.25,
+      0.15,
+      0.1,
+      0.12,
+      0.08,
+      0.03,
+      0.03,
+      0.02,
+      0.02
+    ],
+    "intercept": -0.2
+  },
+  "feature_names": [
+    "title_similarity",
+    "description_similarity",
+    "keyword_overlap",
+    "category_match",
+    "timing_match",
+    "sources_match",
+    "alignment_score",
+    "volume_ratio",
+    "price_correlation",
+    "length_ratio",
+    "avg_word_count"
+  ],
+  "training_info": {
+    "n_samples": 5,
+    "n_augmented": 100,
+    "sklearn_available": false
+  }
+}
