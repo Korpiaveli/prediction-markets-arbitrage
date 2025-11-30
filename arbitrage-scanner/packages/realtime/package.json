@@ -1,0 +1,25 @@
+{
+  "name": "@arb/realtime",
+  "version": "1.0.0",
+  "description": "Real-time price feeds and WebSocket management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@arb/core": "^1.0.0",
+    "ws": "^8.14.2",
+    "eventemitter3": "^5.0.1",
+    "redis": "^4.6.11",
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.9",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
