@@ -1,0 +1,26 @@
+{
+  "name": "@arb/app-api",
+  "version": "1.0.0",
+  "description": "REST API server application",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@arb/api": "^1.0.0",
+    "@arb/core": "^1.0.0",
+    "@arb/math": "^1.0.0",
+    "@arb/exchanges": "^1.0.0",
+    "@arb/scanner": "^1.0.0",
+    "@arb/storage": "^1.0.0",
+    "@arb/ml": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "tsx": "^4.6.2"
+  }
+}

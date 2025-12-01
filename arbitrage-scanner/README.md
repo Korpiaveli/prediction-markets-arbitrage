@@ -14,13 +14,42 @@ Production-ready cross-exchange arbitrage detection system for Kalshi and Polyma
 - ✅ **Backtesting Engine** - Strategy validation with risk metrics
 - ✅ **Market Correlation Detection** - Find hidden opportunities
 
+### User Interfaces
+- 🌐 **Web Dashboard** - Real-time Next.js dashboard with live updates
+- 🔌 **REST API** - Full-featured Express API with WebSocket support
+- 💻 **CLI** - Powerful command-line interface for all operations
+
 ### Architecture
-- **Modular Design** - 8 independent npm packages
+- **Modular Design** - 9 independent npm packages
 - **Plugin System** - Extensible exchanges, calculators, storage
 - **Type-Safe** - Full TypeScript with strict mode
 - **Production Ready** - Error handling, logging, graceful shutdown
 
 ## Quick Start
+
+### Option 1: Web Dashboard (Recommended)
+
+```bash
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+
+# Start API server
+cd apps/api
+npm start
+# API running at http://localhost:3001
+
+# In a new terminal, start web dashboard
+cd apps/web
+npm run dev
+# Dashboard at http://localhost:3000
+```
+
+Open your browser to `http://localhost:3000` to access the real-time dashboard!
+
+### Option 2: CLI Interface
 
 ```bash
 # Install dependencies

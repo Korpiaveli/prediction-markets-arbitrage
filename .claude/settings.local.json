@@ -30,7 +30,13 @@
       "Bash(npm run clean:*)",
       "Bash(rm \"@evan@thelongdrink.com I am primari.txt\" \"Below is (1) a complete, production.txt\" \"● I''ll review the project documenta.txt\")",
       "Bash(npx tsc:*)",
-      "Bash(npm run test:integration:*)"
+      "Bash(npm run test:integration:*)",
+      "Bash(findstr:*)",
+      "Bash(dir \"C:\\Users\\korpe\\Documents\\AI-Agents-Local\\Prediction-Markets-Project\\arbitrage-scanner\\packages\\ml\\dist\")",
+      "Bash(test:*)",
+      "Bash(npm start)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)"
     ],
     "deny": [],
     "ask": []
