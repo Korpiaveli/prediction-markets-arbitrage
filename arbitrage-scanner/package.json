@@ -8,7 +8,9 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build -w @arb/math -w @arb/core -w @arb/exchanges -w @arb/storage -w @arb/scanner -w @arb/ml -w @arb/realtime -w @arb/api",
+    "build:apps": "npm run build -w @arb/cli -w @arb/app-api -w @arb/app-web",
     "rebuild": "npm run clean && npm run build",
     "test": "npm run test --workspaces",
     "test:integration": "vitest run --config vitest.config.integration.ts",
