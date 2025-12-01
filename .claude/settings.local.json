@@ -29,7 +29,8 @@
       "Bash(python train_models.py:*)",
       "Bash(npm run clean:*)",
       "Bash(rm \"@evan@thelongdrink.com I am primari.txt\" \"Below is (1) a complete, production.txt\" \"● I''ll review the project documenta.txt\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run test:integration:*)"
     ],
     "deny": [],
     "ask": []
