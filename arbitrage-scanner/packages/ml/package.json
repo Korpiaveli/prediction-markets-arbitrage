@@ -12,6 +12,7 @@
   "dependencies": {
     "@arb/core": "^1.0.0",
     "@arb/math": "^1.0.0",
+    "@xenova/transformers": "^2.6.0",
     "axios": "^1.6.2"
   },
   "devDependencies": {

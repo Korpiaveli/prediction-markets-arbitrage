@@ -23,6 +23,7 @@ export { BacktestEngine } from './backtest';
 export { CorrelationDetector } from './correlation';
 export { OpportunityPredictor } from './predictor';
 export { TradingStrategyEvaluator } from './strategy';
+export { EmbeddingService, getEmbeddingService, resetEmbeddingService } from './embeddings';
 
 export type {
   FeatureVector,

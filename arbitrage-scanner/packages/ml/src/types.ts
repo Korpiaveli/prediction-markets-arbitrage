@@ -28,6 +28,9 @@ export interface FeatureVector {
   // Text length features
   lengthRatio: number;               // 0-1 (min/max)
   avgWordCount: number;              // average words in titles
+
+  // Semantic similarity (from EmbeddingService)
+  embeddingSimilarity: number;       // 0-100 (cosine similarity)
 }
 
 /**

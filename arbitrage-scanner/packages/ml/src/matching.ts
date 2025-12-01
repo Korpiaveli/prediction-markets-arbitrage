@@ -37,21 +37,23 @@ export class MarketMatchingPredictor {
   /**
    * Use pre-trained weights based on calibration
    * Weights derived from 2024 election historical data analysis
+   * Extended with embedding_similarity (12th feature)
    * See: CALIBRATION_REPORT.md and ml_training/trained_models.json
    */
   useDefaultModel(): void {
     this.modelWeights = [
-      0.12,   // title_similarity (moderate)
-      0.08,   // description_similarity (lower)
-      0.25,   // keyword_overlap (highest - proven reliable)
-      0.15,   // category_match (strong signal)
-      0.10,   // timing_match
-      0.12,   // sources_match
-      0.08,   // alignment_score
-      0.03,   // volume_ratio
-      0.03,   // price_correlation
-      0.02,   // length_ratio
-      0.02    // avg_word_count
+      0.10,   // title_similarity (moderate, reduced slightly)
+      0.07,   // description_similarity (lower, reduced slightly)
+      0.23,   // keyword_overlap (highest - proven reliable, reduced slightly)
+      0.13,   // category_match (strong signal, reduced slightly)
+      0.09,   // timing_match (reduced slightly)
+      0.11,   // sources_match (reduced slightly)
+      0.07,   // alignment_score (reduced slightly)
+      0.03,   // volume_ratio (unchanged)
+      0.03,   // price_correlation (unchanged)
+      0.02,   // length_ratio (unchanged)
+      0.02,   // avg_word_count (unchanged)
+      0.17    // embedding_similarity (NEW - semantic understanding)
     ];
     this.modelIntercept = -0.30;
   }
@@ -59,8 +61,8 @@ export class MarketMatchingPredictor {
   /**
    * Predict if two markets will match
    */
-  predict(kalshiMarket: Market, polyMarket: Market, baselineScore: number): MatchingPrediction {
-    const features = this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
+  async predict(kalshiMarket: Market, polyMarket: Market, baselineScore: number): Promise<MatchingPrediction> {
+    const features = await this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
     return this.predictFromFeatures(features, baselineScore);
   }
 
@@ -139,10 +141,10 @@ export class MarketMatchingPredictor {
   /**
    * Batch predict for multiple pairs
    */
-  batchPredict(
+  async batchPredict(
     pairs: Array<{ kalshi: Market; poly: Market; baseline: number }>
-  ): MatchingPrediction[] {
-    return pairs.map(p => this.predict(p.kalshi, p.poly, p.baseline));
+  ): Promise<MatchingPrediction[]> {
+    return Promise.all(pairs.map(p => this.predict(p.kalshi, p.poly, p.baseline)));
   }
 
   /**

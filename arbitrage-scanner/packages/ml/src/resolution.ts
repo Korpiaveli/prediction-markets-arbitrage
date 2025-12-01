@@ -58,12 +58,12 @@ export class ResolutionRiskPredictor {
   /**
    * Predict resolution risk
    */
-  predict(
+  async predict(
     kalshiMarket: Market,
     polyMarket: Market,
     baselineAlignment: number
-  ): ResolutionPrediction {
-    const features = this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
+  ): Promise<ResolutionPrediction> {
+    const features = await this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
     return this.predictFromFeatures(features, baselineAlignment);
   }
 

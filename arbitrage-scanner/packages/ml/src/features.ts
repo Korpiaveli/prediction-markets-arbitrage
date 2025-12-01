@@ -9,6 +9,7 @@
 
 import { Market, MarketPair } from '@arb/core';
 import { FeatureVector } from './types';
+import { EmbeddingService } from './embeddings';
 
 export class FeatureExtractor {
   private readonly stopWords = new Set([
@@ -18,10 +19,16 @@ export class FeatureExtractor {
     'has', 'had', 'do', 'does', 'did', 'this', 'that'
   ]);
 
+  private embeddingService?: EmbeddingService;
+
+  constructor(embeddingService?: EmbeddingService) {
+    this.embeddingService = embeddingService;
+  }
+
   /**
    * Extract feature vector from a market pair
    */
-  extractFeatures(kalshiMarket: Market, polyMarket: Market): FeatureVector {
+  async extractFeatures(kalshiMarket: Market, polyMarket: Market): Promise<FeatureVector> {
     const titleSimilarity = this.calculateTitleSimilarity(
       kalshiMarket.title,
       polyMarket.title
@@ -53,6 +60,19 @@ export class FeatureExtractor {
     const lengthRatio = this.calculateLengthRatio(kalshiMarket, polyMarket);
     const avgWordCount = this.calculateAvgWordCount(kalshiMarket, polyMarket);
 
+    // Calculate embedding similarity if service is available
+    let embeddingSimilarity = 0;
+    if (this.embeddingService && this.embeddingService.isReady()) {
+      try {
+        const text1 = kalshiMarket.title + ' ' + kalshiMarket.description;
+        const text2 = polyMarket.title + ' ' + polyMarket.description;
+        embeddingSimilarity = await this.embeddingService.calculateSimilarity(text1, text2);
+      } catch (error) {
+        console.warn('[FeatureExtractor] Failed to calculate embedding similarity:', error);
+        embeddingSimilarity = 0;
+      }
+    }
+
     return {
       titleSimilarity,
       descriptionSimilarity,
@@ -64,14 +84,15 @@ export class FeatureExtractor {
       volumeRatio,
       priceCorrelation,
       lengthRatio,
-      avgWordCount
+      avgWordCount,
+      embeddingSimilarity
     };
   }
 
   /**
    * Extract features from a MarketPair object
    */
-  extractFeaturesFromPair(pair: MarketPair): FeatureVector {
+  async extractFeaturesFromPair(pair: MarketPair): Promise<FeatureVector> {
     return this.extractFeatures(pair.kalshiMarket, pair.polymarketMarket);
   }
 
@@ -312,7 +333,8 @@ export class FeatureExtractor {
       features.volumeRatio,
       features.priceCorrelation,
       features.lengthRatio,
-      features.avgWordCount / 20
+      features.avgWordCount / 20,
+      features.embeddingSimilarity / 100
     ];
   }
 
@@ -331,7 +353,8 @@ export class FeatureExtractor {
       'volume_ratio',
       'price_correlation',
       'length_ratio',
-      'avg_word_count'
+      'avg_word_count',
+      'embedding_similarity'
     ];
   }
 }

@@ -1,9 +1,11 @@
 import { Market, MarketPair, IExchange } from '@arb/core';
+import { EmbeddingService, getEmbeddingService } from '@arb/ml';
 
 export interface MatchAnalysis {
   titleSimilarity: number;
   descriptionSimilarity: number;
   keywordOverlap: number;
+  embeddingSimilarity?: number;
   categoryMatch: boolean;
   timingMatch: boolean;
   confidence: number;
@@ -15,17 +17,42 @@ export interface MatcherConfig {
   minConfidence?: number;
   includeLowConfidence?: boolean;
   includeUncertain?: boolean;
+  useEmbeddings?: boolean;
 }
 
 export class MarketMatcher {
   private readonly config: MatcherConfig;
+  private embeddingService?: EmbeddingService;
+  private embeddingsInitialized = false;
 
   constructor(config: MatcherConfig = {}) {
     this.config = {
       minConfidence: config.minConfidence ?? 55,
       includeLowConfidence: config.includeLowConfidence ?? true,
-      includeUncertain: config.includeUncertain ?? false
+      includeUncertain: config.includeUncertain ?? false,
+      useEmbeddings: config.useEmbeddings ?? true
     };
+
+    if (this.config.useEmbeddings) {
+      this.embeddingService = getEmbeddingService();
+    }
+  }
+
+  /**
+   * Initialize embedding service (loads model)
+   */
+  async initializeEmbeddings(): Promise<void> {
+    if (this.embeddingService && !this.embeddingsInitialized) {
+      try {
+        console.log('[MarketMatcher] Initializing embedding model...');
+        await this.embeddingService.initialize();
+        this.embeddingsInitialized = true;
+        console.log('[MarketMatcher] Embedding model ready');
+      } catch (error) {
+        console.warn('[MarketMatcher] Failed to initialize embeddings:', error);
+        this.embeddingService = undefined;
+      }
+    }
   }
 
   /**
@@ -43,13 +70,16 @@ export class MarketMatcher {
 
     console.log(`[MarketMatcher] Kalshi: ${kalshiMarkets.length} markets`);
     console.log(`[MarketMatcher] Polymarket: ${polyMarkets.length} markets`);
+
+    await this.initializeEmbeddings();
+
     console.log('[MarketMatcher] Analyzing matches...\n');
 
     const pairs: MarketPair[] = [];
     const allMatches: Array<{ pair: MarketPair; analysis: MatchAnalysis }> = [];
 
     for (const kMarket of kalshiMarkets) {
-      const match = this.findBestMatch(kMarket, polyMarkets);
+      const match = await this.findBestMatch(kMarket, polyMarkets);
 
       if (match && this.shouldIncludeMatch(match.analysis)) {
         const pair: MarketPair = {
@@ -116,15 +146,15 @@ export class MarketMatcher {
   /**
    * Find the best matching market using multi-strategy analysis
    */
-  private findBestMatch(
+  private async findBestMatch(
     target: Market,
     candidates: Market[]
-  ): { market: Market; analysis: MatchAnalysis } | null {
+  ): Promise<{ market: Market; analysis: MatchAnalysis } | null> {
     let bestMatch: Market | null = null;
     let bestAnalysis: MatchAnalysis | null = null;
 
     for (const candidate of candidates) {
-      const analysis = this.analyzeMatch(target, candidate);
+      const analysis = await this.analyzeMatch(target, candidate);
 
       if (!bestAnalysis || analysis.confidence > bestAnalysis.confidence) {
         bestAnalysis = analysis;
@@ -138,7 +168,7 @@ export class MarketMatcher {
   /**
    * Comprehensive match analysis using multiple strategies
    */
-  private analyzeMatch(market1: Market, market2: Market): MatchAnalysis {
+  private async analyzeMatch(market1: Market, market2: Market): Promise<MatchAnalysis> {
     const titleSimilarity = this.calculateTitleSimilarity(market1.title, market2.title);
     const descriptionSimilarity = this.calculateDescriptionSimilarity(
       market1.description,
@@ -151,10 +181,22 @@ export class MarketMatcher {
     const categoryMatch = this.checkCategoryMatch(market1, market2);
     const timingMatch = this.checkTimingMatch(market1, market2);
 
+    let embeddingSimilarity: number | undefined;
+    if (this.embeddingService && this.embeddingsInitialized) {
+      try {
+        const text1 = market1.title + ' ' + market1.description;
+        const text2 = market2.title + ' ' + market2.description;
+        embeddingSimilarity = await this.embeddingService.calculateSimilarity(text1, text2);
+      } catch (error) {
+        console.warn('[MarketMatcher] Embedding calculation failed:', error);
+      }
+    }
+
     const { confidence, reasons } = this.calculateConfidence({
       titleSimilarity,
       descriptionSimilarity,
       keywordOverlap,
+      embeddingSimilarity,
       categoryMatch,
       timingMatch,
       confidence: 0,
@@ -172,6 +214,7 @@ export class MarketMatcher {
       titleSimilarity,
       descriptionSimilarity,
       keywordOverlap,
+      embeddingSimilarity,
       categoryMatch,
       timingMatch,
       confidence,
@@ -249,36 +292,44 @@ export class MarketMatcher {
     const reasons: string[] = [];
     let confidence = 0;
 
-    // Title similarity (0-30 points) - Reduced weight, less reliable
-    confidence += (signals.titleSimilarity / 100) * 30;
+    // Title similarity (0-25 points) - Slightly reduced to accommodate embeddings
+    confidence += (signals.titleSimilarity / 100) * 25;
     if (signals.titleSimilarity >= 80) {
       reasons.push(`High title match (${signals.titleSimilarity.toFixed(0)}%)`);
     } else if (signals.titleSimilarity >= 50) {
       reasons.push(`Moderate title match (${signals.titleSimilarity.toFixed(0)}%)`);
     }
 
-    // Description similarity (0-20 points) - Reduced weight
-    confidence += (signals.descriptionSimilarity / 100) * 20;
+    // Description similarity (0-18 points) - Slightly reduced
+    confidence += (signals.descriptionSimilarity / 100) * 18;
     if (signals.descriptionSimilarity >= 60) {
       reasons.push(`Description overlap (${signals.descriptionSimilarity.toFixed(0)}%)`);
     }
 
-    // Keyword overlap (0-30 points) - Increased weight, proven reliable
-    confidence += (signals.keywordOverlap / 100) * 30;
+    // Keyword overlap (0-27 points) - Slightly reduced, still highest weight
+    confidence += (signals.keywordOverlap / 100) * 27;
     if (signals.keywordOverlap >= 50) {
       reasons.push(`Keyword match (${signals.keywordOverlap.toFixed(0)}%)`);
     }
 
-    // Category match (0-15 points) - Increased weight, strong signal
+    // Embedding similarity (0-17 points) - NEW semantic understanding
+    if (signals.embeddingSimilarity !== undefined) {
+      confidence += (signals.embeddingSimilarity / 100) * 17;
+      if (signals.embeddingSimilarity >= 70) {
+        reasons.push(`Semantic match (${signals.embeddingSimilarity.toFixed(0)}%)`);
+      }
+    }
+
+    // Category match (0-13 points) - Slightly reduced
     if (signals.categoryMatch) {
-      confidence += 15;
+      confidence += 13;
       const cats = this.extractCategories(market1);
       if (cats.length > 0) {
         reasons.push(`Category: ${cats[0]}`);
       }
     }
 
-    // Timing match (0-5 points)
+    // Timing match (0-5 points) - Unchanged
     if (signals.timingMatch) {
       confidence += 5;
       reasons.push('Similar dates');
@@ -346,7 +397,10 @@ export class MarketMatcher {
     }
 
     const tags = market.metadata?.tags || [];
-    categories.push(...tags.map((t: string) => t.toLowerCase()));
+    categories.push(...tags
+      .filter((t: any) => typeof t === 'string')
+      .map((t: string) => t.toLowerCase())
+    );
 
     return [...new Set(categories)];
   }

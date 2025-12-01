@@ -64,23 +64,23 @@ export class ModelService {
   /**
    * Get combined prediction for a market pair
    */
-  predict(
+  async predict(
     kalshiMarket: Market,
     polyMarket: Market,
     baselineMatchScore: number,
     baselineAlignment: number
-  ): EnhancedPrediction {
+  ): Promise<EnhancedPrediction> {
     if (!this.isInitialized) {
       this.initialize();
     }
 
-    const matching = this.matchingPredictor.predict(
+    const matching = await this.matchingPredictor.predict(
       kalshiMarket,
       polyMarket,
       baselineMatchScore
     );
 
-    const resolution = this.resolutionPredictor.predict(
+    const resolution = await this.resolutionPredictor.predict(
       kalshiMarket,
       polyMarket,
       baselineAlignment
@@ -92,11 +92,11 @@ export class ModelService {
   /**
    * Predict from market pair object
    */
-  predictFromPair(
+  async predictFromPair(
     pair: MarketPair,
     baselineMatchScore: number,
     baselineAlignment: number
-  ): EnhancedPrediction {
+  ): Promise<EnhancedPrediction> {
     return this.predict(
       pair.kalshiMarket,
       pair.polymarketMarket,
@@ -151,12 +151,12 @@ export class ModelService {
   /**
    * Extract features for training
    */
-  extractTrainingFeatures(
+  async extractTrainingFeatures(
     kalshiMarket: Market,
     polyMarket: Market,
     label: number
-  ): TrainingExample {
-    const features = this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
+  ): Promise<TrainingExample> {
+    const features = await this.featureExtractor.extractFeatures(kalshiMarket, polyMarket);
     return {
       features,
       label,
