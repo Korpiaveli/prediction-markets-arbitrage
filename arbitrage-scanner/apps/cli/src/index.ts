@@ -10,13 +10,17 @@ import { MockExchange, KalshiAdapter, PolymarketAdapter } from '@arb/exchanges';
 import { Scanner, OpportunityRanker } from '@arb/scanner';
 import { JsonStorage } from '@arb/storage';
 import path from 'path';
+import { ConfigManager } from './config';
+import { createBacktestCommand } from './commands/backtest';
+import { createPatternsCommand } from './commands/patterns';
 
 const program = new Command();
+const configManager = new ConfigManager();
 
 program
   .name('arb-scan')
   .description('Cross-exchange arbitrage scanner for prediction markets')
-  .version('1.0.0');
+  .version('1.1.0');
 
 // Scan command
 program
@@ -497,6 +501,52 @@ function saveResolutionData(opportunities: any[], dataDir: string) {
   fs.writeFileSync(filename, JSON.stringify(resolutionData, null, 2));
   console.log(chalk.green(`\n💾 Resolution data saved to: ${filename}`));
 }
+
+// Config command
+program
+  .command('config')
+  .description('Display current configuration')
+  .option('--path <path>', 'Path to config file')
+  .action((options) => {
+    try {
+      const manager = options.path ? new ConfigManager(options.path) : configManager;
+      manager.display();
+    } catch (error) {
+      console.error(chalk.red('Failed to load configuration:'), error);
+      process.exit(1);
+    }
+  });
+
+// Backtest command
+const backtestCmd = createBacktestCommand();
+program
+  .command(backtestCmd.command)
+  .description(backtestCmd.description);
+backtestCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(backtestCmd.action);
+
+// Patterns command
+const patternsCmd = createPatternsCommand();
+program
+  .command(patternsCmd.command)
+  .description(patternsCmd.description);
+patternsCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(patternsCmd.action);
+
+// Error handling
+process.on('unhandledRejection', (reason) => {
+  console.error(chalk.red('\n✗ Unhandled error:'), reason);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error(chalk.red('\n✗ Fatal error:'), error);
+  process.exit(1);
+});
 
 // Parse and run
 program.parse();
