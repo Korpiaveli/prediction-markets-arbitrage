@@ -31,6 +31,16 @@ export interface FeatureVector {
 }
 
 /**
+ * Confidence interval for predictions
+ */
+export interface ConfidenceInterval {
+  lower: number;                     // Lower bound (5th percentile)
+  upper: number;                     // Upper bound (95th percentile)
+  mean: number;                      // Expected value
+  stdDev: number;                    // Standard deviation
+}
+
+/**
  * Market matching ML prediction
  */
 export interface MatchingPrediction {
@@ -40,6 +50,7 @@ export interface MatchingPrediction {
   mlBoost: number;                   // ML confidence boost (-20 to +20)
   finalScore: number;                // Combined score (baseline + boost)
   features: FeatureVector;           // Input features used
+  confidenceInterval?: ConfidenceInterval; // Prediction uncertainty
 }
 
 /**
@@ -53,6 +64,7 @@ export interface ResolutionPrediction {
   finalAlignment: number;            // Adjusted alignment score
   tradeable: boolean;                // Safe to trade?
   features: FeatureVector;           // Input features used
+  confidenceInterval?: ConfidenceInterval; // Prediction uncertainty
 }
 
 /**

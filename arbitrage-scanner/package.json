@@ -9,11 +9,12 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
+    "rebuild": "npm run clean && npm run build",
     "test": "npm run test --workspaces",
     "test:integration": "vitest run --config vitest.config.integration.ts",
     "test:integration:watch": "vitest --config vitest.config.integration.ts",
     "dev": "npm run dev --workspace=apps/cli",
-    "clean": "npm run clean --workspaces && rimraf node_modules",
+    "clean": "npm run clean --workspaces --if-present",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

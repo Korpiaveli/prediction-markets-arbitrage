@@ -7,6 +7,8 @@
  * - Liquidity depth analysis for execution feasibility
  * - Backtesting engine for strategy validation
  * - Market correlation detection for advanced strategies
+ * - Opportunity forecasting and timing prediction
+ * - Automated trading strategy evaluation and position sizing
  *
  * Strategy: Simple scikit-learn models, no deep learning complexity.
  */
@@ -19,12 +21,15 @@ export { PatternAnalyzer } from './patterns';
 export { LiquidityAnalyzer } from './liquidity';
 export { BacktestEngine } from './backtest';
 export { CorrelationDetector } from './correlation';
+export { OpportunityPredictor } from './predictor';
+export { TradingStrategyEvaluator } from './strategy';
 
 export type {
   FeatureVector,
   MatchingPrediction,
   ResolutionPrediction,
-  ModelConfig
+  ModelConfig,
+  ConfidenceInterval
 } from './types';
 
 export type {
@@ -55,3 +60,15 @@ export type {
   CorrelationCluster,
   PriceHistory
 } from './correlation';
+
+export type {
+  OpportunityForecast,
+  TimingPrediction
+} from './predictor';
+
+export type {
+  PositionSize,
+  RiskMetrics,
+  StrategySignal,
+  StrategyConfig
+} from './strategy';

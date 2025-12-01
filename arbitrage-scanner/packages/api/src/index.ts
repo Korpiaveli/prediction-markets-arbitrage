@@ -23,6 +23,7 @@ import { createScannerRoutes } from './routes/scanner';
 import { createMarketRoutes } from './routes/markets';
 import { createBacktestRoutes } from './routes/backtest';
 import { createConfigRoutes } from './routes/config';
+import { createMLRoutes } from './routes/ml';
 import { createWebSocketHandler } from './websocket';
 import { ApiConfig, ApiContext } from './types';
 
@@ -88,6 +89,7 @@ export class ApiServer {
     this.app.use('/api/markets', createMarketRoutes(this.context));
     this.app.use('/api/backtest', createBacktestRoutes(this.context));
     this.app.use('/api/config', createConfigRoutes(this.context));
+    this.app.use('/api/ml', createMLRoutes(this.context));
 
     // API documentation
     this.app.get('/api', (_req: Request, res: Response) => {
@@ -99,7 +101,8 @@ export class ApiServer {
           scanner: '/api/scanner',
           markets: '/api/markets',
           backtest: '/api/backtest',
-          config: '/api/config'
+          config: '/api/config',
+          ml: '/api/ml'
         },
         websocket: {
           enabled: this.config.enableWebSocket,
