@@ -30,18 +30,20 @@ interface HistoricalDataset {
 function toMarket(data: any, exchange: 'KALSHI' | 'POLYMARKET'): Market {
   return {
     id: data.market_id,
+    exchangeId: data.market_id,
     title: data.title,
     description: data.description,
     exchange,
-    lastPrice: data.final_price_yes,
-    volume: data.volume_usd,
+    active: false,
+    volume24h: data.volume_usd,
     closeTime: new Date(data.end_date),
     metadata: {
       category: data.category,
       source: data.source,
       resolutionOutcome: data.resolution_outcome,
       rulesPrimary: data.source,
-      resolutionRules: data.source
+      resolutionRules: data.source,
+      finalPriceYes: data.final_price_yes
     }
   };
 }

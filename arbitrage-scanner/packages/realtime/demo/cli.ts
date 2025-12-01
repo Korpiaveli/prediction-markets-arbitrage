@@ -6,8 +6,8 @@
  */
 
 import { RealTimeScanner } from '../src/scanner/realtime';
-import { KalshiAdapter } from '@arb/adapters';
-import { PolymarketAdapter } from '@arb/adapters';
+import { KalshiAdapter } from '@arb/exchanges';
+import { PolymarketAdapter } from '@arb/exchanges';
 import { ArbitrageCalculator } from '@arb/math';
 
 async function main() {
@@ -69,7 +69,7 @@ async function main() {
     console.error('\n❌ ERROR:', error.message);
   });
 
-  scanner.on('metrics', (metrics) => {
+  scanner.on('metrics', () => {
     console.log('\n📊 METRICS UPDATE');
     console.log(scanner.getReport());
   });
