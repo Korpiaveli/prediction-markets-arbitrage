@@ -4,6 +4,23 @@
   "description": "Machine learning module for market matching and resolution risk prediction",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./strategies": {
+      "require": "./dist/strategies/index.js",
+      "import": "./dist/strategies/index.js",
+      "types": "./dist/strategies/index.d.ts"
+    },
+    "./normalizers": {
+      "require": "./dist/normalizers/index.js",
+      "import": "./dist/normalizers/index.js",
+      "types": "./dist/normalizers/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",

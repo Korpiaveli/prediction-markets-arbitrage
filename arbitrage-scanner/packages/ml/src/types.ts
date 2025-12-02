@@ -5,6 +5,15 @@
 // Types only - no runtime imports needed
 
 /**
+ * Feature extraction result with confidence tracking
+ */
+export interface FeatureResult<T> {
+  value: T;
+  confidence: number;                // 0-1, how confident we are in this value
+  source: 'computed' | 'fallback' | 'cached';
+}
+
+/**
  * Feature vector for ML model input
  */
 export interface FeatureVector {
@@ -31,6 +40,22 @@ export interface FeatureVector {
 
   // Semantic similarity (from EmbeddingService)
   embeddingSimilarity: number;       // 0-100 (cosine similarity)
+
+  // Confidence tracking for each feature (0-1)
+  featureConfidence: {
+    titleSimilarity: number;
+    descriptionSimilarity: number;
+    keywordOverlap: number;
+    categoryMatch: number;
+    timingMatch: number;
+    sourcesMatch: number;
+    alignmentScore: number;
+    volumeRatio: number;
+    priceCorrelation: number;
+    lengthRatio: number;
+    avgWordCount: number;
+    embeddingSimilarity: number;
+  };
 }
 
 /**

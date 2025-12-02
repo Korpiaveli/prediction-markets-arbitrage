@@ -1,0 +1,106 @@
+{
+  "$schema": "./matching-strategies.schema.json",
+  "version": "1.0.0",
+  "description": "Scoring strategy configurations for cross-platform market matching",
+  "strategies": {
+    "kalshi-polymarket": {
+      "name": "kalshi-polymarket",
+      "description": "Cross-platform matching for Kalshi (concise) and Polymarket (verbose)",
+      "weights": {
+        "titleSimilarity": 0.15,
+        "descriptionSimilarity": 0.05,
+        "keywordOverlap": 0.15,
+        "categoryMatch": 0.15,
+        "timingMatch": 0.10,
+        "sourcesMatch": 0.05,
+        "alignmentScore": 0.05,
+        "volumeRatio": 0.02,
+        "priceCorrelation": 0.08,
+        "lengthRatio": 0.02,
+        "avgWordCount": 0.02,
+        "embeddingSimilarity": 0.16
+      },
+      "thresholds": {
+        "minMatchScore": 55,
+        "minConfidence": 0.3,
+        "strictMode": false
+      },
+      "rationale": {
+        "embeddingSimilarity": "Highest weight - captures semantic meaning across different writing styles",
+        "categoryMatch": "High weight - critical signal for same event",
+        "titleSimilarity": "Medium weight - after normalization removes style differences",
+        "keywordOverlap": "Medium weight - important after normalizing verbose Polymarket text",
+        "descriptionSimilarity": "Low weight - Kalshi descriptions often empty",
+        "lengthRatio": "Very low weight - would penalize cross-platform matches",
+        "minMatchScore": "Lower threshold (55 vs 70) - accommodates cross-platform differences"
+      }
+    },
+    "kalshi-predictit": {
+      "name": "kalshi-predictit",
+      "description": "Cross-platform matching for Kalshi and PredictIt (multi-contract)",
+      "weights": {
+        "titleSimilarity": 0.18,
+        "descriptionSimilarity": 0.08,
+        "keywordOverlap": 0.18,
+        "categoryMatch": 0.15,
+        "timingMatch": 0.12,
+        "sourcesMatch": 0.05,
+        "alignmentScore": 0.05,
+        "volumeRatio": 0.02,
+        "priceCorrelation": 0.07,
+        "lengthRatio": 0.02,
+        "avgWordCount": 0.02,
+        "embeddingSimilarity": 0.06
+      },
+      "thresholds": {
+        "minMatchScore": 60,
+        "minConfidence": 0.5,
+        "strictMode": false
+      },
+      "rationale": {
+        "titleSimilarity": "Higher weight - both use concise formats",
+        "keywordOverlap": "Higher weight - similar writing styles",
+        "embeddingSimilarity": "Lower weight - text similarity sufficient for same-style platforms"
+      }
+    },
+    "same-platform": {
+      "name": "same-platform",
+      "description": "Matching within same exchange (duplicate detection)",
+      "weights": {
+        "titleSimilarity": 0.30,
+        "descriptionSimilarity": 0.20,
+        "keywordOverlap": 0.20,
+        "categoryMatch": 0.10,
+        "timingMatch": 0.10,
+        "sourcesMatch": 0.02,
+        "alignmentScore": 0.02,
+        "volumeRatio": 0.01,
+        "priceCorrelation": 0.02,
+        "lengthRatio": 0.01,
+        "avgWordCount": 0.01,
+        "embeddingSimilarity": 0.01
+      },
+      "thresholds": {
+        "minMatchScore": 85,
+        "minConfidence": 0.8,
+        "strictMode": true
+      },
+      "rationale": {
+        "titleSimilarity": "Highest weight - expect very high similarity for duplicates",
+        "minMatchScore": "High threshold (85) - strict matching for same platform"
+      }
+    }
+  },
+  "normalizers": {
+    "kalshi": "KalshiNormalizer",
+    "polymarket": "PolymarketNormalizer",
+    "predictit": "KalshiNormalizer"
+  },
+  "notes": [
+    "Weights must sum to 1.0 for each strategy",
+    "Cross-platform strategies emphasize semantic features over exact text match",
+    "Same-platform strategies emphasize exact text similarity",
+    "minConfidence < 1.0 allows fallback features when primary features fail",
+    "Normalizers standardize text before feature extraction"
+  ]
+}

@@ -27,6 +27,7 @@ export { EmbeddingService, getEmbeddingService, resetEmbeddingService } from './
 
 export type {
   FeatureVector,
+  FeatureResult,
   MatchingPrediction,
   ResolutionPrediction,
   ModelConfig,

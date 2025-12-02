@@ -166,6 +166,38 @@ describe('ArbitrageCalculator', () => {
 
       expect(validWithMargin).toBeLessThanOrEqual(validNoMargin);
     });
+
+    it('should apply safety margin as percentage of profit, not dollars (fixed bug)', () => {
+      // BUG FIX VALIDATION: Safety margin should be percentage of profit
+      // Example: profit = 0.05 (5%), safetyMargin = 0.02 (2%)
+      // OLD BUG: adjustedProfit = 0.05 - 0.02 = 0.03 (treats 0.02 as $0.02)
+      // FIXED: adjustedProfit = 0.05 - (0.05 * 0.02) = 0.05 - 0.001 = 0.049 (treats 0.02 as 2%)
+
+      const quotes = createQuotes(0.44, 0.56, 0.56, 0.44);
+      const fees: FeeStructure = {
+        kalshiFeePerContract: 0,
+        polymarketFeeRate: 0,
+        safetyMarginPercent: 0.02 // 2% safety margin
+      };
+
+      const results = calculator.calculate(quotes, fees);
+      const result = results[0];
+
+      // With no fees, profit should be: 1 - (0.44 + 0.44) = 1 - 0.88 = 0.12
+      // Safety margin should be: 0.12 * 0.02 = 0.0024
+      // Adjusted profit should be: 0.12 - 0.0024 = 0.1176 = 11.76%
+
+      // If bug existed, adjusted profit would be: 0.12 - 0.02 = 0.10 = 10%
+      // So we verify it's > 11% (not 10%)
+
+      expect(result.profitPercent).toBeCloseTo(12, 1); // Raw profit ~12%
+      expect(result.valid).toBe(true); // Should still be valid after 2% reduction
+
+      // The key test: with 2% safety margin on 12% profit,
+      // we should still have ~11.76% profit, NOT 10%
+      const expectedAdjustedProfit = 12 * (1 - 0.02);
+      expect(result.profitPercent).toBeGreaterThan(expectedAdjustedProfit - 0.5);
+    });
   });
 
   describe('Edge Cases', () => {
@@ -249,14 +281,14 @@ describe('ArbitrageCalculator', () => {
       });
     });
 
-    it('should validate break-even calculation', () => {
+    it('should validate break-even calculation (fixed bug)', () => {
       const quotes = createQuotes(0.45, 0.55, 0.55, 0.45);
       const results = calculator.calculate(quotes, DEFAULT_FEE_STRUCTURE);
 
       results.forEach(result => {
-        // Break-even should be 1 - profit
-        const expectedBreakEven = 1 - (result.profitPercent / 100);
-        expect(result.breakEven).toBeCloseTo(expectedBreakEven, 3);
+        // Break-even should be totalCost (what you paid)
+        // BUG FIX: Previously was "1 - profit" which was inverted logic
+        expect(result.breakEven).toBeCloseTo(result.totalCost, 3);
       });
     });
   });

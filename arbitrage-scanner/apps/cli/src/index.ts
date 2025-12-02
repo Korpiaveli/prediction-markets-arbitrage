@@ -6,13 +6,15 @@ import ora from 'ora';
 import Table from 'cli-table3';
 import { DEFAULT_FEE_STRUCTURE } from '@arb/core';
 import { ArbitrageCalculator } from '@arb/math';
-import { MockExchange, KalshiAdapter, PolymarketAdapter } from '@arb/exchanges';
+import { MockExchange } from '@arb/exchanges';
 import { Scanner, OpportunityRanker } from '@arb/scanner';
 import { JsonStorage } from '@arb/storage';
 import path from 'path';
 import { ConfigManager } from './config';
 import { createBacktestCommand } from './commands/backtest';
 import { createPatternsCommand } from './commands/patterns';
+import { createFetchHistoricalCommand } from './commands/fetch-historical';
+import { createExchanges as createExchangesFromFactory, parseExchangeList, getAvailableExchanges } from './utils/exchanges';
 
 const program = new Command();
 const configManager = new ConfigManager();
@@ -26,18 +28,20 @@ program
 program
   .command('scan')
   .description('Scan for arbitrage opportunities')
-  .option('-m, --mode <mode>', 'Exchange mode: mock, test, live', 'mock')
+  .option('-m, --mode <mode>', 'Exchange mode: mock, test, live', 'live')
   .option('-i, --interval <ms>', 'Scan interval in milliseconds', '5000')
   .option('-o, --once', 'Run single scan and exit')
   .option('--min-profit <percent>', 'Minimum profit percentage', '0.5')
   .option('--data-dir <path>', 'Data directory for storage', './data')
   .option('--collect-resolution-data', 'Collect resolution analysis data (disables filtering)')
+  .option('--exchanges <list>', `Comma-separated list: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket')
+  .option('--all-exchanges', 'Include all available exchanges', false)
   .action(async (options) => {
     const spinner = ora('Initializing scanner...').start();
 
     try {
-      // Create exchanges based on mode
-      const exchanges = await createExchanges(options.mode);
+      // Create exchanges based on mode and exchange selection
+      const exchanges = await createExchanges(options.mode, options.exchanges, options.allExchanges);
 
       // Create storage
       const storage = new JsonStorage({
@@ -183,63 +187,100 @@ program
   .option('--include-low', 'Include low confidence matches', false)
   .option('--include-uncertain', 'Include uncertain matches', false)
   .option('--save <file>', 'Save results to JSON file')
+  .option('--exchanges <list>', `Comma-separated list: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket')
+  .option('--all-exchanges', 'Include all available exchanges', false)
   .action(async (options) => {
     const spinner = ora('Finding market pairs...').start();
 
     try {
-      const exchanges = await createExchanges('live');
-      const [kalshi, polymarket] = exchanges;
+      // Parse exchange selection
+      const exchangeOptions = options.allExchanges
+        ? { includeKalshi: true, includePolymarket: true, includePredictIt: true }
+        : parseExchangeList(options.exchanges);
 
-      await kalshi.connect();
-      await polymarket.connect();
-
-      const { MarketMatcher } = await import('@arb/scanner');
-      const matcher = new MarketMatcher({
-        minConfidence: parseFloat(options.minConfidence),
-        includeLowConfidence: options.includeLow,
-        includeUncertain: options.includeUncertain
+      const exchanges = createExchangesFromFactory({
+        ...exchangeOptions,
+        filterSports: false
       });
 
-      spinner.text = 'Analyzing matches...';
-      const pairs = await matcher.matchMarkets(kalshi, polymarket);
+      if (exchanges.length < 2) {
+        throw new Error('Need at least 2 exchanges for matching. Use --exchanges or --all-exchanges');
+      }
 
-      await kalshi.disconnect();
-      await polymarket.disconnect();
+      spinner.text = `Connecting to ${exchanges.length} exchanges...`;
+      await Promise.all(exchanges.map(e => e.connect()));
 
-      spinner.succeed(`Found ${pairs.length} market pairs`);
+      const { MarketMatcher } = await import('@arb/scanner');
+      const allPairs = [];
+
+      // Match all exchange pairs
+      for (let i = 0; i < exchanges.length; i++) {
+        for (let j = i + 1; j < exchanges.length; j++) {
+          const exchange1 = exchanges[i];
+          const exchange2 = exchanges[j];
+
+          spinner.text = `Matching ${exchange1.name} ⟷ ${exchange2.name}...`;
+
+          const matcher = new MarketMatcher({
+            minConfidence: parseFloat(options.minConfidence),
+            includeLowConfidence: options.includeLow,
+            includeUncertain: options.includeUncertain
+          });
+
+          const pairs = await matcher.matchMarkets(exchange1, exchange2);
+          allPairs.push(...pairs.map(p => ({
+            ...p,
+            exchangePair: `${exchange1.name}-${exchange2.name}`
+          })));
+        }
+      }
+
+      await Promise.all(exchanges.map(e => e.disconnect()));
+
+      spinner.succeed(`Found ${allPairs.length} market pairs across ${exchanges.length} exchanges`);
 
       // Save if requested
       if (options.save) {
         const fs = require('fs');
         const savePath = path.resolve(options.save);
-        fs.writeFileSync(savePath, JSON.stringify(pairs, null, 2));
+        fs.writeFileSync(savePath, JSON.stringify(allPairs, null, 2));
         console.log(chalk.green(`\n💾 Saved to: ${savePath}`));
       }
 
-      // Display summary
+      // Display summary by exchange pair
       console.log(chalk.cyan('\n📊 Match Summary:\n'));
-      const byLevel = {
-        high: pairs.filter(p => (p.correlationScore ?? 0) >= 0.8),
-        medium: pairs.filter(p => (p.correlationScore ?? 0) >= 0.6 && (p.correlationScore ?? 0) < 0.8),
-        low: pairs.filter(p => (p.correlationScore ?? 0) >= 0.4 && (p.correlationScore ?? 0) < 0.6),
-        uncertain: pairs.filter(p => (p.correlationScore ?? 0) < 0.4)
-      };
+      const byExchange: { [key: string]: any[] } = {};
+      allPairs.forEach(p => {
+        const key = (p as any).exchangePair || 'unknown';
+        if (!byExchange[key]) byExchange[key] = [];
+        byExchange[key].push(p);
+      });
 
-      console.log(`  ${chalk.green('High confidence (80+):')}     ${byLevel.high.length} pairs`);
-      console.log(`  ${chalk.yellow('Medium confidence (60-79):')} ${byLevel.medium.length} pairs`);
-      console.log(`  ${chalk.blue('Low confidence (40-59):')}    ${byLevel.low.length} pairs`);
-      console.log(`  ${chalk.gray('Uncertain (<40):')}          ${byLevel.uncertain.length} pairs\n`);
+      Object.entries(byExchange).forEach(([exchangePair, pairs]) => {
+        const byLevel = {
+          high: pairs.filter(p => (p.correlationScore ?? 0) >= 0.8),
+          medium: pairs.filter(p => (p.correlationScore ?? 0) >= 0.6 && (p.correlationScore ?? 0) < 0.8),
+          low: pairs.filter(p => (p.correlationScore ?? 0) >= 0.4 && (p.correlationScore ?? 0) < 0.6),
+          uncertain: pairs.filter(p => (p.correlationScore ?? 0) < 0.4)
+        };
 
-      // Show top high-confidence matches
-      if (byLevel.high.length > 0) {
-        console.log(chalk.green('Top High-Confidence Matches:\n'));
-        byLevel.high.slice(0, 10).forEach(pair => {
-          const score = ((pair.correlationScore ?? 0) * 100).toFixed(0);
-          console.log(`  ${chalk.bold(pair.description)}`);
-          console.log(`    → ${pair.polymarketMarket.title}`);
-          console.log(`    Confidence: ${chalk.green(score + '%')}\n`);
-        });
-      }
+        console.log(chalk.bold(`\n${exchangePair}:`));
+        console.log(`  ${chalk.green('High confidence (80+):')}     ${byLevel.high.length} pairs`);
+        console.log(`  ${chalk.yellow('Medium confidence (60-79):')} ${byLevel.medium.length} pairs`);
+        console.log(`  ${chalk.blue('Low confidence (40-59):')}    ${byLevel.low.length} pairs`);
+        console.log(`  ${chalk.gray('Uncertain (<40):')}          ${byLevel.uncertain.length} pairs`);
+
+        // Show top matches for this exchange pair
+        if (byLevel.high.length > 0) {
+          console.log(chalk.green('\n  Top Matches:'));
+          byLevel.high.slice(0, 5).forEach(pair => {
+            const score = ((pair.correlationScore ?? 0) * 100).toFixed(0);
+            console.log(`    ${chalk.bold(pair.description)}`);
+            console.log(`      → ${pair.polymarketMarket?.title || pair.kalshiMarket?.title}`);
+            console.log(`      Confidence: ${chalk.green(score + '%')}`);
+          });
+        }
+      });
 
       console.log('');
     } catch (error) {
@@ -333,7 +374,7 @@ program
 
 // Helper functions
 
-async function createExchanges(mode: string) {
+async function createExchanges(mode: string, exchangeList?: string, allExchanges?: boolean) {
   switch (mode) {
     case 'mock':
       // Create two mock exchanges with different names
@@ -345,17 +386,26 @@ async function createExchanges(mode: string) {
       return [mockKalshi, mockPoly];
 
     case 'test':
-      return [
-        new KalshiAdapter({ testMode: true }),
-        new PolymarketAdapter({ testMode: true })
-      ];
+      const testExchangeOptions = allExchanges
+        ? { includeKalshi: true, includePolymarket: true, includePredictIt: true }
+        : parseExchangeList(exchangeList || 'kalshi,polymarket');
+
+      return createExchangesFromFactory({
+        ...testExchangeOptions,
+        filterSports: false,
+        testMode: true
+      });
 
     case 'live':
-      // In production, would load API keys from environment
-      return [
-        new KalshiAdapter(),
-        new PolymarketAdapter()
-      ];
+      const liveExchangeOptions = allExchanges
+        ? { includeKalshi: true, includePolymarket: true, includePredictIt: true }
+        : parseExchangeList(exchangeList || 'kalshi,polymarket');
+
+      return createExchangesFromFactory({
+        ...liveExchangeOptions,
+        filterSports: false,
+        testMode: false
+      });
 
     default:
       throw new Error(`Invalid mode: ${mode}`);
@@ -536,6 +586,16 @@ patternsCmd.options.forEach((opt: any) => {
   program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
 });
 program.commands[program.commands.length - 1].action(patternsCmd.action);
+
+// Fetch Historical command
+const fetchHistCmd = createFetchHistoricalCommand();
+program
+  .command(fetchHistCmd.command)
+  .description(fetchHistCmd.description);
+fetchHistCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(fetchHistCmd.action);
 
 // Error handling
 process.on('unhandledRejection', (reason) => {

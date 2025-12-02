@@ -55,9 +55,9 @@ export class ArbitrageCalculator implements IArbitrageCalculator {
     const profit = SafeDecimal.from(1).sub(totalCost);
     const profitPercent = profit.mul(100);
 
-    // Apply safety margin
+    // Apply safety margin (as percentage of profit)
     const safetyMargin = SafeDecimal.from(fees.safetyMarginPercent);
-    const adjustedProfit = profit.sub(safetyMargin);
+    const adjustedProfit = profit.sub(profit.mul(safetyMargin));
 
     // Validation
     const valid = adjustedProfit.gt(0);
@@ -69,7 +69,7 @@ export class ArbitrageCalculator implements IArbitrageCalculator {
       kalshiLeg: kalshiPrice,
       polymarketLeg: polyPrice,
       fees: feeBreakdown,
-      breakEven: SafeDecimal.from(1).sub(profit).toNumber(),
+      breakEven: totalCost.toNumber(), // Break-even is what you paid (total cost)
       valid,
       validationErrors: valid ? undefined : ['Insufficient profit after fees and safety margin']
     };

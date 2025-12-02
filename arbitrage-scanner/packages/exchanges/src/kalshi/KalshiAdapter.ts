@@ -7,6 +7,11 @@ import {
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
+interface KalshiConfig extends ExchangeConfig {
+  filterSports?: boolean;
+  filterTypes?: string[];
+}
+
 interface KalshiMarketResponse {
   cursor?: string;
   markets: Array<{
@@ -66,9 +71,14 @@ export class KalshiAdapter extends BaseExchange {
     burstLimit: 20
   };
 
-  constructor(config: ExchangeConfig = {}) {
+  private readonly filterSports: boolean;
+  private readonly filterTypes: string[];
+
+  constructor(config: KalshiConfig = {}) {
     super(config);
     this.setBaseURL(this.apiUrl);
+    this.filterSports = config.filterSports ?? false; // Default: include ALL markets (sports, politics, etc.)
+    this.filterTypes = config.filterTypes ?? ['kxmvementions', 'nflsinglegame', 'nflmultigame'];
   }
 
   async getMarkets(): Promise<Market[]> {
@@ -88,7 +98,7 @@ export class KalshiAdapter extends BaseExchange {
         return [];
       }
 
-      // Apply filtering to focus on non-sports markets
+      // Apply filtering
       const markets = response.markets
         .filter((m) => {
           // Status filter
@@ -96,13 +106,20 @@ export class KalshiAdapter extends BaseExchange {
             return false;
           }
 
+          // Only apply sports filtering if enabled
+          if (!this.filterSports) {
+            return true;
+          }
+
           // Filter out pure NFL/sports prop bets (commentator mentions, player stats)
           const title = m.title.toLowerCase();
           const ticker = m.ticker.toLowerCase();
 
-          // Exclude NFL commentator mentions and detailed game props
-          if (ticker.includes('kxmvementions') || ticker.includes('nflsinglegame') || ticker.includes('nflmultigame')) {
-            return false;
+          // Exclude specific ticker types from filterTypes config
+          for (const filterType of this.filterTypes) {
+            if (ticker.includes(filterType)) {
+              return false;
+            }
           }
 
           // Exclude detailed player stat props
@@ -114,7 +131,8 @@ export class KalshiAdapter extends BaseExchange {
         })
         .map((m) => this.transformMarket(m));
 
-      console.log(`[${this.name}] Filtered ${response.markets.length} → ${markets.length} markets (removed ${response.markets.length - markets.length} sports props)`);
+      const filterStatus = this.filterSports ? 'ON' : 'OFF';
+      console.log(`[${this.name}] Filtered ${response.markets.length} → ${markets.length} markets (sports filter: ${filterStatus}, removed: ${response.markets.length - markets.length})`);
 
       this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
       return markets;
@@ -186,7 +204,7 @@ export class KalshiAdapter extends BaseExchange {
   async getOrderbook(marketId: string): Promise<KalshiOrderbookResponse> {
     try {
       const response = await this.queue.add(async () => {
-        const { data } = await this.client.get<KalshiOrderbookResponse>(
+        const { data} = await this.client.get<KalshiOrderbookResponse>(
           `/markets/${marketId}/orderbook`
         );
         return data;
@@ -199,6 +217,45 @@ export class KalshiAdapter extends BaseExchange {
       return response;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch orderbook for ${marketId}:`, error);
+      throw error;
+    }
+  }
+
+  async getHistoricalTrades(marketId: string, options?: {
+    limit?: number;
+    cursor?: string;
+    minTimestamp?: Date;
+    maxTimestamp?: Date;
+  }): Promise<{trades: any[], cursor?: string}> {
+    try {
+      const params: any = {
+        ticker: marketId,
+        limit: options?.limit || 100
+      };
+
+      if (options?.cursor) {
+        params.cursor = options.cursor;
+      }
+
+      if (options?.minTimestamp) {
+        params.min_ts = Math.floor(options.minTimestamp.getTime() / 1000);
+      }
+
+      if (options?.maxTimestamp) {
+        params.max_ts = Math.floor(options.maxTimestamp.getTime() / 1000);
+      }
+
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/markets/trades', { params });
+        return data;
+      });
+
+      return {
+        trades: response.trades || [],
+        cursor: response.cursor
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Failed to fetch historical trades for ${marketId}:`, error);
       throw error;
     }
   }

@@ -1,5 +1,19 @@
 import { Market, MarketPair, IExchange } from '@arb/core';
-import { EmbeddingService, getEmbeddingService } from '@arb/ml';
+import {
+  EmbeddingService,
+  getEmbeddingService,
+  FeatureExtractor,
+  FeatureVector
+} from '@arb/ml';
+import {
+  ScoringStrategy,
+  KalshiPolymarketStrategy
+} from '@arb/ml/strategies';
+import {
+  ExchangeNormalizer,
+  KalshiNormalizer,
+  PolymarketNormalizer
+} from '@arb/ml/normalizers';
 
 export interface MatchAnalysis {
   titleSimilarity: number;
@@ -18,12 +32,19 @@ export interface MatcherConfig {
   includeLowConfidence?: boolean;
   includeUncertain?: boolean;
   useEmbeddings?: boolean;
+  strategy?: ScoringStrategy;
+  kalshiNormalizer?: ExchangeNormalizer;
+  polymarketNormalizer?: ExchangeNormalizer;
 }
 
 export class MarketMatcher {
   private readonly config: MatcherConfig;
   private embeddingService?: EmbeddingService;
   private embeddingsInitialized = false;
+  private readonly strategy: ScoringStrategy;
+  private readonly kalshiNormalizer: ExchangeNormalizer;
+  private readonly polymarketNormalizer: ExchangeNormalizer;
+  private readonly featureExtractor: FeatureExtractor;
 
   constructor(config: MatcherConfig = {}) {
     this.config = {
@@ -33,9 +54,15 @@ export class MarketMatcher {
       useEmbeddings: config.useEmbeddings ?? true
     };
 
+    this.strategy = config.strategy ?? new KalshiPolymarketStrategy();
+    this.kalshiNormalizer = config.kalshiNormalizer ?? new KalshiNormalizer();
+    this.polymarketNormalizer = config.polymarketNormalizer ?? new PolymarketNormalizer();
+
     if (this.config.useEmbeddings) {
       this.embeddingService = getEmbeddingService();
     }
+
+    this.featureExtractor = new FeatureExtractor(this.embeddingService);
   }
 
   /**
@@ -72,6 +99,13 @@ export class MarketMatcher {
     console.log(`[MarketMatcher] Polymarket: ${polyMarkets.length} markets`);
 
     await this.initializeEmbeddings();
+
+    // Diagnostic logging for embedding service status
+    console.log('[DEBUG] Embedding service status:', {
+      available: !!this.embeddingService,
+      initialized: this.embeddingsInitialized,
+      ready: this.embeddingService?.isReady() ?? false
+    });
 
     console.log('[MarketMatcher] Analyzing matches...\n');
 
@@ -166,43 +200,28 @@ export class MarketMatcher {
   }
 
   /**
-   * Comprehensive match analysis using multiple strategies
+   * Comprehensive match analysis using normalizers, feature extraction, and scoring strategy
    */
   private async analyzeMatch(market1: Market, market2: Market): Promise<MatchAnalysis> {
-    const titleSimilarity = this.calculateTitleSimilarity(market1.title, market2.title);
-    const descriptionSimilarity = this.calculateDescriptionSimilarity(
-      market1.description,
-      market2.description
-    );
-    const keywordOverlap = this.calculateKeywordOverlap(
-      market1.title + ' ' + market1.description,
-      market2.title + ' ' + market2.description
-    );
-    const categoryMatch = this.checkCategoryMatch(market1, market2);
-    const timingMatch = this.checkTimingMatch(market1, market2);
+    const normalizedMarket1: Market = {
+      ...market1,
+      title: this.kalshiNormalizer.normalizeTitle(market1.title),
+      description: this.kalshiNormalizer.normalizeDescription(market1.description || '')
+    };
 
-    let embeddingSimilarity: number | undefined;
-    if (this.embeddingService && this.embeddingsInitialized) {
-      try {
-        const text1 = market1.title + ' ' + market1.description;
-        const text2 = market2.title + ' ' + market2.description;
-        embeddingSimilarity = await this.embeddingService.calculateSimilarity(text1, text2);
-      } catch (error) {
-        console.warn('[MarketMatcher] Embedding calculation failed:', error);
-      }
-    }
+    const normalizedMarket2: Market = {
+      ...market2,
+      title: this.polymarketNormalizer.normalizeTitle(market2.title),
+      description: this.polymarketNormalizer.normalizeDescription(market2.description || '')
+    };
 
-    const { confidence, reasons } = this.calculateConfidence({
-      titleSimilarity,
-      descriptionSimilarity,
-      keywordOverlap,
-      embeddingSimilarity,
-      categoryMatch,
-      timingMatch,
-      confidence: 0,
-      level: 'uncertain',
-      reasons: []
-    }, market1, market2);
+    const features: FeatureVector = await this.featureExtractor.extractFeatures(
+      normalizedMarket1,
+      normalizedMarket2
+    );
+
+    const confidence = this.strategy.calculateScore(features, market1, market2);
+    const reasons = this.generateReasons(features, market1, market2);
 
     let level: 'high' | 'medium' | 'low' | 'uncertain';
     if (confidence >= 80) level = 'high';
@@ -210,13 +229,21 @@ export class MarketMatcher {
     else if (confidence >= 40) level = 'low';
     else level = 'uncertain';
 
+    // Diagnostic logging for feature-level analysis
+    console.log(`\n[DEBUG] ${market1.title.substring(0, 40)} vs ${market2.title.substring(0, 40)}`);
+    console.log(`  titleSimilarity: ${features.titleSimilarity.toFixed(1)}% (conf: ${features.featureConfidence.titleSimilarity.toFixed(2)})`);
+    console.log(`  keywordOverlap: ${features.keywordOverlap.toFixed(1)}% (conf: ${features.featureConfidence.keywordOverlap.toFixed(2)})`);
+    console.log(`  embeddingSimilarity: ${features.embeddingSimilarity?.toFixed(1) ?? 'N/A'}% (conf: ${features.featureConfidence.embeddingSimilarity?.toFixed(2) ?? 'N/A'})`);
+    console.log(`  categoryMatch: ${features.categoryMatch} (conf: ${features.featureConfidence.categoryMatch.toFixed(2)})`);
+    console.log(`  → Final confidence: ${confidence.toFixed(1)}% (level: ${level})`);
+
     return {
-      titleSimilarity,
-      descriptionSimilarity,
-      keywordOverlap,
-      embeddingSimilarity,
-      categoryMatch,
-      timingMatch,
+      titleSimilarity: features.titleSimilarity,
+      descriptionSimilarity: features.descriptionSimilarity,
+      keywordOverlap: features.keywordOverlap,
+      embeddingSimilarity: features.embeddingSimilarity,
+      categoryMatch: features.categoryMatch === 1,
+      timingMatch: features.timingMatch === 1,
       confidence,
       level,
       reasons
@@ -224,153 +251,45 @@ export class MarketMatcher {
   }
 
   /**
-   * Calculate title similarity using fuzzy matching
+   * Generate human-readable reasons for match confidence
    */
-  private calculateTitleSimilarity(title1: string, title2: string): number {
-    const t1 = this.normalize(title1);
-    const t2 = this.normalize(title2);
-
-    if (t1 === t2) return 100;
-
-    // Levenshtein-based similarity
-    const distance = this.levenshteinDistance(t1, t2);
-    const maxLen = Math.max(t1.length, t2.length);
-    const similarity = maxLen > 0 ? (1 - distance / maxLen) * 100 : 0;
-
-    // Substring match bonus
-    if (t1.includes(t2) || t2.includes(t1)) {
-      return Math.min(100, similarity + 20);
-    }
-
-    // Word overlap
-    const words1 = new Set(t1.split(/\s+/));
-    const words2 = new Set(t2.split(/\s+/));
-    const commonWords = [...words1].filter(w => words2.has(w)).length;
-    const totalWords = Math.max(words1.size, words2.size);
-    const wordOverlap = totalWords > 0 ? (commonWords / totalWords) * 100 : 0;
-
-    return Math.max(similarity, wordOverlap);
-  }
-
-  /**
-   * Calculate description similarity
-   */
-  private calculateDescriptionSimilarity(desc1: string, desc2: string): number {
-    const d1 = this.normalize(desc1);
-    const d2 = this.normalize(desc2);
-
-    const phrases1 = new Set(d1.split(/\s+/).filter(w => w.length >= 3));
-    const phrases2 = new Set(d2.split(/\s+/).filter(w => w.length >= 3));
-
-    const common = [...phrases1].filter(p => phrases2.has(p)).length;
-    const total = Math.max(phrases1.size, phrases2.size);
-
-    return total > 0 ? (common / total) * 100 : 0;
-  }
-
-  /**
-   * Calculate keyword overlap
-   */
-  private calculateKeywordOverlap(text1: string, text2: string): number {
-    const keywords1 = this.extractKeywords(text1);
-    const keywords2 = this.extractKeywords(text2);
-
-    const common = keywords1.filter(k => keywords2.includes(k)).length;
-    const total = Math.max(keywords1.length, keywords2.length);
-
-    return total > 0 ? (common / total) * 100 : 0;
-  }
-
-  /**
-   * Calculate overall confidence score
-   */
-  private calculateConfidence(
-    signals: MatchAnalysis,
-    market1: Market,
-    market2: Market
-  ): { confidence: number; reasons: string[] } {
+  private generateReasons(features: FeatureVector, market1: Market, _market2: Market): string[] {
     const reasons: string[] = [];
-    let confidence = 0;
 
-    // Title similarity (0-25 points) - Slightly reduced to accommodate embeddings
-    confidence += (signals.titleSimilarity / 100) * 25;
-    if (signals.titleSimilarity >= 80) {
-      reasons.push(`High title match (${signals.titleSimilarity.toFixed(0)}%)`);
-    } else if (signals.titleSimilarity >= 50) {
-      reasons.push(`Moderate title match (${signals.titleSimilarity.toFixed(0)}%)`);
+    if (features.titleSimilarity >= 80) {
+      reasons.push(`High title match (${features.titleSimilarity.toFixed(0)}%)`);
+    } else if (features.titleSimilarity >= 50) {
+      reasons.push(`Moderate title match (${features.titleSimilarity.toFixed(0)}%)`);
     }
 
-    // Description similarity (0-18 points) - Slightly reduced
-    confidence += (signals.descriptionSimilarity / 100) * 18;
-    if (signals.descriptionSimilarity >= 60) {
-      reasons.push(`Description overlap (${signals.descriptionSimilarity.toFixed(0)}%)`);
+    if (features.descriptionSimilarity >= 60) {
+      reasons.push(`Description overlap (${features.descriptionSimilarity.toFixed(0)}%)`);
     }
 
-    // Keyword overlap (0-27 points) - Slightly reduced, still highest weight
-    confidence += (signals.keywordOverlap / 100) * 27;
-    if (signals.keywordOverlap >= 50) {
-      reasons.push(`Keyword match (${signals.keywordOverlap.toFixed(0)}%)`);
+    if (features.keywordOverlap >= 50) {
+      reasons.push(`Keyword match (${features.keywordOverlap.toFixed(0)}%)`);
     }
 
-    // Embedding similarity (0-17 points) - NEW semantic understanding
-    if (signals.embeddingSimilarity !== undefined) {
-      confidence += (signals.embeddingSimilarity / 100) * 17;
-      if (signals.embeddingSimilarity >= 70) {
-        reasons.push(`Semantic match (${signals.embeddingSimilarity.toFixed(0)}%)`);
-      }
+    if (features.embeddingSimilarity >= 70) {
+      reasons.push(`Semantic match (${features.embeddingSimilarity.toFixed(0)}%)`);
     }
 
-    // Category match (0-13 points) - Slightly reduced
-    if (signals.categoryMatch) {
-      confidence += 13;
+    if (features.categoryMatch === 1) {
       const cats = this.extractCategories(market1);
       if (cats.length > 0) {
         reasons.push(`Category: ${cats[0]}`);
       }
     }
 
-    // Timing match (0-5 points) - Unchanged
-    if (signals.timingMatch) {
-      confidence += 5;
+    if (features.timingMatch === 1) {
       reasons.push('Similar dates');
     }
 
-    // Penalty for very different lengths
-    const len1 = (market1.title + market1.description).length;
-    const len2 = (market2.title + market2.description).length;
-    const lengthRatio = Math.min(len1, len2) / Math.max(len1, len2);
-    if (lengthRatio < 0.3) {
-      confidence *= 0.8;
-      reasons.push('⚠️ Different lengths');
+    if (features.featureConfidence.embeddingSimilarity < 1.0) {
+      reasons.push('⚠️ Embedding fallback used');
     }
 
-    return { confidence: Math.min(100, Math.max(0, confidence)), reasons };
-  }
-
-  /**
-   * Extract keywords from text
-   */
-  private extractKeywords(text: string): string[] {
-    // Remove common words and split
-    const stopWords = new Set([
-      'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at',
-      'to', 'for', 'of', 'with', 'by', 'from', 'will', 'be',
-      'is', 'are', 'was', 'were', 'been', 'being', 'have',
-      'has', 'had', 'do', 'does', 'did', 'this', 'that'
-    ]);
-
-    return text
-      .split(/\W+/)
-      .filter(word => word.length > 2 && !stopWords.has(word));
-  }
-
-  /**
-   * Check if markets are in same category
-   */
-  private checkCategoryMatch(market1: Market, market2: Market): boolean {
-    const categories1 = this.extractCategories(market1);
-    const categories2 = this.extractCategories(market2);
-    return categories1.some(c => categories2.includes(c));
+    return reasons;
   }
 
   /**
@@ -403,55 +322,6 @@ export class MarketMatcher {
     );
 
     return [...new Set(categories)];
-  }
-
-  /**
-   * Check if timing/dates match
-   */
-  private checkTimingMatch(market1: Market, market2: Market): boolean {
-    if (!market1.closeTime || !market2.closeTime) {
-      return false;
-    }
-    const diff = Math.abs(market1.closeTime.getTime() - market2.closeTime.getTime());
-    const daysDiff = diff / (1000 * 60 * 60 * 24);
-    return daysDiff <= 7;
-  }
-
-  /**
-   * Normalize text for comparison
-   */
-  private normalize(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  /**
-   * Calculate Levenshtein distance
-   */
-  private levenshteinDistance(str1: string, str2: string): number {
-    const m = str1.length;
-    const n = str2.length;
-    const dp: number[][] = Array(m + 1)
-      .fill(0)
-      .map(() => Array(n + 1).fill(0));
-
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        if (str1[i - 1] === str2[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1];
-        } else {
-          dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-        }
-      }
-    }
-
-    return dp[m][n];
   }
 
   /**

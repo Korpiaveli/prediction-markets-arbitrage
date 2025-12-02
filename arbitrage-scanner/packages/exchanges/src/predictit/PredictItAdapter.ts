@@ -216,6 +216,15 @@ export class PredictItAdapter extends BaseExchange {
     return 'other';
   }
 
+  /**
+   * PredictIt does NOT support historical data via API.
+   * Historical prices must be downloaded as CSV files from the website.
+   * API only provides live data (updated every 60 seconds).
+   */
+  getHistoricalTrades(_marketId: string, _options?: any): Promise<{trades: any[], cursor?: string}> {
+    throw new Error('PredictIt does not support historical data via API. Download CSV files from predictit.org website.');
+  }
+
   subscribe(_marketId: string, _callback: (quote: Quote) => void): void {
     console.log(`[${this.name}] WebSocket subscription not supported`);
   }

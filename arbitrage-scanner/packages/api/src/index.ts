@@ -132,20 +132,60 @@ export class ApiServer {
   }
 
   async start(): Promise<void> {
-    return new Promise((resolve) => {
-      this.server = this.app.listen(this.config.port, () => {
-        console.log(`[API] Server listening on port ${this.config.port}`);
-        console.log(`[API] Health check: http://localhost:${this.config.port}/health`);
-        console.log(`[API] Documentation: http://localhost:${this.config.port}/api`);
+    const maxPortAttempts = 5;
+    let currentPort = this.config.port;
+    let attempts = 0;
+
+    while (attempts < maxPortAttempts) {
+      try {
+        await this.tryListen(currentPort);
+        this.config.port = currentPort;
+        return;
+      } catch (error: any) {
+        if (error.code === 'EADDRINUSE') {
+          attempts++;
+          console.warn(`[API] Port ${currentPort} is in use (attempt ${attempts}/${maxPortAttempts})`);
+
+          if (attempts < maxPortAttempts) {
+            currentPort++;
+            console.log(`[API] Trying port ${currentPort}...`);
+          } else {
+            throw new Error(
+              `Failed to start server: Ports ${this.config.port}-${currentPort} are all in use. ` +
+              `Please stop other processes or choose a different port.`
+            );
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+
+  private tryListen(port: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.server = this.app.listen(port, () => {
+        console.log(`[API] Server listening on port ${port}`);
+        console.log(`[API] Health check: http://localhost:${port}/health`);
+        console.log(`[API] Documentation: http://localhost:${port}/api`);
 
         // Set up WebSocket if enabled
         if (this.config.enableWebSocket && this.server) {
           this.wss = new WebSocketServer({ server: this.server, path: '/ws' });
           createWebSocketHandler(this.wss, this.context);
-          console.log(`[API] WebSocket enabled at ws://localhost:${this.config.port}/ws`);
+          console.log(`[API] WebSocket enabled at ws://localhost:${port}/ws`);
         }
 
         resolve();
+      });
+
+      this.server?.on('error', (error: any) => {
+        if (error.code === 'EADDRINUSE') {
+          reject(error);
+        } else {
+          console.error('[API] Server error:', error);
+          reject(error);
+        }
       });
     });
   }

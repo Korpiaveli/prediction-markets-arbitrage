@@ -60,17 +60,23 @@ export class FeatureExtractor {
     const lengthRatio = this.calculateLengthRatio(kalshiMarket, polyMarket);
     const avgWordCount = this.calculateAvgWordCount(kalshiMarket, polyMarket);
 
-    // Calculate embedding similarity if service is available
+    // Calculate embedding similarity with fallback
     let embeddingSimilarity = 0;
+    let embeddingConfidence = 1.0;
+
     if (this.embeddingService && this.embeddingService.isReady()) {
       try {
         const text1 = kalshiMarket.title + ' ' + kalshiMarket.description;
         const text2 = polyMarket.title + ' ' + polyMarket.description;
         embeddingSimilarity = await this.embeddingService.calculateSimilarity(text1, text2);
       } catch (error) {
-        console.warn('[FeatureExtractor] Failed to calculate embedding similarity:', error);
-        embeddingSimilarity = 0;
+        console.warn('[FeatureExtractor] Embedding service failed, using fallback:', error);
+        embeddingSimilarity = (titleSimilarity + descriptionSimilarity + keywordOverlap) / 3;
+        embeddingConfidence = 0.3;
       }
+    } else {
+      embeddingSimilarity = (titleSimilarity + descriptionSimilarity + keywordOverlap) / 3;
+      embeddingConfidence = 0.3;
     }
 
     return {
@@ -85,7 +91,21 @@ export class FeatureExtractor {
       priceCorrelation,
       lengthRatio,
       avgWordCount,
-      embeddingSimilarity
+      embeddingSimilarity,
+      featureConfidence: {
+        titleSimilarity: 1.0,
+        descriptionSimilarity: 1.0,
+        keywordOverlap: 1.0,
+        categoryMatch: 1.0,
+        timingMatch: 1.0,
+        sourcesMatch: 1.0,
+        alignmentScore: 1.0,
+        volumeRatio: 1.0,
+        priceCorrelation: 1.0,
+        lengthRatio: 1.0,
+        avgWordCount: 1.0,
+        embeddingSimilarity: embeddingConfidence
+      }
     };
   }
 

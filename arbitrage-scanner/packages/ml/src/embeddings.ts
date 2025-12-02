@@ -20,23 +20,98 @@ export class EmbeddingService {
   private modelName = 'Xenova/all-MiniLM-L6-v2'; // Lightweight model (384 dims, 80MB)
   private cache: EmbeddingCache = {};
   private isInitialized = false;
+  private initializationAttempts = 0;
+  private readonly maxRetries = 3;
+  private lastHealthCheck: Date | null = null;
 
   /**
-   * Initialize the embedding model
+   * Initialize the embedding model with retry logic
    * Downloads model on first run (~80MB), cached locally after
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
-    try {
-      console.log('[EmbeddingService] Loading model:', this.modelName);
-      this.model = await pipeline('feature-extraction', this.modelName);
-      this.isInitialized = true;
-      console.log('[EmbeddingService] Model loaded successfully');
-    } catch (error) {
-      console.error('[EmbeddingService] Failed to load model:', error);
-      throw new Error('Failed to initialize embedding model');
+    const maxAttempts = this.maxRetries;
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        console.log(`[EmbeddingService] Loading model (attempt ${attempt}/${maxAttempts}):`, this.modelName);
+        this.model = await pipeline('feature-extraction', this.modelName);
+        this.isInitialized = true;
+        this.initializationAttempts = attempt;
+        this.lastHealthCheck = new Date();
+        console.log('[EmbeddingService] Model loaded successfully');
+        return;
+      } catch (error) {
+        lastError = error as Error;
+        console.error(`[EmbeddingService] Attempt ${attempt}/${maxAttempts} failed:`, error);
+
+        if (attempt < maxAttempts) {
+          const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+          console.log(`[EmbeddingService] Retrying in ${delayMs}ms...`);
+          await this.sleep(delayMs);
+        }
+      }
     }
+
+    console.error('[EmbeddingService] All initialization attempts failed');
+    throw new Error(`Failed to initialize embedding model after ${maxAttempts} attempts: ${lastError?.message}`);
+  }
+
+  /**
+   * Sleep utility for retry delays
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Perform health check on the model
+   * Returns true if model is healthy, false otherwise
+   */
+  async healthCheck(): Promise<boolean> {
+    if (!this.isInitialized || !this.model) {
+      return false;
+    }
+
+    try {
+      const testText = 'health check';
+      const output = await this.model(testText, {
+        pooling: 'mean',
+        normalize: true
+      });
+
+      if (!output || !output.data || output.data.length === 0) {
+        console.warn('[EmbeddingService] Health check failed: invalid output');
+        return false;
+      }
+
+      this.lastHealthCheck = new Date();
+      return true;
+    } catch (error) {
+      console.error('[EmbeddingService] Health check failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get health status
+   */
+  getHealthStatus(): {
+    initialized: boolean;
+    healthy: boolean;
+    lastCheck: Date | null;
+    cacheSize: number;
+    initAttempts: number;
+  } {
+    return {
+      initialized: this.isInitialized,
+      healthy: this.model !== null,
+      lastCheck: this.lastHealthCheck,
+      cacheSize: Object.keys(this.cache).length,
+      initAttempts: this.initializationAttempts
+    };
   }
 
   /**

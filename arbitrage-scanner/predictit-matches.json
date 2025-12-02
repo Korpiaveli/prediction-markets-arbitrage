@@ -1,0 +1,394 @@
+[
+  {
+    "id": "POWER-28-RH-RS-RP_8157-31952",
+    "description": "Will the Republican party win the House, the Republican party win the Senate, and the Republican party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-RH-RS-RP",
+      "exchangeId": "POWER-28-RH-RS-RP",
+      "exchange": "KALSHI",
+      "title": "Will the Republican party win the House, the Republican party win the Senate, and the Republican party win the Presidency?",
+      "description": "Republican Sweep",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 1,
+      "openInterest": 15000,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Republican party wins the House, the Republican party wins the Senate, and the Republican party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 6350309.79
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31952",
+      "exchangeId": "8157-31952",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Republican",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31952,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.26,
+        "bestBuyYesCost": 0.27,
+        "bestSellYesCost": 0.25,
+        "bestBuyNoCost": 0.75,
+        "bestSellNoCost": 0.73,
+        "lastClosePrice": 0.27,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-RH-RS-RP",
+    "polymarketId": "8157-31952",
+    "correlationScore": 0.6487650256497568,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-RH-RS-DP_8157-31952",
+    "description": "Will the Republican party win the House, the Republican party win the Senate, and the Democratic party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-RH-RS-DP",
+      "exchangeId": "POWER-28-RH-RS-DP",
+      "exchange": "KALSHI",
+      "title": "Will the Republican party win the House, the Republican party win the Senate, and the Democratic party win the Presidency?",
+      "description": "R-House, R-Senate, D-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 9289,
+      "openInterest": 2560,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Republican party wins the House, the Republican party wins the Senate, and the Democratic party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 6461868.18
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31952",
+      "exchangeId": "8157-31952",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Republican",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31952,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.26,
+        "bestBuyYesCost": 0.27,
+        "bestSellYesCost": 0.25,
+        "bestBuyNoCost": 0.75,
+        "bestSellNoCost": 0.73,
+        "lastClosePrice": 0.27,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-RH-RS-DP",
+    "polymarketId": "8157-31952",
+    "correlationScore": 0.605416591807649,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-RH-DS-RP_8157-31952",
+    "description": "Will the Republican party win the House, the Democratic party win the Senate, and the Republican party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-RH-DS-RP",
+      "exchangeId": "POWER-28-RH-DS-RP",
+      "exchange": "KALSHI",
+      "title": "Will the Republican party win the House, the Democratic party win the Senate, and the Republican party win the Presidency?",
+      "description": "R-House, D-Senate, R-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 2384,
+      "openInterest": 2077,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Republican party wins the House, the Democratic party wins the Senate, and the Republican party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 3965797.6
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31952",
+      "exchangeId": "8157-31952",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Republican",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31952,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.26,
+        "bestBuyYesCost": 0.27,
+        "bestSellYesCost": 0.25,
+        "bestBuyNoCost": 0.75,
+        "bestSellNoCost": 0.73,
+        "lastClosePrice": 0.27,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-RH-DS-RP",
+    "polymarketId": "8157-31952",
+    "correlationScore": 0.6064125638741554,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-RH-DS-DP_8157-31951",
+    "description": "Will the Republican party win the House, the Democratic party win the Senate, and the Democratic party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-RH-DS-DP",
+      "exchangeId": "POWER-28-RH-DS-DP",
+      "exchange": "KALSHI",
+      "title": "Will the Republican party win the House, the Democratic party win the Senate, and the Democratic party win the Presidency?",
+      "description": "R-House, D-Senate, D-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 3284,
+      "openInterest": 2861,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Republican party wins the House, the Democratic party wins the Senate, and the Democratic party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 3987072.76
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31951",
+      "exchangeId": "8157-31951",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Democratic",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31951,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.76,
+        "bestBuyYesCost": 0.76,
+        "bestSellYesCost": 0.75,
+        "bestBuyNoCost": 0.25,
+        "bestSellNoCost": 0.24,
+        "lastClosePrice": 0.76,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-RH-DS-DP",
+    "polymarketId": "8157-31951",
+    "correlationScore": 0.6037478261571856,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-DH-RS-RP_8157-31952",
+    "description": "Will the Democratic party win the House, the Republican party win the Senate, and the Republican party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-DH-RS-RP",
+      "exchangeId": "POWER-28-DH-RS-RP",
+      "exchange": "KALSHI",
+      "title": "Will the Democratic party win the House, the Republican party win the Senate, and the Republican party win the Presidency?",
+      "description": "D-House, R-Senate, R-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 2360,
+      "openInterest": 1855,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Democratic party wins the House, the Republican party wins the Senate, and the Republican party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 7975529.97
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31952",
+      "exchangeId": "8157-31952",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Republican",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31952,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.26,
+        "bestBuyYesCost": 0.27,
+        "bestSellYesCost": 0.25,
+        "bestBuyNoCost": 0.75,
+        "bestSellNoCost": 0.73,
+        "lastClosePrice": 0.27,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-DH-RS-RP",
+    "polymarketId": "8157-31952",
+    "correlationScore": 0.6043125867578101,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-DH-RS-DP_8157-31951",
+    "description": "Will the Democratic party win the House, the Republican party win the Senate, and the Democratic party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-DH-RS-DP",
+      "exchangeId": "POWER-28-DH-RS-DP",
+      "exchange": "KALSHI",
+      "title": "Will the Democratic party win the House, the Republican party win the Senate, and the Democratic party win the Presidency?",
+      "description": "D-House, R-Senate, D-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 7103,
+      "openInterest": 5755,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Democratic party wins the House, the Republican party wins the Senate, and the Democratic party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 6876933.36
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31951",
+      "exchangeId": "8157-31951",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Democratic",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31951,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.76,
+        "bestBuyYesCost": 0.76,
+        "bestSellYesCost": 0.75,
+        "bestBuyNoCost": 0.25,
+        "bestSellNoCost": 0.24,
+        "lastClosePrice": 0.76,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-DH-RS-DP",
+    "polymarketId": "8157-31951",
+    "correlationScore": 0.6037611407876676,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-DH-DS-RP_8157-31951",
+    "description": "Will the Democratic party win the House, the Democratic party win the Senate, and the Republican party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-DH-DS-RP",
+      "exchangeId": "POWER-28-DH-DS-RP",
+      "exchange": "KALSHI",
+      "title": "Will the Democratic party win the House, the Democratic party win the Senate, and the Republican party win the Presidency?",
+      "description": "D-House, D-Senate, R-President",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 2670,
+      "openInterest": 2344,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Democratic party wins the House, the Democratic party wins the Senate, and the Republican party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 4514520.29
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31951",
+      "exchangeId": "8157-31951",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Democratic",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31951,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.76,
+        "bestBuyYesCost": 0.76,
+        "bestSellYesCost": 0.75,
+        "bestBuyNoCost": 0.25,
+        "bestSellNoCost": 0.24,
+        "lastClosePrice": 0.76,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-DH-DS-RP",
+    "polymarketId": "8157-31951",
+    "correlationScore": 0.6033284711289812,
+    "exchangePair": "KALSHI-PREDICTIT"
+  },
+  {
+    "id": "POWER-28-DH-DS-DP_8157-31951",
+    "description": "Will the Democratic party win the House, the Democratic party win the Senate, and the Democratic party win the Presidency?",
+    "kalshiMarket": {
+      "id": "POWER-28-DH-DS-DP",
+      "exchangeId": "POWER-28-DH-DS-DP",
+      "exchange": "KALSHI",
+      "title": "Will the Democratic party win the House, the Democratic party win the Senate, and the Democratic party win the Presidency?",
+      "description": "Democrat Sweep",
+      "closeTime": "2029-11-07T15:00:00.000Z",
+      "volume24h": 35,
+      "openInterest": 11697,
+      "active": true,
+      "metadata": {
+        "eventTicker": "POWER-28",
+        "marketType": "binary",
+        "rulesPrimary": "If the Democratic party wins the House, the Democratic party wins the Senate, and the Democratic party wins the Presidency in the 2028 election, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 7468870.46
+      }
+    },
+    "polymarketMarket": {
+      "id": "8157-31951",
+      "exchangeId": "8157-31951",
+      "exchange": "PREDICTIT",
+      "title": "Which party will win the House in 2026?: Democratic",
+      "description": "Which party will win the House in the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8157,
+        "contractId": 31951,
+        "marketUrl": "https://www.predictit.org/markets/detail/8157/Which-party-will-win-the-House-in-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/71c780c4-fde9-41e3-8376-0399f0354378.png",
+        "lastTradePrice": 0.76,
+        "bestBuyYesCost": 0.76,
+        "bestSellYesCost": 0.75,
+        "bestBuyNoCost": 0.25,
+        "bestSellNoCost": 0.24,
+        "lastClosePrice": 0.76,
+        "category": "politics"
+      }
+    },
+    "kalshiId": "POWER-28-DH-DS-DP",
+    "polymarketId": "8157-31951",
+    "correlationScore": 0.6179048061657437,
+    "exchangePair": "KALSHI-PREDICTIT"
+  }
+]
