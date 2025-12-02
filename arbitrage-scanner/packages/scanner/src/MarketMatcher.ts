@@ -1,4 +1,4 @@
-import { Market, MarketPair, IExchange } from '@arb/core';
+import { Market, MarketPair, IExchange, MarketCategory, categoryDetector } from '@arb/core';
 import {
   EmbeddingService,
   getEmbeddingService,
@@ -35,6 +35,8 @@ export interface MatcherConfig {
   strategy?: ScoringStrategy;
   kalshiNormalizer?: ExchangeNormalizer;
   polymarketNormalizer?: ExchangeNormalizer;
+  allowedCategories?: MarketCategory[];
+  excludedCategories?: MarketCategory[];
 }
 
 export class MarketMatcher {
@@ -90,13 +92,41 @@ export class MarketMatcher {
     polymarket: IExchange
   ): Promise<MarketPair[]> {
     console.log('[MarketMatcher] Fetching markets from both exchanges...');
-    const [kalshiMarkets, polyMarkets] = await Promise.all([
+    let [kalshiMarkets, polyMarkets] = await Promise.all([
       kalshi.getMarkets(),
       polymarket.getMarkets()
     ]);
 
     console.log(`[MarketMatcher] Kalshi: ${kalshiMarkets.length} markets`);
     console.log(`[MarketMatcher] Polymarket: ${polyMarkets.length} markets`);
+
+    // Apply category filtering if configured
+    if (this.config.allowedCategories || this.config.excludedCategories) {
+      const beforeKalshi = kalshiMarkets.length;
+      const beforePoly = polyMarkets.length;
+
+      kalshiMarkets = categoryDetector.filterByCategory(
+        kalshiMarkets,
+        this.config.allowedCategories,
+        this.config.excludedCategories
+      ) as Market[];
+
+      polyMarkets = categoryDetector.filterByCategory(
+        polyMarkets,
+        this.config.allowedCategories,
+        this.config.excludedCategories
+      ) as Market[];
+
+      console.log(`[MarketMatcher] Category filtering applied:`);
+      console.log(`  Kalshi: ${beforeKalshi} → ${kalshiMarkets.length} markets`);
+      console.log(`  Polymarket: ${beforePoly} → ${polyMarkets.length} markets`);
+      if (this.config.allowedCategories) {
+        console.log(`  Allowed: ${this.config.allowedCategories.join(', ')}`);
+      }
+      if (this.config.excludedCategories) {
+        console.log(`  Excluded: ${this.config.excludedCategories.join(', ')}`);
+      }
+    }
 
     await this.initializeEmbeddings();
 

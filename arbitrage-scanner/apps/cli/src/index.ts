@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
-import { DEFAULT_FEE_STRUCTURE } from '@arb/core';
+import { DEFAULT_FEE_STRUCTURE, MarketCategory } from '@arb/core';
 import { ArbitrageCalculator } from '@arb/math';
 import { MockExchange } from '@arb/exchanges';
 import { Scanner, OpportunityRanker } from '@arb/scanner';
@@ -189,6 +189,8 @@ program
   .option('--save <file>', 'Save results to JSON file')
   .option('--exchanges <list>', `Comma-separated list: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket')
   .option('--all-exchanges', 'Include all available exchanges', false)
+  .option('--categories <list>', 'Comma-separated allowed categories: politics,sports,crypto,economy,technology,entertainment,science,other')
+  .option('--exclude-categories <list>', 'Comma-separated excluded categories')
   .action(async (options) => {
     const spinner = ora('Finding market pairs...').start();
 
@@ -213,6 +215,14 @@ program
       const { MarketMatcher } = await import('@arb/scanner');
       const allPairs = [];
 
+      // Parse category filters
+      const allowedCategories = options.categories
+        ? options.categories.split(',').map((c: string) => c.trim() as MarketCategory)
+        : undefined;
+      const excludedCategories = options.excludeCategories
+        ? options.excludeCategories.split(',').map((c: string) => c.trim() as MarketCategory)
+        : undefined;
+
       // Match all exchange pairs
       for (let i = 0; i < exchanges.length; i++) {
         for (let j = i + 1; j < exchanges.length; j++) {
@@ -224,7 +234,9 @@ program
           const matcher = new MarketMatcher({
             minConfidence: parseFloat(options.minConfidence),
             includeLowConfidence: options.includeLow,
-            includeUncertain: options.includeUncertain
+            includeUncertain: options.includeUncertain,
+            allowedCategories,
+            excludedCategories
           });
 
           const pairs = await matcher.matchMarkets(exchange1, exchange2);

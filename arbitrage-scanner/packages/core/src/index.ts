@@ -10,3 +10,6 @@ export * from './interfaces/storage.js';
 
 // Constants
 export * from './constants/fees.js';
+
+// Utils
+export * from './utils/category-detector.js';

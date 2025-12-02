@@ -129,7 +129,7 @@ export class KalshiAdapter extends BaseExchange {
 
           return true;
         })
-        .map((m) => this.transformMarket(m));
+        .map((m) => this.enhanceMarketWithCategories(this.transformMarket(m)));
 
       const filterStatus = this.filterSports ? 'ON' : 'OFF';
       console.log(`[${this.name}] Filtered ${response.markets.length} → ${markets.length} markets (sports filter: ${filterStatus}, removed: ${response.markets.length - markets.length})`);

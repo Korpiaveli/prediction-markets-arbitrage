@@ -1,6 +1,8 @@
-export type ExchangeName = 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MOCK';
+export type ExchangeName = 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD' | 'MOCK';
 export type MarketOutcome = 'YES' | 'NO';
 export type ArbitrageDirection = 'KALSHI_YES_POLY_NO' | 'KALSHI_NO_POLY_YES';
+
+export type MarketCategory = 'politics' | 'sports' | 'crypto' | 'economy' | 'technology' | 'entertainment' | 'science' | 'other';
 
 export interface Market {
   id: string;
@@ -12,6 +14,8 @@ export interface Market {
   volume24h?: number;
   openInterest?: number;
   active: boolean;
+  categories?: MarketCategory[];
+  primaryCategory?: MarketCategory;
   metadata?: Record<string, any>; // Exchange-specific data (resolution criteria, fees, etc.)
 }
 

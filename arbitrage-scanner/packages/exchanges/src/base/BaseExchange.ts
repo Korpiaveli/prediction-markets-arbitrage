@@ -5,7 +5,8 @@ import {
   ExchangeName,
   RateLimits,
   ExchangeConfig,
-  PriceLevel
+  PriceLevel,
+  categoryDetector
 } from '@arb/core';
 import axios, { AxiosInstance } from 'axios';
 import PQueue from 'p-queue';
@@ -157,5 +158,16 @@ export abstract class BaseExchange implements IExchange {
   protected normalizePrice(price: number): number {
     // Ensure price is between 0 and 1
     return Math.max(0, Math.min(1, price));
+  }
+
+  protected enhanceMarketWithCategories(market: Market): Market {
+    const categories = categoryDetector.detectCategories(market.title, market.description, market.metadata);
+    const primaryCategory = categoryDetector.getPrimaryCategory(categories);
+
+    return {
+      ...market,
+      categories,
+      primaryCategory
+    };
   }
 }
