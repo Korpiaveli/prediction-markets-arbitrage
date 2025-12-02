@@ -1,10 +1,11 @@
 import { IExchange } from '@arb/core';
-import { KalshiAdapter, PolymarketAdapter, PredictItAdapter } from '@arb/exchanges';
+import { KalshiAdapter, PolymarketAdapter, PredictItAdapter, ManifoldAdapter } from '@arb/exchanges';
 
 export interface ExchangeFactoryOptions {
   includeKalshi?: boolean;
   includePolymarket?: boolean;
   includePredictIt?: boolean;
+  includeManifold?: boolean;
   filterSports?: boolean;
   testMode?: boolean;
 }
@@ -18,6 +19,7 @@ export function createExchanges(options: ExchangeFactoryOptions = {}): IExchange
     includeKalshi = true,
     includePolymarket = true,
     includePredictIt = false,
+    includeManifold = false,
     filterSports = false,
     testMode = false
   } = options;
@@ -39,6 +41,13 @@ export function createExchanges(options: ExchangeFactoryOptions = {}): IExchange
     exchanges.push(new PredictItAdapter({ testMode }));
   }
 
+  if (includeManifold) {
+    exchanges.push(new ManifoldAdapter({
+      excludeResolved: true,
+      minVolume: 100
+    }));
+  }
+
   return exchanges;
 }
 
@@ -49,13 +58,15 @@ export function parseExchangeList(exchangeList: string): {
   includeKalshi: boolean;
   includePolymarket: boolean;
   includePredictIt: boolean;
+  includeManifold: boolean;
 } {
   const exchanges = exchangeList.toLowerCase().split(',').map(e => e.trim());
 
   return {
     includeKalshi: exchanges.includes('kalshi'),
     includePolymarket: exchanges.includes('polymarket'),
-    includePredictIt: exchanges.includes('predictit')
+    includePredictIt: exchanges.includes('predictit'),
+    includeManifold: exchanges.includes('manifold')
   };
 }
 
@@ -63,5 +74,5 @@ export function parseExchangeList(exchangeList: string): {
  * Get all available exchange names
  */
 export function getAvailableExchanges(): string[] {
-  return ['kalshi', 'polymarket', 'predictit'];
+  return ['kalshi', 'polymarket', 'predictit', 'manifold'];
 }

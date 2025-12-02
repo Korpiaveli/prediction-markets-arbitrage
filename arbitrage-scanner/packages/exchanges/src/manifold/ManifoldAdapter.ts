@@ -70,7 +70,7 @@ export class ManifoldAdapter extends BaseExchange {
         const { data } = await this.client.get<ManifoldMarketResponse[]>('/markets', {
           params: {
             limit: 1000,
-            sort: 'volume-24h'
+            sort: 'last-bet-time'
           }
         });
         return data;
