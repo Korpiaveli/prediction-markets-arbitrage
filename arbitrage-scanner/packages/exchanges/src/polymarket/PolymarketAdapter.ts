@@ -77,7 +77,8 @@ interface PolymarketOrderbook {
 
 export class PolymarketAdapter extends BaseExchange {
   readonly name: ExchangeName = 'POLYMARKET';
-  readonly apiUrl = 'https://clob.polymarket.com';
+  readonly apiUrl = 'https://clob.polymarket.com'; // CLOB API for orderbook/quotes
+  readonly gammaApiUrl = 'https://gamma-api.polymarket.com'; // Gamma API for market discovery
   readonly dataApiUrl = 'https://api.polymarket.com';
   readonly wsUrl = 'wss://ws.polymarket.com';
   readonly rateLimits: RateLimits = {
@@ -87,14 +88,21 @@ export class PolymarketAdapter extends BaseExchange {
   };
 
   private dataClient: AxiosInstance;
+  private gammaClient: AxiosInstance;
 
   constructor(config: ExchangeConfig = {}) {
     super(config);
-    this.setBaseURL(this.apiUrl);
+    this.setBaseURL(this.apiUrl); // Keep CLOB for orderbook
 
     // Create separate client for data API
     this.dataClient = axios.create({
       baseURL: this.dataApiUrl,
+      timeout: config.timeout || 5000
+    });
+
+    // Create Gamma API client for market discovery
+    this.gammaClient = axios.create({
+      baseURL: this.gammaApiUrl,
       timeout: config.timeout || 5000
     });
   }
@@ -105,66 +113,58 @@ export class PolymarketAdapter extends BaseExchange {
     if (cached) return cached;
 
     try {
-      // Fetch from Polymarket's CLOB API with higher limit
+      // Fetch from Gamma API (official market discovery endpoint)
       const response = await this.queue.add(async () => {
-        const { data } = await this.client.get('/markets', {
+        const { data } = await this.gammaClient.get('/events', {
           params: {
             closed: false,
-            limit: 1000,  // Increased to get more markets
-            active: true
+            active: true,
+            order: 'id',
+            ascending: false,
+            limit: 100
           }
         });
         return data;
       });
 
-      // Handle wrapped response format { data: [...] }
-      const marketsArray = Array.isArray(response) ? response : response?.data || [];
+      // Gamma API returns direct array
+      const eventsArray = Array.isArray(response) ? response : [];
 
-      if (!Array.isArray(marketsArray)) {
-        console.warn(`[${this.name}] Unexpected response format, expected array`);
+      if (!Array.isArray(eventsArray)) {
+        console.warn(`[${this.name}] Unexpected Gamma API response format`);
         return [];
       }
 
       // Apply data quality filtering
       const now = new Date();
 
-      const markets = marketsArray
-        .filter((m: PolymarketMarket) => {
+      const markets = eventsArray
+        .filter((event: any) => {
           // Basic status checks
-          if (!m.active || !m.accepting_orders || m.archived || m.closed) {
+          if (!event.active || event.closed || event.archived) {
             return false;
           }
 
           // Date-based filtering: remove markets with past end dates
-          if (m.end_date_iso) {
-            const endDate = new Date(m.end_date_iso);
+          if (event.end_date_iso) {
+            const endDate = new Date(event.end_date_iso);
             if (endDate < now) {
-              return false; // Market already closed/expired
-            }
-          }
-
-          // Freshness check: remove markets created more than 6 months ago with no recent activity
-          // (This helps filter stale 2022-2024 markets)
-          if (m.end_date_iso) {
-            const endDate = new Date(m.end_date_iso);
-            // If end date is in far future (>1 year) and creation was long ago, it's likely stale
-            const oneYearFromNow = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-            if (endDate > oneYearFromNow) {
-              // Far future markets are likely test/abandoned markets
-              return false;
+              return false; // Event already closed/expired
             }
           }
 
           return true;
         })
-        .map((m: PolymarketMarket) => this.transformMarket(m));
+        .flatMap((event: any) =>
+          event.markets?.map((m: any) => this.transformGammaMarket(m, event)) || []
+        );
 
-      console.log(`[${this.name}] Filtered ${marketsArray.length} → ${markets.length} markets (removed ${marketsArray.length - markets.length} stale/expired)`);
+      console.log(`[${this.name}] Fetched ${eventsArray.length} events → ${markets.length} active markets from Gamma API`);
 
       this.cache.set(cacheKey, markets, 30);
       return markets;
     } catch (error) {
-      console.error(`[${this.name}] Failed to fetch markets:`, error);
+      console.error(`[${this.name}] Failed to fetch markets from Gamma API:`, error);
       throw error;
     }
   }
@@ -301,6 +301,33 @@ export class PolymarketAdapter extends BaseExchange {
           maker: data.maker_base_fee,
           taker: data.taker_base_fee
         }
+      }
+    };
+  }
+
+  // Transform Gamma API event/market response to Market interface
+  private transformGammaMarket(data: any, event?: any): Market {
+    return {
+      id: data.condition_id,
+      exchangeId: data.condition_id,
+      exchange: this.name,
+      title: data.question || event?.title,
+      description: event?.description || data.description || data.question,
+      closeTime: data.end_date_iso ? new Date(data.end_date_iso) : undefined,
+      volume24h: data.volume || 0,
+      openInterest: data.liquidity || 0,
+      active: data.active && !data.closed && !data.archived,
+      metadata: {
+        questionId: data.question_id,
+        marketSlug: data.market_slug,
+        resolutionRules: data.description || event?.description || '',
+        tokens: data.tokens?.map((t: any) => ({
+          tokenId: t.token_id,
+          outcome: t.outcome,
+          price: t.price
+        })) || [],
+        tags: event?.tags || data.tags || [],
+        category: event?.category || data.category
       }
     };
   }

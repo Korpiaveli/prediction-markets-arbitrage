@@ -11,13 +11,13 @@
   },
   "dependencies": {
     "@arb/core": "^1.0.0",
-    "@arb/math": "^1.0.0",
     "@arb/exchanges": "^1.0.0",
-    "p-limit": "^4.0.0",
-    "eventemitter3": "^5.0.1"
+    "@arb/math": "^1.0.0",
+    "eventemitter3": "^5.0.1",
+    "p-limit": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "vitest": "^1.1.0"
+    "vitest": "^4.0.14"
   }
 }
