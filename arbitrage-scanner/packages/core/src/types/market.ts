@@ -1,4 +1,4 @@
-export type ExchangeName = 'KALSHI' | 'POLYMARKET' | 'MOCK';
+export type ExchangeName = 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MOCK';
 export type MarketOutcome = 'YES' | 'NO';
 export type ArbitrageDirection = 'KALSHI_YES_POLY_NO' | 'KALSHI_NO_POLY_YES';
 
