@@ -79,6 +79,9 @@ export class FeatureExtractor {
       embeddingConfidence = 0.3;
     }
 
+    const temporalDistance = this.calculateTemporalDistance(kalshiMarket, polyMarket);
+    const outcomeMatch = this.checkOutcomeMatch(kalshiMarket, polyMarket) ? 1 : 0;
+
     return {
       titleSimilarity,
       descriptionSimilarity,
@@ -92,6 +95,8 @@ export class FeatureExtractor {
       lengthRatio,
       avgWordCount,
       embeddingSimilarity,
+      temporalDistance,
+      outcomeMatch,
       featureConfidence: {
         titleSimilarity: 1.0,
         descriptionSimilarity: 1.0,
@@ -104,7 +109,9 @@ export class FeatureExtractor {
         priceCorrelation: 1.0,
         lengthRatio: 1.0,
         avgWordCount: 1.0,
-        embeddingSimilarity: embeddingConfidence
+        embeddingSimilarity: embeddingConfidence,
+        temporalDistance: 1.0,
+        outcomeMatch: 1.0
       }
     };
   }
@@ -212,13 +219,84 @@ export class FeatureExtractor {
   }
 
   /**
-   * Check if timing matches
+   * Check if timing matches (enhanced with year validation)
    */
   private checkTimingMatch(market1: Market, market2: Market): boolean {
-    if (!market1.closeTime || !market2.closeTime) return false;
+    const year1 = this.extractYear(market1.title + ' ' + market1.description);
+    const year2 = this.extractYear(market2.title + ' ' + market2.description);
+
+    if (year1 && year2 && year1 !== year2) {
+      return false;
+    }
+
+    if (!market1.closeTime || !market2.closeTime) return true;
     const diff = Math.abs(market1.closeTime.getTime() - market2.closeTime.getTime());
     const daysDiff = diff / (1000 * 60 * 60 * 24);
     return daysDiff <= 7;
+  }
+
+  /**
+   * Extract year from text (e.g., "2024", "2028")
+   */
+  private extractYear(text: string): number | null {
+    const yearMatch = text.match(/\b(20\d{2})\b/);
+    return yearMatch ? parseInt(yearMatch[1], 10) : null;
+  }
+
+  /**
+   * Calculate temporal distance between markets
+   * Returns 1.0 if same year, 0.3 if adjacent years, 0.0 if 2+ years apart
+   */
+  private calculateTemporalDistance(market1: Market, market2: Market): number {
+    const year1 = this.extractYear(market1.title + ' ' + market1.description);
+    const year2 = this.extractYear(market2.title + ' ' + market2.description);
+
+    if (!year1 || !year2) {
+      return 0.5;
+    }
+
+    const yearDiff = Math.abs(year1 - year2);
+
+    if (yearDiff === 0) return 1.0;
+    if (yearDiff === 1) return 0.3;
+    return 0.0;
+  }
+
+  /**
+   * Extract outcome from PredictIt-style title (e.g., "Which party wins House?: Republican")
+   */
+  private extractOutcome(title: string): string | null {
+    const colonMatch = title.match(/:\s*([^:]+)$/);
+    if (colonMatch) {
+      return colonMatch[1].trim().toLowerCase();
+    }
+    return null;
+  }
+
+  /**
+   * Check if outcome matches (for PredictIt multi-outcome contracts)
+   * For PredictIt contracts, the outcome MUST appear in the other market's title
+   */
+  private checkOutcomeMatch(market1: Market, market2: Market): boolean {
+    const outcome1 = this.extractOutcome(market1.title);
+    const outcome2 = this.extractOutcome(market2.title);
+
+    if (!outcome1 && !outcome2) {
+      return true;
+    }
+
+    const text1 = (market1.title + ' ' + market1.description).toLowerCase();
+    const text2 = (market2.title + ' ' + market2.description).toLowerCase();
+
+    if (outcome1 && !text2.includes(outcome1)) {
+      return false;
+    }
+
+    if (outcome2 && !text1.includes(outcome2)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -354,7 +432,9 @@ export class FeatureExtractor {
       features.priceCorrelation,
       features.lengthRatio,
       features.avgWordCount / 20,
-      features.embeddingSimilarity / 100
+      features.embeddingSimilarity / 100,
+      features.temporalDistance,
+      features.outcomeMatch
     ];
   }
 
@@ -374,7 +454,9 @@ export class FeatureExtractor {
       'price_correlation',
       'length_ratio',
       'avg_word_count',
-      'embedding_similarity'
+      'embedding_similarity',
+      'temporal_distance',
+      'outcome_match'
     ];
   }
 }

@@ -41,6 +41,10 @@ export interface FeatureVector {
   // Semantic similarity (from EmbeddingService)
   embeddingSimilarity: number;       // 0-100 (cosine similarity)
 
+  // Temporal features (prevent year mismatches)
+  temporalDistance: number;          // 0-1 (1=same year, 0=2+ years apart)
+  outcomeMatch: number;              // 0 or 1 (for PredictIt multi-outcome contracts)
+
   // Confidence tracking for each feature (0-1)
   featureConfidence: {
     titleSimilarity: number;
@@ -55,6 +59,8 @@ export interface FeatureVector {
     lengthRatio: number;
     avgWordCount: number;
     embeddingSimilarity: number;
+    temporalDistance: number;
+    outcomeMatch: number;
   };
 }
 

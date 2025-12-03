@@ -7,7 +7,8 @@ import {
 } from '@arb/ml';
 import {
   ScoringStrategy,
-  KalshiPolymarketStrategy
+  KalshiPolymarketStrategy,
+  getStrategy
 } from '@arb/ml/strategies';
 import {
   ExchangeNormalizer,
@@ -172,6 +173,9 @@ export class MarketMatcher {
     exchange1: IExchange,
     exchange2: IExchange
   ): Promise<CrossExchangePair[]> {
+    const exchangeStrategy = getStrategy(exchange1.name, exchange2.name);
+    console.log(`[MarketMatcher] Using strategy: ${exchangeStrategy.name} for ${exchange1.name}-${exchange2.name}`);
+
     console.log('[MarketMatcher] Fetching markets from both exchanges...');
     let [markets1, markets2] = await Promise.all([
       exchange1.getMarkets(),
@@ -217,7 +221,7 @@ export class MarketMatcher {
     const allMatches: Array<{ pair: CrossExchangePair; analysis: MatchAnalysis }> = [];
 
     for (const market1 of markets1) {
-      const match = await this.findBestMatch(market1, markets2);
+      const match = await this.findBestMatch(market1, markets2, exchangeStrategy);
 
       if (match && this.shouldIncludeMatch(match.analysis)) {
         const pair: CrossExchangePair = {
@@ -322,13 +326,14 @@ export class MarketMatcher {
    */
   private async findBestMatch(
     target: Market,
-    candidates: Market[]
+    candidates: Market[],
+    customStrategy?: ScoringStrategy
   ): Promise<{ market: Market; analysis: MatchAnalysis } | null> {
     let bestMatch: Market | null = null;
     let bestAnalysis: MatchAnalysis | null = null;
 
     for (const candidate of candidates) {
-      const analysis = await this.analyzeMatch(target, candidate);
+      const analysis = await this.analyzeMatch(target, candidate, customStrategy);
 
       if (!bestAnalysis || analysis.confidence > bestAnalysis.confidence) {
         bestAnalysis = analysis;
@@ -342,7 +347,11 @@ export class MarketMatcher {
   /**
    * Comprehensive match analysis using normalizers, feature extraction, and scoring strategy
    */
-  private async analyzeMatch(market1: Market, market2: Market): Promise<MatchAnalysis> {
+  private async analyzeMatch(
+    market1: Market,
+    market2: Market,
+    customStrategy?: ScoringStrategy
+  ): Promise<MatchAnalysis> {
     const normalizedMarket1: Market = {
       ...market1,
       title: this.kalshiNormalizer.normalizeTitle(market1.title),
@@ -360,7 +369,8 @@ export class MarketMatcher {
       normalizedMarket2
     );
 
-    const confidence = this.strategy.calculateScore(features, market1, market2);
+    const strategy = customStrategy ?? this.strategy;
+    const confidence = strategy.calculateScore(features, market1, market2);
     const reasons = this.generateReasons(features, market1, market2);
 
     let level: 'high' | 'medium' | 'low' | 'uncertain';
