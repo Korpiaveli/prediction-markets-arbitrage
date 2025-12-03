@@ -31,7 +31,9 @@ export class KalshiPolymarketStrategy extends BaseScoringStrategy {
     priceCorrelation: 0.08,          // Medium - useful signal
     lengthRatio: 0.02,               // Very low - penalizes cross-platform
     avgWordCount: 0.02,              // Very low - not meaningful
-    embeddingSimilarity: 0.16        // Highest - semantic meaning
+    embeddingSimilarity: 0.16,       // Highest - semantic meaning
+    temporalDistance: 0.00,          // Zero - less critical for Polymarket
+    outcomeMatch: 0.00               // Zero - Polymarket rarely has multi-outcome
   };
 
   readonly thresholds: ScoringThresholds = {

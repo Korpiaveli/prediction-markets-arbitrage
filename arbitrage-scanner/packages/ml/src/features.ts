@@ -276,6 +276,7 @@ export class FeatureExtractor {
   /**
    * Check if outcome matches (for PredictIt multi-outcome contracts)
    * For PredictIt contracts, the outcome MUST appear in the other market's title
+   * Also detects opposite outcomes (Republican vs Democrat, Yes vs No)
    */
   private checkOutcomeMatch(market1: Market, market2: Market): boolean {
     const outcome1 = this.extractOutcome(market1.title);
@@ -288,6 +289,34 @@ export class FeatureExtractor {
     const text1 = (market1.title + ' ' + market1.description).toLowerCase();
     const text2 = (market2.title + ' ' + market2.description).toLowerCase();
 
+    // Check for opposite outcomes (mutually exclusive)
+    const opposites = [
+      ['republican', 'democrat', 'democratic'],
+      ['yes', 'no'],
+      ['win', 'lose', 'loss'],
+      ['increase', 'decrease'],
+      ['above', 'below'],
+      ['more', 'less', 'fewer']
+    ];
+
+    for (const oppositeSet of opposites) {
+      const has1 = oppositeSet.some(term => text1.includes(term));
+      const has2 = oppositeSet.some(term => text2.includes(term));
+
+      if (has1 && has2) {
+        // Both mention terms from same opposite set - check if they're different
+        const terms1 = oppositeSet.filter(term => text1.includes(term));
+        const terms2 = oppositeSet.filter(term => text2.includes(term));
+
+        // If they have different terms from the opposite set, they're mismatched
+        const overlap = terms1.filter(term => terms2.includes(term));
+        if (overlap.length === 0) {
+          return false;
+        }
+      }
+    }
+
+    // Check if extracted outcome appears in the other market
     if (outcome1 && !text2.includes(outcome1)) {
       return false;
     }

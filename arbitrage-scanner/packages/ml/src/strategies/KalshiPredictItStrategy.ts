@@ -24,15 +24,17 @@ export class KalshiPredictItStrategy extends BaseScoringStrategy {
   readonly description = 'Cross-platform matching strategy for Kalshi and PredictIt markets';
 
   readonly weights: FeatureWeights = {
-    embeddingSimilarity: 0.20,       // Highest - semantic understanding critical
-    timingMatch: 0.18,               // Very high - prevent year mismatches
-    titleSimilarity: 0.14,           // Medium - after normalization
-    keywordOverlap: 0.14,            // Medium - important signals
-    categoryMatch: 0.15,             // High - critical for politics/sports
-    alignmentScore: 0.11,            // Medium-high - resolution matters
-    descriptionSimilarity: 0.06,     // Low-medium - both have descriptions
-    volumeRatio: 0.01,               // Very low - not predictive
-    priceCorrelation: 0.01,          // Very low - different market structures
+    embeddingSimilarity: 0.18,       // Highest - semantic understanding critical
+    timingMatch: 0.16,               // Very high - prevent year mismatches
+    temporalDistance: 0.12,          // High - year alignment crucial
+    outcomeMatch: 0.10,              // High - prevent opposite outcomes
+    titleSimilarity: 0.12,           // Medium - after normalization
+    keywordOverlap: 0.12,            // Medium - important signals
+    categoryMatch: 0.12,             // Medium-high - critical for politics/sports
+    alignmentScore: 0.06,            // Low-medium - resolution matters
+    descriptionSimilarity: 0.02,     // Very low - both have descriptions
+    volumeRatio: 0.00,               // Zero - not predictive
+    priceCorrelation: 0.00,          // Zero - different market structures
     lengthRatio: 0.00,               // Zero - penalizes cross-platform
     avgWordCount: 0.00,              // Zero - not meaningful
     sourcesMatch: 0.00               // Zero - hard to extract reliably

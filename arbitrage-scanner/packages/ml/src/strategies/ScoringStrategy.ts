@@ -27,6 +27,8 @@ export interface FeatureWeights {
   lengthRatio: number;
   avgWordCount: number;
   embeddingSimilarity: number;
+  temporalDistance: number;
+  outcomeMatch: number;
 }
 
 export interface ScoringThresholds {
