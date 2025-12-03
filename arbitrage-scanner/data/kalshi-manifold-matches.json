@@ -1,0 +1,222 @@
+[
+  {
+    "id": "KXUSTAKEOVER-30_zzUiDdlyZuWMu05NEGC3",
+    "description": "Will the US government take control of any AI company or project before 2030?",
+    "kalshiMarket": {
+      "id": "KXUSTAKEOVER-30",
+      "exchangeId": "KXUSTAKEOVER-30",
+      "exchange": "KALSHI",
+      "title": "Will the US government take control of any AI company or project before 2030?",
+      "description": "Before 2030",
+      "closeTime": "2030-01-01T04:59:00.000Z",
+      "volume24h": 138,
+      "openInterest": 1425,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXUSTAKEOVER-30",
+        "marketType": "binary",
+        "rulesPrimary": "If the U.S. government has taken operational control of any private AI company or project before Jan 1, 2030, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 8365.04
+      },
+      "categories": [
+        "technology"
+      ],
+      "primaryCategory": "technology"
+    },
+    "polymarketMarket": {
+      "id": "zzUiDdlyZuWMu05NEGC3",
+      "exchangeId": "zzUiDdlyZuWMu05NEGC3",
+      "exchange": "MANIFOLD",
+      "title": "Will AI/ML be among the fastest growing fields through 2030?",
+      "description": "Will AI/ML be among the fastest growing fields through 2030?",
+      "closeTime": "2030-01-01T05:59:00.000Z",
+      "volume24h": 275,
+      "active": true,
+      "metadata": {
+        "creator": "Gigacasting",
+        "url": "https://manifold.markets/Gigacasting/will-aiml-be-among-the-fastest-grow",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 1521.4249725366178,
+          "YES": 912.976474810401
+        },
+        "probability": 0.9117333733259183
+      },
+      "categories": [
+        "technology"
+      ],
+      "primaryCategory": "technology"
+    },
+    "kalshiId": "KXUSTAKEOVER-30",
+    "polymarketId": "zzUiDdlyZuWMu05NEGC3",
+    "correlationScore": 0.6003869927919004,
+    "exchangePair": "KALSHI-MANIFOLD"
+  },
+  {
+    "id": "KXVPRESNOMR-28-JDV_wpdomi6nif",
+    "description": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+    "kalshiMarket": {
+      "id": "KXVPRESNOMR-28-JDV",
+      "exchangeId": "KXVPRESNOMR-28-JDV",
+      "exchange": "KALSHI",
+      "title": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+      "description": "J.D. Vance",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 26704,
+      "openInterest": 18670,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXVPRESNOMR-28",
+        "marketType": "binary",
+        "rulesPrimary": "If J.D. Vance accepts the nomination for the Vice Presidency for the Republican party, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 485678.14
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "polymarketMarket": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 924.138983508173,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81317.08014129067,
+          "YES": 139460.67380621238
+        },
+        "probability": 0.2642522049505744
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "kalshiId": "KXVPRESNOMR-28-JDV",
+    "polymarketId": "wpdomi6nif",
+    "correlationScore": 0.6142277631476903,
+    "exchangePair": "KALSHI-MANIFOLD"
+  },
+  {
+    "id": "KXTRUMPPRES-28_wpdomi6nif",
+    "description": "Will a Trump family member the 2028 Republican presidential nominee?",
+    "kalshiMarket": {
+      "id": "KXTRUMPPRES-28",
+      "exchangeId": "KXTRUMPPRES-28",
+      "exchange": "KALSHI",
+      "title": "Will a Trump family member the 2028 Republican presidential nominee?",
+      "description": "Before 2028",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 8050,
+      "openInterest": 2263,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXTRUMPPRES-28",
+        "marketType": "binary",
+        "rulesPrimary": "If a member of the Donald J. Trump family (including him personally) is nominated as the 2028 Republican presidential candidate, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 648415.88
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "polymarketMarket": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 924.138983508173,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81317.08014129067,
+          "YES": 139460.67380621238
+        },
+        "probability": 0.2642522049505744
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "kalshiId": "KXTRUMPPRES-28",
+    "polymarketId": "wpdomi6nif",
+    "correlationScore": 0.6169796589204796,
+    "exchangePair": "KALSHI-MANIFOLD"
+  },
+  {
+    "id": "KXPRESNOMR-28-JDV_wpdomi6nif",
+    "description": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+    "kalshiMarket": {
+      "id": "KXPRESNOMR-28-JDV",
+      "exchangeId": "KXPRESNOMR-28-JDV",
+      "exchange": "KALSHI",
+      "title": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+      "description": "J.D. Vance",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 1867,
+      "openInterest": 372719,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXPRESNOMR-28",
+        "marketType": "binary",
+        "rulesPrimary": "If J.D. Vance wins and accepts the nomination for the Presidency for the Republican party, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 5286985.83
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "polymarketMarket": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 924.138983508173,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81317.08014129067,
+          "YES": 139460.67380621238
+        },
+        "probability": 0.2642522049505744
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "kalshiId": "KXPRESNOMR-28-JDV",
+    "polymarketId": "wpdomi6nif",
+    "correlationScore": 0.6268650153599878,
+    "exchangePair": "KALSHI-MANIFOLD"
+  }
+]
