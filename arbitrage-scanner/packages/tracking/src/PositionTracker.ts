@@ -432,7 +432,7 @@ export class PositionTracker {
       `SELECT * FROM positions WHERE status = 'open' ORDER BY opened_at DESC`
     );
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       id: row.id,
       executionId: row.execution_id,
       exchange1: row.exchange1,

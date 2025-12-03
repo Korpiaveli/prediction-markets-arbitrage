@@ -3,7 +3,11 @@ import {
   Quote,
   ExchangeName,
   RateLimits,
-  ExchangeConfig
+  ExchangeConfig,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -125,6 +129,130 @@ export class PredictItAdapter extends BaseExchange {
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch quote for ${marketId}:`, error);
       throw error;
+    }
+  }
+
+  async placeOrder(order: OrderRequest): Promise<OrderResult> {
+    if (!this.config.apiKey) {
+      throw new Error('[PredictIt] API key required for trading');
+    }
+
+    try {
+      const [_marketId, contractId] = order.marketId.split('-');
+
+      const piOrder = {
+        contractId: parseInt(contractId),
+        side: order.side === 'YES' ? 'buy' : 'sell',
+        quantity: Math.floor(order.size),
+        price: Math.floor(order.price * 100),
+        orderType: order.type === 'limit' ? 'LIMIT' : 'MARKET'
+      };
+
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.post('/trade/order', piOrder);
+        return data;
+      });
+
+      const orderResult: OrderResult = {
+        orderId: response.orderId.toString(),
+        status: this.mapPredictItStatus(response.status),
+        filledSize: response.quantityFilled || 0,
+        filledPrice: response.avgPrice ? response.avgPrice / 100 : order.price,
+        timestamp: new Date(response.timestamp)
+      };
+
+      return orderResult;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to place order:`, error);
+      throw error;
+    }
+  }
+
+  async cancelOrder(orderId: string): Promise<void> {
+    if (!this.config.apiKey) {
+      throw new Error('[PredictIt] API key required for trading');
+    }
+
+    try {
+      await this.queue.add(async () => {
+        await this.client.delete(`/trade/order/${orderId}`);
+      });
+      console.log(`[${this.name}] Cancelled order ${orderId}`);
+    } catch (error) {
+      console.error(`[${this.name}] Failed to cancel order ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getOrderStatus(orderId: string): Promise<OrderStatus> {
+    if (!this.config.apiKey) {
+      throw new Error('[PredictIt] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get(`/trade/order/${orderId}`);
+        return data;
+      });
+
+      const status: OrderStatus = {
+        orderId: response.orderId.toString(),
+        status: this.mapPredictItStatus(response.status),
+        filledSize: response.quantityFilled || 0,
+        remainingSize: response.quantity - (response.quantityFilled || 0),
+        averagePrice: response.avgPrice ? response.avgPrice / 100 : 0,
+        lastUpdate: new Date(response.lastUpdated || response.timestamp)
+      };
+
+      return status;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get order status for ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAccountBalance(): Promise<Balance> {
+    if (!this.config.apiKey) {
+      throw new Error('[PredictIt] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/profile/balance');
+        return data;
+      });
+
+      const balance: Balance = {
+        available: parseFloat(response.availableBalance) / 100,
+        allocated: parseFloat(response.investedBalance || '0') / 100,
+        total: parseFloat(response.totalBalance) / 100,
+        currency: 'USD'
+      };
+
+      return balance;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get account balance:`, error);
+      throw error;
+    }
+  }
+
+  private mapPredictItStatus(status: string): 'pending' | 'filled' | 'partial' | 'cancelled' | 'rejected' {
+    switch (status.toUpperCase()) {
+      case 'OPEN':
+      case 'PENDING':
+        return 'pending';
+      case 'FILLED':
+      case 'EXECUTED':
+        return 'filled';
+      case 'PARTIALLY_FILLED':
+        return 'partial';
+      case 'CANCELLED':
+      case 'CANCELED':
+        return 'cancelled';
+      case 'REJECTED':
+        return 'rejected';
+      default:
+        return 'pending';
     }
   }
 

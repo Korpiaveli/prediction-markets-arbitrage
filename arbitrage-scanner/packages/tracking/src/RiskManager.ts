@@ -157,6 +157,19 @@ export class RiskManager {
       warnings.push(...opportunity.resolutionAlignment.warnings);
     }
 
+    // Apply Polymarket 50-50 position sizing reduction
+    if (opportunity.resolutionAlignment?.polymarket5050Risk) {
+      const originalSize = adjustedSize;
+      adjustedSize = Math.floor(adjustedSize * 0.5);
+      warnings.push(`Position size reduced 50% due to Polymarket 50-50 outcome risk (${originalSize} → ${adjustedSize})`);
+
+      // Verify still above minimum after reduction
+      if (adjustedSize < this.limits.minPositionSize) {
+        blockers.push(`Position size after 50-50 reduction (${adjustedSize}) below minimum ${this.limits.minPositionSize}`);
+        approved = false;
+      }
+    }
+
     return {
       approved,
       adjustedSize: adjustedSize !== requestedSize ? adjustedSize : undefined,

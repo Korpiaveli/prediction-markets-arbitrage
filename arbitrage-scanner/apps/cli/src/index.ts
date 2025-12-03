@@ -32,6 +32,7 @@ program
   .option('-i, --interval <ms>', 'Scan interval in milliseconds', '5000')
   .option('-o, --once', 'Run single scan and exit')
   .option('--min-profit <percent>', 'Minimum profit percentage', '0.5')
+  .option('--min-resolution-score <score>', 'Minimum resolution score (0-100)', '65')
   .option('--data-dir <path>', 'Data directory for storage', './data')
   .option('--collect-resolution-data', 'Collect resolution analysis data (disables filtering)')
   .option('--exchanges <list>', `Comma-separated list: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket')
@@ -56,7 +57,8 @@ program
         calculator: new ArbitrageCalculator(),
         storage,
         scanInterval: parseInt(options.interval),
-        disableResolutionFiltering: options.collectResolutionData
+        disableResolutionFiltering: options.collectResolutionData,
+        minResolutionScore: parseInt(options.minResolutionScore)
       });
 
       // Notify if in data collection mode

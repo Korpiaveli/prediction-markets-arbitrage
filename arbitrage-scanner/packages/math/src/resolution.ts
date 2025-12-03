@@ -33,6 +33,7 @@ export interface ResolutionAlignment {
   // Risk assessment
   risks: string[];
   warnings: string[];
+  polymarket5050Risk?: boolean;  // Polymarket 50-50 outcome flag
 
   // Recommendations
   tradeable: boolean;         // Safe to trade?
@@ -43,6 +44,24 @@ export interface ResolutionAlignment {
  * Analyzes and compares resolution criteria between platforms
  */
 export class ResolutionAnalyzer {
+  private minThreshold: number = 65;
+
+  /**
+   * Set minimum threshold for tradeable opportunities
+   */
+  setMinThreshold(threshold: number): void {
+    if (threshold < 0 || threshold > 100) {
+      throw new Error('Threshold must be between 0 and 100');
+    }
+    this.minThreshold = threshold;
+  }
+
+  /**
+   * Get current minimum threshold
+   */
+  getMinThreshold(): number {
+    return this.minThreshold;
+  }
 
   /**
    * Extract resolution criteria from a market
@@ -202,7 +221,7 @@ export class ResolutionAnalyzer {
     const kalshiCriteria = this.extractCriteria(kalshiMarket);
     const polymarketCriteria = this.extractCriteria(polymarketMarket);
 
-    return this.calculateAlignment(kalshiCriteria, polymarketCriteria);
+    return this.calculateAlignment(kalshiCriteria, polymarketCriteria, polymarketMarket);
   }
 
   /**
@@ -210,11 +229,13 @@ export class ResolutionAnalyzer {
    */
   private calculateAlignment(
     criteria1: ResolutionCriteria,
-    criteria2: ResolutionCriteria
+    criteria2: ResolutionCriteria,
+    market2?: Market
   ): ResolutionAlignment {
     const risks: string[] = [];
     const warnings: string[] = [];
     let score = 100;
+    let polymarket5050Risk = false;
 
     // Check source alignment
     const sourcesMatch = this.checkSourcesMatch(criteria1.sources, criteria2.sources);
@@ -243,6 +264,13 @@ export class ResolutionAnalyzer {
       risks.push('Strict vs flexible resolution standards - high risk of divergence');
     }
 
+    // Check for Polymarket 50-50 outcome risk
+    if (market2 && market2.metadata?.is_50_50_outcome === true) {
+      polymarket5050Risk = true;
+      score -= 5;  // Small score penalty
+      warnings.push('Polymarket 50-50 outcome risk detected - position size will be reduced 50%');
+    }
+
     // Missing criteria
     if (!criteria1.rawText || criteria1.rawText.length < 20) {
       score -= 10;
@@ -253,15 +281,15 @@ export class ResolutionAnalyzer {
       warnings.push('Polymarket resolution criteria unclear');
     }
 
-    // Determine level
+    // Determine level (relative to threshold)
     let level: 'high' | 'medium' | 'low' | 'critical';
     if (score >= 85) level = 'high';
-    else if (score >= 70) level = 'medium';
-    else if (score >= 50) level = 'low';
+    else if (score >= this.minThreshold + 5) level = 'medium';
+    else if (score >= this.minThreshold - 15) level = 'low';
     else level = 'critical';
 
-    // Determine tradeability
-    const tradeable = score >= 70 && risks.length === 0;
+    // Determine tradeability (uses configurable threshold)
+    const tradeable = score >= this.minThreshold && risks.length === 0;
     const requiresReview = score < 85 || risks.length > 0;
 
     return {
@@ -272,6 +300,7 @@ export class ResolutionAnalyzer {
       conditionsMatch,
       risks,
       warnings,
+      polymarket5050Risk,
       tradeable,
       requiresReview
     };

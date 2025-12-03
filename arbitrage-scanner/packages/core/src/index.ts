@@ -1,6 +1,7 @@
 // Types
 export * from './types/market.js';
 export * from './types/arbitrage.js';
+export * from './types/trading.js';
 
 // Interfaces
 export * from './interfaces/exchange.js';

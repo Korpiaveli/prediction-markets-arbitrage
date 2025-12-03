@@ -2,7 +2,11 @@ import {
   Market,
   Quote,
   ExchangeName,
-  ExchangeConfig
+  ExchangeConfig,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -141,5 +145,42 @@ export class MockExchange extends BaseExchange {
         lastUpdate: new Date()
       };
     }
+  }
+
+  async placeOrder(order: OrderRequest): Promise<OrderResult> {
+    await this.delay(100);
+    return {
+      orderId: `MOCK_ORDER_${Date.now()}`,
+      status: 'filled',
+      filledSize: order.size,
+      filledPrice: order.price,
+      timestamp: new Date()
+    };
+  }
+
+  async cancelOrder(_orderId: string): Promise<void> {
+    await this.delay(50);
+  }
+
+  async getOrderStatus(orderId: string): Promise<OrderStatus> {
+    await this.delay(50);
+    return {
+      orderId,
+      status: 'filled',
+      filledSize: 100,
+      remainingSize: 0,
+      averagePrice: 0.5,
+      lastUpdate: new Date()
+    };
+  }
+
+  async getAccountBalance(): Promise<Balance> {
+    await this.delay(50);
+    return {
+      available: 10000,
+      allocated: 2000,
+      total: 12000,
+      currency: 'USD'
+    };
   }
 }

@@ -6,7 +6,11 @@ import {
   RateLimits,
   ExchangeConfig,
   PriceLevel,
-  categoryDetector
+  categoryDetector,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import axios, { AxiosInstance } from 'axios';
 import PQueue from 'p-queue';
@@ -128,6 +132,10 @@ export abstract class BaseExchange implements IExchange {
   abstract getMarkets(): Promise<Market[]>;
   abstract getMarket(marketId: string): Promise<Market | null>;
   abstract getQuote(marketId: string): Promise<Quote>;
+  abstract placeOrder(order: OrderRequest): Promise<OrderResult>;
+  abstract cancelOrder(orderId: string): Promise<void>;
+  abstract getOrderStatus(orderId: string): Promise<OrderStatus>;
+  abstract getAccountBalance(): Promise<Balance>;
 
   async getBulkQuotes(marketIds: string[]): Promise<Quote[]> {
     // Default implementation - can be overridden for batch endpoints

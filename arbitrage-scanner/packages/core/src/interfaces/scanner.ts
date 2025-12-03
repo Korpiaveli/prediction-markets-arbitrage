@@ -50,4 +50,5 @@ export interface ScannerConfig {
   maxConcurrent?: number;
   timeout?: number;
   disableResolutionFiltering?: boolean;
+  minResolutionScore?: number;
 }

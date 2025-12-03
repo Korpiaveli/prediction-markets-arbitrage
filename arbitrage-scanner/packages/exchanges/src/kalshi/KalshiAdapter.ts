@@ -3,7 +3,11 @@ import {
   Quote,
   ExchangeName,
   RateLimits,
-  ExchangeConfig
+  ExchangeConfig,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -257,6 +261,128 @@ export class KalshiAdapter extends BaseExchange {
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch historical trades for ${marketId}:`, error);
       throw error;
+    }
+  }
+
+  async placeOrder(order: OrderRequest): Promise<OrderResult> {
+    if (!this.config.apiKey) {
+      throw new Error('[Kalshi] API key required for trading');
+    }
+
+    try {
+      const kalshiOrder = {
+        ticker: order.marketId,
+        action: order.type === 'limit' ? 'buy' : 'market',
+        side: order.side.toLowerCase(),
+        count: Math.floor(order.size),
+        yes_price: order.side === 'YES' ? Math.floor(order.price * 100) : undefined,
+        no_price: order.side === 'NO' ? Math.floor(order.price * 100) : undefined,
+        type: order.type
+      };
+
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.post('/portfolio/orders', kalshiOrder);
+        return data;
+      });
+
+      const orderResult: OrderResult = {
+        orderId: response.order_id,
+        status: this.mapKalshiStatus(response.status),
+        filledSize: response.queue_position === 0 ? order.size : 0,
+        filledPrice: response.yes_price ? response.yes_price / 100 : response.no_price / 100,
+        timestamp: new Date(response.created_time)
+      };
+
+      return orderResult;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to place order:`, error);
+      throw error;
+    }
+  }
+
+  async cancelOrder(orderId: string): Promise<void> {
+    if (!this.config.apiKey) {
+      throw new Error('[Kalshi] API key required for trading');
+    }
+
+    try {
+      await this.queue.add(async () => {
+        await this.client.delete(`/portfolio/orders/${orderId}`);
+      });
+      console.log(`[${this.name}] Cancelled order ${orderId}`);
+    } catch (error) {
+      console.error(`[${this.name}] Failed to cancel order ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getOrderStatus(orderId: string): Promise<OrderStatus> {
+    if (!this.config.apiKey) {
+      throw new Error('[Kalshi] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get(`/portfolio/orders/${orderId}`);
+        return data;
+      });
+
+      const status: OrderStatus = {
+        orderId: response.order_id,
+        status: this.mapKalshiStatus(response.status),
+        filledSize: response.queue_position === 0 ? response.count : 0,
+        remainingSize: response.queue_position > 0 ? response.count : 0,
+        averagePrice: response.yes_price ? response.yes_price / 100 : response.no_price / 100,
+        lastUpdate: new Date(response.last_update_time || response.created_time)
+      };
+
+      return status;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get order status for ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAccountBalance(): Promise<Balance> {
+    if (!this.config.apiKey) {
+      throw new Error('[Kalshi] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/portfolio/balance');
+        return data;
+      });
+
+      const balance: Balance = {
+        available: parseFloat(response.balance) / 100,
+        allocated: parseFloat(response.payout_pending || '0') / 100,
+        total: parseFloat(response.balance) / 100 + parseFloat(response.payout_pending || '0') / 100,
+        currency: 'USD'
+      };
+
+      return balance;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get account balance:`, error);
+      throw error;
+    }
+  }
+
+  private mapKalshiStatus(status: string): 'pending' | 'filled' | 'partial' | 'cancelled' | 'rejected' {
+    switch (status.toLowerCase()) {
+      case 'resting':
+      case 'pending':
+        return 'pending';
+      case 'executed':
+      case 'filled':
+        return 'filled';
+      case 'canceled':
+      case 'cancelled':
+        return 'cancelled';
+      case 'rejected':
+        return 'rejected';
+      default:
+        return 'pending';
     }
   }
 

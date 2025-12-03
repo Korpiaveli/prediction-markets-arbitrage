@@ -3,7 +3,11 @@ import {
   Quote,
   ExchangeName,
   RateLimits,
-  ExchangeConfig
+  ExchangeConfig,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -290,6 +294,7 @@ export class PolymarketAdapter extends BaseExchange {
         questionId: data.question_id,
         marketSlug: data.market_slug,
         resolutionRules: data.description || '',
+        is_50_50_outcome: data.is_50_50_outcome || false,
         tokens: data.tokens?.map(t => ({
           tokenId: t.token_id,
           outcome: t.outcome,
@@ -321,6 +326,7 @@ export class PolymarketAdapter extends BaseExchange {
         questionId: data.question_id,
         marketSlug: data.market_slug,
         resolutionRules: data.description || event?.description || '',
+        is_50_50_outcome: data.is_50_50_outcome || event?.is_50_50_outcome || false,
         tokens: data.tokens?.map((t: any) => ({
           tokenId: t.token_id,
           outcome: t.outcome,
@@ -330,6 +336,129 @@ export class PolymarketAdapter extends BaseExchange {
         category: event?.category || data.category
       }
     };
+  }
+
+  async placeOrder(order: OrderRequest): Promise<OrderResult> {
+    if (!this.config.apiKey) {
+      throw new Error('[Polymarket] API key required for trading');
+    }
+
+    try {
+      const polyOrder = {
+        tokenID: order.marketId,
+        side: order.side === 'YES' ? 'BUY' : 'SELL',
+        amount: order.size,
+        price: order.price,
+        orderType: order.type.toUpperCase()
+      };
+
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.post('/order', polyOrder);
+        return data;
+      });
+
+      const orderResult: OrderResult = {
+        orderId: response.orderID,
+        status: this.mapPolymarketStatus(response.status),
+        filledSize: response.matchedAmount || 0,
+        filledPrice: response.avgPrice || order.price,
+        timestamp: new Date(response.timestamp)
+      };
+
+      return orderResult;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to place order:`, error);
+      throw error;
+    }
+  }
+
+  async cancelOrder(orderId: string): Promise<void> {
+    if (!this.config.apiKey) {
+      throw new Error('[Polymarket] API key required for trading');
+    }
+
+    try {
+      await this.queue.add(async () => {
+        await this.client.delete(`/order/${orderId}`);
+      });
+      console.log(`[${this.name}] Cancelled order ${orderId}`);
+    } catch (error) {
+      console.error(`[${this.name}] Failed to cancel order ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getOrderStatus(orderId: string): Promise<OrderStatus> {
+    if (!this.config.apiKey) {
+      throw new Error('[Polymarket] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get(`/order/${orderId}`);
+        return data;
+      });
+
+      const status: OrderStatus = {
+        orderId: response.orderID,
+        status: this.mapPolymarketStatus(response.status),
+        filledSize: response.matchedAmount || 0,
+        remainingSize: response.amount - (response.matchedAmount || 0),
+        averagePrice: response.avgPrice || 0,
+        lastUpdate: new Date(response.lastUpdated || response.timestamp)
+      };
+
+      return status;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get order status for ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAccountBalance(): Promise<Balance> {
+    if (!this.config.apiKey) {
+      throw new Error('[Polymarket] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/balance');
+        return data;
+      });
+
+      const balance: Balance = {
+        available: parseFloat(response.available) || 0,
+        allocated: parseFloat(response.allocated) || 0,
+        total: parseFloat(response.total) || 0,
+        currency: 'USDC'
+      };
+
+      return balance;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get account balance:`, error);
+      throw error;
+    }
+  }
+
+  private mapPolymarketStatus(status: string): 'pending' | 'filled' | 'partial' | 'cancelled' | 'rejected' {
+    switch (status.toUpperCase()) {
+      case 'LIVE':
+      case 'PENDING':
+        return 'pending';
+      case 'MATCHED':
+      case 'FILLED':
+        return 'filled';
+      case 'PARTIAL':
+      case 'PARTIALLY_MATCHED':
+        return 'partial';
+      case 'CANCELLED':
+      case 'CANCELED':
+        return 'cancelled';
+      case 'REJECTED':
+        return 'rejected';
+      default:
+        return 'pending';
+    }
   }
 
   // WebSocket subscription for real-time updates

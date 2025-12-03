@@ -38,6 +38,11 @@ export class Scanner extends EventEmitter implements IScanner {
     this.plugins = config.plugins || [];
     this.resolutionAnalyzer = new ResolutionAnalyzer();
 
+    // Configure resolution threshold if provided
+    if (config.minResolutionScore !== undefined) {
+      this.resolutionAnalyzer.setMinThreshold(config.minResolutionScore);
+    }
+
     // Add exchanges
     for (const exchange of config.exchanges) {
       this.addExchange(exchange);

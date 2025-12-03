@@ -3,7 +3,11 @@ import {
   Quote,
   ExchangeName,
   RateLimits,
-  ExchangeConfig
+  ExchangeConfig,
+  OrderRequest,
+  OrderResult,
+  OrderStatus,
+  Balance
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 import axios from 'axios';
@@ -183,6 +187,99 @@ export class ManifoldAdapter extends BaseExchange {
       return quote;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch quote for ${marketId}:`, error);
+      throw error;
+    }
+  }
+
+  async placeOrder(order: OrderRequest): Promise<OrderResult> {
+    if (!this.config.apiKey) {
+      throw new Error('[Manifold] API key required for trading');
+    }
+
+    console.warn('[Manifold] Play-money only - no real-money trading available');
+
+    try {
+      const manifoldOrder = {
+        contractId: order.marketId,
+        outcome: order.side,
+        amount: Math.floor(order.size * 100), // Convert to play-money cents
+        limitProb: order.type === 'limit' ? order.price : undefined
+      };
+
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.post('/bet', manifoldOrder);
+        return data;
+      });
+
+      const orderResult: OrderResult = {
+        orderId: response.betId,
+        status: 'filled', // Manifold bets are instant
+        filledSize: order.size,
+        filledPrice: response.probAfter || order.price,
+        timestamp: new Date(response.createdTime)
+      };
+
+      return orderResult;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to place order:`, error);
+      throw error;
+    }
+  }
+
+  async cancelOrder(_orderId: string): Promise<void> {
+    throw new Error('[Manifold] Order cancellation not supported (bets are instant)');
+  }
+
+  async getOrderStatus(orderId: string): Promise<OrderStatus> {
+    if (!this.config.apiKey) {
+      throw new Error('[Manifold] API key required for trading');
+    }
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get(`/bet/${orderId}`);
+        return data;
+      });
+
+      const status: OrderStatus = {
+        orderId: response.id,
+        status: 'filled',
+        filledSize: response.amount / 100,
+        remainingSize: 0,
+        averagePrice: response.probAfter,
+        lastUpdate: new Date(response.createdTime)
+      };
+
+      return status;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get order status for ${orderId}:`, error);
+      throw error;
+    }
+  }
+
+  async getAccountBalance(): Promise<Balance> {
+    if (!this.config.apiKey) {
+      throw new Error('[Manifold] API key required for trading');
+    }
+
+    console.warn('[Manifold] Play-money balance - not real USD');
+
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/me');
+        return data;
+      });
+
+      const balance: Balance = {
+        available: parseFloat(response.balance) / 100,
+        allocated: parseFloat(response.totalDeposits || '0') / 100,
+        total: parseFloat(response.balance) / 100,
+        currency: 'MANA' // Manifold play-money
+      };
+
+      return balance;
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get account balance:`, error);
       throw error;
     }
   }

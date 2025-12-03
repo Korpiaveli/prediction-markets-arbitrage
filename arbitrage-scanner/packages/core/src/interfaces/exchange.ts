@@ -1,4 +1,5 @@
 import { Market, Quote, ExchangeName } from '../types/market.js';
+import { OrderRequest, OrderResult, OrderStatus, Balance } from '../types/trading.js';
 
 export interface IExchange {
   readonly name: ExchangeName;
@@ -17,6 +18,11 @@ export interface IExchange {
 
   subscribe?(marketId: string, callback: (quote: Quote) => void): void;
   unsubscribe?(marketId: string): void;
+
+  placeOrder(order: OrderRequest): Promise<OrderResult>;
+  cancelOrder(orderId: string): Promise<void>;
+  getOrderStatus(orderId: string): Promise<OrderStatus>;
+  getAccountBalance(): Promise<Balance>;
 }
 
 export interface RateLimits {
