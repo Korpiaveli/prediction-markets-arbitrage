@@ -1,0 +1,1057 @@
+[
+  {
+    "id": "8100-31489_ndggZSlcNQ",
+    "description": "SCOTUS justice confirmed in 2025?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8100-31489",
+      "exchangeId": "8100-31489",
+      "exchange": "PREDICTIT",
+      "title": "SCOTUS justice confirmed in 2025?",
+      "description": "Will Congress confirm a Supreme Court justice in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8100,
+        "contractId": 31489,
+        "marketUrl": "https://www.predictit.org/markets/detail/8100/Will-Congress-confirm-a-Supreme-Court-justice-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/7065b8cf-5957-4354-9078-601e13e3c823.png",
+        "lastTradePrice": 0.01,
+        "bestBuyYesCost": 0.01,
+        "bestSellYesCost": null,
+        "bestBuyNoCost": null,
+        "bestSellNoCost": 0.99,
+        "lastClosePrice": 0.01,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "ndggZSlcNQ",
+      "exchangeId": "ndggZSlcNQ",
+      "exchange": "MANIFOLD",
+      "title": "Will Elon Musk testify before Congress in 2025?",
+      "description": "Will Elon Musk testify before Congress in 2025?",
+      "closeTime": "2026-01-01T04:59:00.000Z",
+      "volume24h": 7460.309034658076,
+      "active": true,
+      "metadata": {
+        "creator": "strutheo",
+        "url": "https://manifold.markets/strutheo/will-elon-musk-testify-before-congr",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 631.9830826772693,
+          "YES": 12479.209248611442
+        },
+        "probability": 0.030107576681365704
+      },
+      "categories": [
+        "politics",
+        "technology"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8100-31489",
+    "market2Id": "ndggZSlcNQ",
+    "correlationScore": 0.638353842722504
+  },
+  {
+    "id": "8143-31862_cUO9ENLnES",
+    "description": "Veto overridden in 2025?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8143-31862",
+      "exchangeId": "8143-31862",
+      "exchange": "PREDICTIT",
+      "title": "Veto overridden in 2025?",
+      "description": "Will Congress override a veto in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8143,
+        "contractId": 31862,
+        "marketUrl": "https://www.predictit.org/markets/detail/8143/Will-Congress-override-a-veto-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/c09d1703-ca6c-4230-8641-23d0e7fa29ad.png",
+        "lastTradePrice": 0.02,
+        "bestBuyYesCost": 0.02,
+        "bestSellYesCost": 0.01,
+        "bestBuyNoCost": 0.99,
+        "bestSellNoCost": 0.98,
+        "lastClosePrice": 0.01,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "cUO9ENLnES",
+      "exchangeId": "cUO9ENLnES",
+      "exchange": "MANIFOLD",
+      "title": "Will Trump be president on 12/31/2025?",
+      "description": "Will Trump be president on 12/31/2025?",
+      "closeTime": "2025-12-31T23:59:00.000Z",
+      "volume24h": 431,
+      "active": true,
+      "metadata": {
+        "creator": "CivilizedGuy",
+        "url": "https://manifold.markets/CivilizedGuy/trump-president-on-12312025",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 5686.240703077382,
+          "YES": 175.8631145281646
+        },
+        "probability": 0.9700000000000001
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8143-31862",
+    "market2Id": "cUO9ENLnES",
+    "correlationScore": 0.6189653643119208
+  },
+  {
+    "id": "8155-31948_r8pPurlDEuz6HYfxl1V4",
+    "description": "Who will control the Senate after 2026?: Republican",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8155-31948",
+      "exchangeId": "8155-31948",
+      "exchange": "PREDICTIT",
+      "title": "Who will control the Senate after 2026?: Republican",
+      "description": "Which party will control the Senate after the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8155,
+        "contractId": 31948,
+        "marketUrl": "https://www.predictit.org/markets/detail/8155/Which-party-will-control-the-Senate-after-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/84e37a69-3dcd-4049-b1a6-d2acc3944234.png",
+        "lastTradePrice": 0.7,
+        "bestBuyYesCost": 0.73,
+        "bestSellYesCost": 0.7,
+        "bestBuyNoCost": 0.3,
+        "bestSellNoCost": 0.27,
+        "lastClosePrice": 0.73,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "r8pPurlDEuz6HYfxl1V4",
+      "exchangeId": "r8pPurlDEuz6HYfxl1V4",
+      "exchange": "MANIFOLD",
+      "title": "Will Democrats regain control of the Senate in 2026?",
+      "description": "Will Democrats regain control of the Senate in 2026?",
+      "closeTime": "2026-12-01T05:59:00.000Z",
+      "volume24h": 1.4639619642461599,
+      "active": true,
+      "metadata": {
+        "creator": "BoltonBailey",
+        "url": "https://manifold.markets/BoltonBailey/will-democrats-lose-control-of-the",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 73.37327925205499,
+          "YES": 112.08453002451486
+        },
+        "probability": 0.27001681621890217
+      },
+      "categories": [
+        "politics",
+        "technology"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8155-31948",
+    "market2Id": "r8pPurlDEuz6HYfxl1V4",
+    "correlationScore": 0.609584002398894
+  },
+  {
+    "id": "8155-31947_r8pPurlDEuz6HYfxl1V4",
+    "description": "Who will control the Senate after 2026?: Democratic",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8155-31947",
+      "exchangeId": "8155-31947",
+      "exchange": "PREDICTIT",
+      "title": "Who will control the Senate after 2026?: Democratic",
+      "description": "Which party will control the Senate after the 2026 election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8155,
+        "contractId": 31947,
+        "marketUrl": "https://www.predictit.org/markets/detail/8155/Which-party-will-control-the-Senate-after-the-2026-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/84e37a69-3dcd-4049-b1a6-d2acc3944234.png",
+        "lastTradePrice": 0.29,
+        "bestBuyYesCost": 0.32,
+        "bestSellYesCost": 0.29,
+        "bestBuyNoCost": 0.71,
+        "bestSellNoCost": 0.68,
+        "lastClosePrice": 0.3,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "r8pPurlDEuz6HYfxl1V4",
+      "exchangeId": "r8pPurlDEuz6HYfxl1V4",
+      "exchange": "MANIFOLD",
+      "title": "Will Democrats regain control of the Senate in 2026?",
+      "description": "Will Democrats regain control of the Senate in 2026?",
+      "closeTime": "2026-12-01T05:59:00.000Z",
+      "volume24h": 1.4639619642461599,
+      "active": true,
+      "metadata": {
+        "creator": "BoltonBailey",
+        "url": "https://manifold.markets/BoltonBailey/will-democrats-lose-control-of-the",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 73.37327925205499,
+          "YES": 112.08453002451486
+        },
+        "probability": 0.27001681621890217
+      },
+      "categories": [
+        "politics",
+        "technology"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8155-31947",
+    "market2Id": "r8pPurlDEuz6HYfxl1V4",
+    "correlationScore": 0.612172941134761
+  },
+  {
+    "id": "8171-32018_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Vance",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32018",
+      "exchangeId": "8171-32018",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Vance",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32018,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.27,
+        "bestBuyYesCost": 0.28,
+        "bestSellYesCost": 0.27,
+        "bestBuyNoCost": 0.73,
+        "bestSellNoCost": 0.72,
+        "lastClosePrice": 0.26,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32018",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6844450561089382
+  },
+  {
+    "id": "8171-32023_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Newsom",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32023",
+      "exchangeId": "8171-32023",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Newsom",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32023,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.18,
+        "bestBuyYesCost": 0.21,
+        "bestSellYesCost": 0.18,
+        "bestBuyNoCost": 0.82,
+        "bestSellNoCost": 0.79,
+        "lastClosePrice": 0.21,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32023",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6315741799896765
+  },
+  {
+    "id": "8171-32019_wpdomi6nif",
+    "description": "2028 US presidential election winner?: AOC",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32019",
+      "exchangeId": "8171-32019",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: AOC",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32019,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.07,
+        "bestBuyYesCost": 0.08,
+        "bestSellYesCost": 0.06,
+        "bestBuyNoCost": 0.94,
+        "bestSellNoCost": 0.92,
+        "lastClosePrice": 0.07,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32019",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6286625406199714
+  },
+  {
+    "id": "8171-32024_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Rubio",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32024",
+      "exchangeId": "8171-32024",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Rubio",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32024,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.06,
+        "bestBuyYesCost": 0.05,
+        "bestSellYesCost": 0.04,
+        "bestBuyNoCost": 0.96,
+        "bestSellNoCost": 0.95,
+        "lastClosePrice": 0.06,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32024",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6264341500334678
+  },
+  {
+    "id": "8171-32066_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Trump",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32066",
+      "exchangeId": "8171-32066",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Trump",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32066,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.05,
+        "bestBuyYesCost": 0.05,
+        "bestSellYesCost": 0.03,
+        "bestBuyNoCost": 0.97,
+        "bestSellNoCost": 0.95,
+        "lastClosePrice": 0.04,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32066",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6340460939004653
+  },
+  {
+    "id": "8171-32020_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Shapiro",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32020",
+      "exchangeId": "8171-32020",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Shapiro",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32020,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.03,
+        "bestBuyYesCost": 0.03,
+        "bestSellYesCost": 0.02,
+        "bestBuyNoCost": 0.98,
+        "bestSellNoCost": 0.97,
+        "lastClosePrice": 0.03,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32020",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6304409892245585
+  },
+  {
+    "id": "8171-32021_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Harris",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32021",
+      "exchangeId": "8171-32021",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Harris",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32021,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.03,
+        "bestBuyYesCost": 0.03,
+        "bestSellYesCost": 0.02,
+        "bestBuyNoCost": 0.98,
+        "bestSellNoCost": 0.97,
+        "lastClosePrice": 0.03,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32021",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6288500331913134
+  },
+  {
+    "id": "8171-32022_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Buttigieg",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32022",
+      "exchangeId": "8171-32022",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Buttigieg",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32022,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.03,
+        "bestBuyYesCost": 0.04,
+        "bestSellYesCost": 0.03,
+        "bestBuyNoCost": 0.97,
+        "bestSellNoCost": 0.96,
+        "lastClosePrice": 0.03,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32022",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6322215719920546
+  },
+  {
+    "id": "8171-32026_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Whitmer",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32026",
+      "exchangeId": "8171-32026",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Whitmer",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32026,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.03,
+        "bestBuyYesCost": 0.04,
+        "bestSellYesCost": 0.03,
+        "bestBuyNoCost": 0.97,
+        "bestSellNoCost": 0.96,
+        "lastClosePrice": 0.03,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32026",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6312749133482477
+  },
+  {
+    "id": "8171-32025_wpdomi6nif",
+    "description": "2028 US presidential election winner?: Gabbard",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8171-32025",
+      "exchangeId": "8171-32025",
+      "exchange": "PREDICTIT",
+      "title": "2028 US presidential election winner?: Gabbard",
+      "description": "Who will win the 2028 US presidential election?",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8171,
+        "contractId": 32025,
+        "marketUrl": "https://www.predictit.org/markets/detail/8171/Who-will-win-the-2028-US-presidential-election",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/deb45203-2cb8-4986-9d47-cde422af624e.png",
+        "lastTradePrice": 0.01,
+        "bestBuyYesCost": 0.02,
+        "bestSellYesCost": 0.01,
+        "bestBuyNoCost": 0.99,
+        "bestSellNoCost": 0.98,
+        "lastClosePrice": 0.01,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8171-32025",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6260814155359827
+  },
+  {
+    "id": "8222-32185_ndggZSlcNQ",
+    "description": "Ghislaine congressional testimony?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8222-32185",
+      "exchangeId": "8222-32185",
+      "exchange": "PREDICTIT",
+      "title": "Ghislaine congressional testimony?",
+      "description": "Will Ghislaine Maxwell testify publicly before Congress in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8222,
+        "contractId": 32185,
+        "marketUrl": "https://www.predictit.org/markets/detail/8222/Will-Ghislaine-Maxwell-testify-publicly-before-Congress-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/34726a9b-cbbd-45c8-82eb-cf6f1dbd6e0e.png",
+        "lastTradePrice": 0.01,
+        "bestBuyYesCost": 0.01,
+        "bestSellYesCost": null,
+        "bestBuyNoCost": null,
+        "bestSellNoCost": 0.99,
+        "lastClosePrice": 0.01,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "ndggZSlcNQ",
+      "exchangeId": "ndggZSlcNQ",
+      "exchange": "MANIFOLD",
+      "title": "Will Elon Musk testify before Congress in 2025?",
+      "description": "Will Elon Musk testify before Congress in 2025?",
+      "closeTime": "2026-01-01T04:59:00.000Z",
+      "volume24h": 7460.309034658076,
+      "active": true,
+      "metadata": {
+        "creator": "strutheo",
+        "url": "https://manifold.markets/strutheo/will-elon-musk-testify-before-congr",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 631.9830826772693,
+          "YES": 12479.209248611442
+        },
+        "probability": 0.030107576681365704
+      },
+      "categories": [
+        "politics",
+        "technology"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8222-32185",
+    "market2Id": "ndggZSlcNQ",
+    "correlationScore": 0.6186474456154155
+  },
+  {
+    "id": "8304-32579_ZCAgdEQUhs",
+    "description": "Trump invokes Insurrection Act in 2025?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8304-32579",
+      "exchangeId": "8304-32579",
+      "exchange": "PREDICTIT",
+      "title": "Trump invokes Insurrection Act in 2025?",
+      "description": "Will Trump invoke the Insurrection Act in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8304,
+        "contractId": 32579,
+        "marketUrl": "https://www.predictit.org/markets/detail/8304/Will-Trump-invoke-the-Insurrection-Act-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/9b7f0d4f-e392-4213-91eb-281de77e8caf.png",
+        "lastTradePrice": 0.04,
+        "bestBuyYesCost": 0.04,
+        "bestSellYesCost": 0.03,
+        "bestBuyNoCost": 0.97,
+        "bestSellNoCost": 0.96,
+        "lastClosePrice": 0.05,
+        "category": "other"
+      }
+    },
+    "market2": {
+      "id": "ZCAgdEQUhs",
+      "exchangeId": "ZCAgdEQUhs",
+      "exchange": "MANIFOLD",
+      "title": "Will Trump invoke the Insurrection act by the end of 2025?",
+      "description": "Will Trump invoke the Insurrection act by the end of 2025?",
+      "closeTime": "2025-12-31T23:59:00.000Z",
+      "volume24h": 153.49515799534623,
+      "active": true,
+      "metadata": {
+        "creator": "GuyCohen",
+        "url": "https://manifold.markets/GuyCohen/will-trump-invoke-the-insurrection-hutlRLAqQ9",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 16.200796786784508,
+          "YES": 617.2535913886215
+        },
+        "probability": 0.025575317006563146
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8304-32579",
+    "market2Id": "ZCAgdEQUhs",
+    "correlationScore": 0.6514461197394802
+  },
+  {
+    "id": "8327-32727_cUO9ENLnES",
+    "description": "Trump challenges 2025 results?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8327-32727",
+      "exchangeId": "8327-32727",
+      "exchange": "PREDICTIT",
+      "title": "Trump challenges 2025 results?",
+      "description": "Will Trump legally challenge a state or citywide election result in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8327,
+        "contractId": 32727,
+        "marketUrl": "https://www.predictit.org/markets/detail/8327/Will-Trump-legally-challenge-a-state-or-citywide-election-result-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/08cafcc5-fbef-46d5-98ea-39dcbf9970f7.png",
+        "lastTradePrice": 0.02,
+        "bestBuyYesCost": 0.03,
+        "bestSellYesCost": 0.02,
+        "bestBuyNoCost": 0.98,
+        "bestSellNoCost": 0.97,
+        "lastClosePrice": 0.02,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "cUO9ENLnES",
+      "exchangeId": "cUO9ENLnES",
+      "exchange": "MANIFOLD",
+      "title": "Will Trump be president on 12/31/2025?",
+      "description": "Will Trump be president on 12/31/2025?",
+      "closeTime": "2025-12-31T23:59:00.000Z",
+      "volume24h": 431,
+      "active": true,
+      "metadata": {
+        "creator": "CivilizedGuy",
+        "url": "https://manifold.markets/CivilizedGuy/trump-president-on-12312025",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 5686.240703077382,
+          "YES": 175.8631145281646
+        },
+        "probability": 0.9700000000000001
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8327-32727",
+    "market2Id": "cUO9ENLnES",
+    "correlationScore": 0.6185452466851027
+  },
+  {
+    "id": "8329-32738_ndggZSlcNQ",
+    "description": "Smith congressional testimony?",
+    "exchange1": "PREDICTIT",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "PREDICTIT-MANIFOLD",
+    "market1": {
+      "id": "8329-32738",
+      "exchangeId": "8329-32738",
+      "exchange": "PREDICTIT",
+      "title": "Smith congressional testimony?",
+      "description": "Will Jack Smith testify publicly before Congress in 2025?",
+      "closeTime": "2026-01-01T07:59:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "marketId": 8329,
+        "contractId": 32738,
+        "marketUrl": "https://www.predictit.org/markets/detail/8329/Will-Jack-Smith-testify-publicly-before-Congress-in-2025",
+        "imageUrl": "https://cdn1.predictit.org/images/Markets/3c51e940-a7e1-4896-943b-b32f51ec6853.png",
+        "lastTradePrice": 0.03,
+        "bestBuyYesCost": 0.03,
+        "bestSellYesCost": 0.02,
+        "bestBuyNoCost": 0.98,
+        "bestSellNoCost": 0.97,
+        "lastClosePrice": 0.03,
+        "category": "politics"
+      }
+    },
+    "market2": {
+      "id": "ndggZSlcNQ",
+      "exchangeId": "ndggZSlcNQ",
+      "exchange": "MANIFOLD",
+      "title": "Will Elon Musk testify before Congress in 2025?",
+      "description": "Will Elon Musk testify before Congress in 2025?",
+      "closeTime": "2026-01-01T04:59:00.000Z",
+      "volume24h": 7460.309034658076,
+      "active": true,
+      "metadata": {
+        "creator": "strutheo",
+        "url": "https://manifold.markets/strutheo/will-elon-musk-testify-before-congr",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 631.9830826772693,
+          "YES": 12479.209248611442
+        },
+        "probability": 0.030107576681365704
+      },
+      "categories": [
+        "politics",
+        "technology"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "8329-32738",
+    "market2Id": "ndggZSlcNQ",
+    "correlationScore": 0.6196150691137499
+  }
+]

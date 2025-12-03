@@ -1,0 +1,120 @@
+{
+  "timestamp": "2025-12-03T02:01:19.071Z",
+  "initialCapital": 1000,
+  "totalInvested": 997.8600000000001,
+  "totalProfit": 30.357999999999997,
+  "finalCapital": 1030.358,
+  "avgRoi": 3.0423105445653693,
+  "trades": [
+    {
+      "pair_id": "president_2024",
+      "title": "Will Donald Trump win the 2024 Presidential Election?",
+      "buyYes": "kalshi",
+      "buyNo": "polymarket",
+      "yesPrice": 0.57,
+      "noPrice": 0.38,
+      "totalCost": 0.95,
+      "guaranteedPayout": 1,
+      "fees": {
+        "kalshi": 0.017,
+        "polymarket": 0,
+        "total": 0.017
+      },
+      "netProfit": 0.03300000000000004,
+      "roi": 3.4736842105263204,
+      "profitable": true,
+      "numContracts": 210,
+      "actualInvestment": 199.5,
+      "actualProfit": 6.9300000000000095,
+      "actualRoi": 3.4736842105263204
+    },
+    {
+      "pair_id": "pennsylvania_2024",
+      "title": "Will Trump win Pennsylvania in 2024?",
+      "buyYes": "kalshi",
+      "buyNo": "polymarket",
+      "yesPrice": 0.54,
+      "noPrice": 0.41000000000000003,
+      "totalCost": 0.9500000000000001,
+      "guaranteedPayout": 1,
+      "fees": {
+        "kalshi": 0.017,
+        "polymarket": 0,
+        "total": 0.017
+      },
+      "netProfit": 0.03299999999999993,
+      "roi": 3.473684210526309,
+      "profitable": true,
+      "numContracts": 210,
+      "actualInvestment": 199.5,
+      "actualProfit": 6.9299999999999855,
+      "actualRoi": 3.473684210526309
+    },
+    {
+      "pair_id": "georgia_2024",
+      "title": "Will Trump win Georgia in 2024?",
+      "buyYes": "kalshi",
+      "buyNo": "polymarket",
+      "yesPrice": 0.67,
+      "noPrice": 0.29000000000000004,
+      "totalCost": 0.9600000000000001,
+      "guaranteedPayout": 1,
+      "fees": {
+        "kalshi": 0.017,
+        "polymarket": 0,
+        "total": 0.017
+      },
+      "netProfit": 0.022999999999999923,
+      "roi": 2.395833333333325,
+      "profitable": true,
+      "numContracts": 208,
+      "actualInvestment": 199.68,
+      "actualProfit": 4.783999999999984,
+      "actualRoi": 2.395833333333325
+    },
+    {
+      "pair_id": "north_carolina_2024",
+      "title": "Will Trump win North Carolina in 2024?",
+      "buyYes": "kalshi",
+      "buyNo": "polymarket",
+      "yesPrice": 0.64,
+      "noPrice": 0.31999999999999995,
+      "totalCost": 0.96,
+      "guaranteedPayout": 1,
+      "fees": {
+        "kalshi": 0.017,
+        "polymarket": 0,
+        "total": 0.017
+      },
+      "netProfit": 0.023000000000000034,
+      "roi": 2.395833333333337,
+      "profitable": true,
+      "numContracts": 208,
+      "actualInvestment": 199.68,
+      "actualProfit": 4.784000000000007,
+      "actualRoi": 2.3958333333333366
+    },
+    {
+      "pair_id": "wisconsin_2024",
+      "title": "Will Trump win Wisconsin in 2024?",
+      "buyYes": "kalshi",
+      "buyNo": "polymarket",
+      "yesPrice": 0.51,
+      "noPrice": 0.43999999999999995,
+      "totalCost": 0.95,
+      "guaranteedPayout": 1,
+      "fees": {
+        "kalshi": 0.017,
+        "polymarket": 0,
+        "total": 0.017
+      },
+      "netProfit": 0.03300000000000004,
+      "roi": 3.4736842105263204,
+      "profitable": true,
+      "numContracts": 210,
+      "actualInvestment": 199.5,
+      "actualProfit": 6.9300000000000095,
+      "actualRoi": 3.4736842105263204
+    }
+  ]
+}
