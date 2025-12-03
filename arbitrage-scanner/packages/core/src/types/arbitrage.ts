@@ -1,6 +1,56 @@
-import { ArbitrageDirection, MarketPair, QuotePair } from './market.js';
+import { ArbitrageDirection, MarketPair, QuotePair, CrossExchangePair, CrossExchangeQuotePair, ExchangeName } from './market.js';
 import { ResolutionAlignment } from '@arb/math';
 
+export interface CrossExchangeArbitrageOpportunity {
+  id: string;
+  timestamp: Date;
+  marketPair: CrossExchangePair;
+  quotePair: CrossExchangeQuotePair;
+  direction: ArbitrageDirection;
+  profitPercent: number;
+  profitDollars: number;
+  totalCost: number;
+  maxSize: number;
+  confidence: number;
+  ttl: number;
+  fees: CrossExchangeFeeBreakdown;
+  liquidity: CrossExchangeLiquidityInfo;
+  resolutionAlignment?: ResolutionAlignment;
+  valid: boolean;
+  executionNotes?: string[];
+}
+
+export interface CrossExchangeArbitrageResult {
+  direction: ArbitrageDirection;
+  profitPercent: number;
+  totalCost: number;
+  exchange1Leg: number;
+  exchange2Leg: number;
+  fees: CrossExchangeFeeBreakdown;
+  breakEven: number;
+  valid: boolean;
+  validationErrors?: string[];
+}
+
+export interface CrossExchangeFeeBreakdown {
+  exchange1Name: ExchangeName;
+  exchange2Name: ExchangeName;
+  exchange1Fee: number;
+  exchange2Fee: number;
+  totalFees: number;
+  feePercent: number;
+}
+
+export interface CrossExchangeLiquidityInfo {
+  exchange1Name: ExchangeName;
+  exchange2Name: ExchangeName;
+  exchange1Available: number;
+  exchange2Available: number;
+  maxExecutable: number;
+  depthQuality: 'DEEP' | 'MEDIUM' | 'SHALLOW';
+}
+
+/** @deprecated Use CrossExchangeArbitrageOpportunity instead */
 export interface ArbitrageOpportunity {
   id: string;
   timestamp: Date;
@@ -20,6 +70,7 @@ export interface ArbitrageOpportunity {
   executionNotes?: string[];
 }
 
+/** @deprecated Use CrossExchangeArbitrageResult instead */
 export interface ArbitrageResult {
   direction: ArbitrageDirection;
   profitPercent: number;
@@ -32,6 +83,7 @@ export interface ArbitrageResult {
   validationErrors?: string[];
 }
 
+/** @deprecated Use CrossExchangeFeeBreakdown instead */
 export interface FeeBreakdown {
   kalshiFee: number;
   polymarketFee: number;
@@ -39,6 +91,7 @@ export interface FeeBreakdown {
   feePercent: number;
 }
 
+/** @deprecated Use CrossExchangeLiquidityInfo instead */
 export interface LiquidityInfo {
   kalshiAvailable: number;
   polymarketAvailable: number;

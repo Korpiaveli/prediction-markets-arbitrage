@@ -8,6 +8,9 @@ import {
   ArbitrageOpportunity,
   MarketPair,
   QuotePair,
+  CrossExchangePair,
+  CrossExchangeQuotePair,
+  CrossExchangeArbitrageOpportunity,
   DEFAULT_FEE_STRUCTURE
 } from '@arb/core';
 import { ResolutionAnalyzer } from '@arb/math';
@@ -124,6 +127,115 @@ export class Scanner extends EventEmitter implements IScanner {
     return opportunities;
   }
 
+  async scanCrossExchangePair(pair: CrossExchangePair): Promise<CrossExchangeArbitrageOpportunity | null> {
+    try {
+      // Fetch quotes from both exchanges dynamically
+      const exchange1 = this.exchanges.get(pair.exchange1);
+      const exchange2 = this.exchanges.get(pair.exchange2);
+
+      if (!exchange1 || !exchange2) {
+        console.error(`[Scanner] Missing exchange adapters: ${pair.exchange1}=${!!exchange1}, ${pair.exchange2}=${!!exchange2}`);
+        return null;
+      }
+
+      const [quote1, quote2] = await Promise.all([
+        exchange1.getQuote(pair.market1Id),
+        exchange2.getQuote(pair.market2Id)
+      ]);
+
+      const quotePair: CrossExchangeQuotePair = {
+        exchange1: pair.exchange1,
+        exchange2: pair.exchange2,
+        quote1,
+        quote2,
+        timestamp: new Date()
+      };
+
+      // Calculate arbitrage using cross-exchange method
+      const results: any[] = (this.calculator as any).calculateCrossExchange(quotePair, DEFAULT_FEE_STRUCTURE);
+
+      // Find the best opportunity
+      const bestResult = results.find((r: any) => r.valid);
+      if (!bestResult) {
+        return null;
+      }
+
+      // Validate the result
+      const validation = this.calculator.validate(bestResult);
+      if (!validation.valid) {
+        console.warn(`[Scanner] Invalid opportunity for ${pair.description}: ${validation.errors.join(', ')}`);
+        return null;
+      }
+
+      // Calculate max size based on liquidity
+      const minLiquidity = Math.min(
+        quote1.yes.liquidity || 0,
+        quote2.no.liquidity || 0
+      );
+      const maxSize = this.calculator.calculateMaxSize(bestResult, minLiquidity);
+
+      // Create opportunity object
+      let opportunity: CrossExchangeArbitrageOpportunity = {
+        id: `${pair.id}_${Date.now()}`,
+        timestamp: new Date(),
+        marketPair: pair,
+        quotePair,
+        direction: bestResult.direction,
+        profitPercent: bestResult.profitPercent,
+        profitDollars: bestResult.profitPercent * maxSize,
+        totalCost: bestResult.totalCost,
+        maxSize,
+        confidence: validation.confidence,
+        ttl: 30,
+        fees: {
+          exchange1Name: pair.exchange1,
+          exchange2Name: pair.exchange2,
+          exchange1Fee: bestResult.fees.kalshiFee,
+          exchange2Fee: bestResult.fees.polymarketFee,
+          totalFees: bestResult.fees.totalFees,
+          feePercent: bestResult.fees.feePercent
+        },
+        liquidity: {
+          exchange1Name: pair.exchange1,
+          exchange2Name: pair.exchange2,
+          exchange1Available: quote1.yes.liquidity || 0,
+          exchange2Available: quote2.no.liquidity || 0,
+          maxExecutable: maxSize,
+          depthQuality: minLiquidity > 5000 ? 'DEEP' : minLiquidity > 1000 ? 'MEDIUM' : 'SHALLOW'
+        },
+        valid: true
+      };
+
+      // Analyze resolution criteria alignment
+      const resolutionAlignment = this.resolutionAnalyzer.analyzeCrossExchangePair(pair);
+      opportunity.resolutionAlignment = resolutionAlignment;
+
+      // Filter based on resolution risk
+      if (!this.config.disableResolutionFiltering && !resolutionAlignment.tradeable) {
+        console.warn(
+          `[Scanner] Filtering opportunity due to resolution risk (score: ${resolutionAlignment.score}):\n` +
+          `  Market: ${pair.description}\n` +
+          `  Risks: ${resolutionAlignment.risks.join(', ')}`
+        );
+        return null;
+      }
+
+      // Add resolution warnings to execution notes
+      if (resolutionAlignment.warnings.length > 0) {
+        opportunity.executionNotes = resolutionAlignment.warnings.map(w => `⚠️ ${w}`);
+      }
+
+      this.emit('opportunity:found', opportunity);
+      return opportunity;
+
+    } catch (error) {
+      console.error(`[Scanner] Error scanning pair ${pair.description}:`, error);
+      this.emit('scan:error', { pair, error });
+      return null;
+    }
+  }
+
+  /** @deprecated Use scanCrossExchangePair instead */
   async scanPair(pair: MarketPair): Promise<ArbitrageOpportunity | null> {
     try {
       // Fetch quotes from both exchanges

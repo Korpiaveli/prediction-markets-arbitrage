@@ -239,11 +239,8 @@ program
             excludedCategories
           });
 
-          const pairs = await matcher.matchMarkets(exchange1, exchange2);
-          allPairs.push(...pairs.map(p => ({
-            ...p,
-            exchangePair: `${exchange1.name}-${exchange2.name}`
-          })));
+          const pairs = await matcher.matchCrossExchangeMarkets(exchange1, exchange2);
+          allPairs.push(...pairs);
         }
       }
 

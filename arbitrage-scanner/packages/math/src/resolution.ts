@@ -1,4 +1,4 @@
-import { Market, MarketPair } from '@arb/core';
+import { Market, MarketPair, CrossExchangePair } from '@arb/core';
 
 /**
  * Resolution criteria extracted from market metadata
@@ -365,7 +365,15 @@ export class ResolutionAnalyzer {
   }
 
   /**
+   * Analyze a cross-exchange pair for resolution alignment
+   */
+  analyzeCrossExchangePair(pair: CrossExchangePair): ResolutionAlignment {
+    return this.compareResolution(pair.market1, pair.market2);
+  }
+
+  /**
    * Analyze a market pair for resolution alignment
+   * @deprecated Use analyzeCrossExchangePair instead
    */
   analyzeMarketPair(pair: MarketPair): ResolutionAlignment {
     return this.compareResolution(pair.kalshiMarket, pair.polymarketMarket);

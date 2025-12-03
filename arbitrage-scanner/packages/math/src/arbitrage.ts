@@ -5,12 +5,95 @@ import {
   FeeStructure,
   ValidationResult,
   ArbitrageDirection,
-  FeeBreakdown
+  FeeBreakdown,
+  CrossExchangeQuotePair,
+  CrossExchangeArbitrageResult
 } from '@arb/core';
 import { SafeDecimal } from './decimal.js';
 
 export class ArbitrageCalculator implements IArbitrageCalculator {
 
+  /**
+   * Calculate arbitrage for cross-exchange pairs (any two exchanges)
+   */
+  calculateCrossExchange(quotes: CrossExchangeQuotePair, fees: FeeStructure): CrossExchangeArbitrageResult[] {
+    // Calculate Combo A: EXCHANGE1 YES + EXCHANGE2 NO
+    const comboA = this.calculateCrossExchangeCombo(
+      quotes.quote1.yes.ask,
+      quotes.quote2.no.ask,
+      fees,
+      'EXCHANGE1_YES_EXCHANGE2_NO',
+      quotes.exchange1,
+      quotes.exchange2
+    );
+
+    // Calculate Combo B: EXCHANGE1 NO + EXCHANGE2 YES
+    const comboB = this.calculateCrossExchangeCombo(
+      quotes.quote1.no.ask,
+      quotes.quote2.yes.ask,
+      fees,
+      'EXCHANGE1_NO_EXCHANGE2_YES',
+      quotes.exchange1,
+      quotes.exchange2
+    );
+
+    // Return both results, sorted by profit
+    return [comboA, comboB].sort((a, b) => b.profitPercent - a.profitPercent);
+  }
+
+  private calculateCrossExchangeCombo(
+    exchange1Price: number,
+    exchange2Price: number,
+    fees: FeeStructure,
+    direction: ArbitrageDirection,
+    exchange1Name: string,
+    exchange2Name: string
+  ): CrossExchangeArbitrageResult {
+    const e1 = SafeDecimal.from(exchange1Price);
+    const e2 = SafeDecimal.from(exchange2Price);
+
+    // Base cost (price of both legs)
+    const baseCost = e1.add(e2);
+
+    // Calculate fees (using legacy fee structure for now)
+    const feeBreakdown = this.calculateFees(exchange1Price, exchange2Price, fees);
+    const totalFees = SafeDecimal.from(feeBreakdown.totalFees);
+
+    // Total cost including fees
+    const totalCost = baseCost.add(totalFees);
+
+    // Profit calculation: guaranteed payout is 1.0
+    const profit = SafeDecimal.from(1).sub(totalCost);
+    const profitPercent = profit.mul(100);
+
+    // Apply safety margin
+    const safetyMargin = SafeDecimal.from(fees.safetyMarginPercent);
+    const adjustedProfit = profit.sub(profit.mul(safetyMargin));
+
+    // Validation
+    const valid = adjustedProfit.gt(0);
+
+    return {
+      direction,
+      profitPercent: profitPercent.toNumber(),
+      totalCost: totalCost.toNumber(),
+      exchange1Leg: exchange1Price,
+      exchange2Leg: exchange2Price,
+      fees: {
+        exchange1Name: exchange1Name as any,
+        exchange2Name: exchange2Name as any,
+        exchange1Fee: feeBreakdown.kalshiFee,
+        exchange2Fee: feeBreakdown.polymarketFee,
+        totalFees: feeBreakdown.totalFees,
+        feePercent: feeBreakdown.feePercent
+      },
+      breakEven: totalCost.toNumber(),
+      valid,
+      validationErrors: valid ? undefined : ['Insufficient profit after fees and safety margin']
+    };
+  }
+
+  /** @deprecated Use calculateCrossExchange instead */
   calculate(quotes: QuotePair, fees: FeeStructure): ArbitrageResult[] {
     // Calculate Combo A: KALSHI YES + POLY NO
     const comboA = this.calculateCombo(

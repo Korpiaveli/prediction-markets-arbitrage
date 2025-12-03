@@ -1,0 +1,459 @@
+[
+  {
+    "id": "OAIAGI-29_eGRA9SyIFf963DRJQaan",
+    "description": "Will OpenAI announce the creation of AGI?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "OAIAGI-29",
+      "exchangeId": "OAIAGI-29",
+      "exchange": "KALSHI",
+      "title": "Will OpenAI announce the creation of AGI?",
+      "description": "Before 2030",
+      "closeTime": "2030-01-01T04:59:00.000Z",
+      "volume24h": 18,
+      "openInterest": 34528,
+      "active": true,
+      "metadata": {
+        "eventTicker": "OAIAGI",
+        "marketType": "binary",
+        "rulesPrimary": "If OpenAI announces that they have attained AGI by Dec 31, 2029, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 703926.48
+      },
+      "categories": [
+        "technology"
+      ],
+      "primaryCategory": "technology"
+    },
+    "market2": {
+      "id": "eGRA9SyIFf963DRJQaan",
+      "exchangeId": "eGRA9SyIFf963DRJQaan",
+      "exchange": "MANIFOLD",
+      "title": "Will OpenAI be remembered as the Altavista of AI?",
+      "description": "Will OpenAI be remembered as the Altavista of AI?",
+      "closeTime": "2029-12-31T16:00:00.000Z",
+      "volume24h": 18.512984190961152,
+      "active": true,
+      "metadata": {
+        "creator": "alby",
+        "url": "https://manifold.markets/alby/will-openai-be-remembered-as-the-al",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 190.88753113573068,
+          "YES": 55.14535168175617
+        },
+        "probability": 0.7374818390259743
+      },
+      "categories": [
+        "technology"
+      ],
+      "primaryCategory": "technology"
+    },
+    "market1Id": "OAIAGI-29",
+    "market2Id": "eGRA9SyIFf963DRJQaan",
+    "correlationScore": 0.6009305713674472
+  },
+  {
+    "id": "KXUKPARTY-29-R_lq6m4461pk",
+    "description": "Will Reform win the next U.K. election?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXUKPARTY-29-R",
+      "exchangeId": "KXUKPARTY-29-R",
+      "exchange": "KALSHI",
+      "title": "Will Reform win the next U.K. election?",
+      "description": "Reform party",
+      "closeTime": "2029-08-31T14:00:00.000Z",
+      "volume24h": 15031,
+      "openInterest": 8422,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXUKPARTY-29",
+        "marketType": "binary",
+        "rulesPrimary": "If Reform receives the most seats in the next U.K. general election, then the market resolves to Yes.",
+        "rulesSecondary": "If two parties tie in seat count, then the party with the highest percentage of the vote will resolve to Yes and the others will resolve to No.",
+        "liquidity": 908356.84
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "lq6m4461pk",
+      "exchangeId": "lq6m4461pk",
+      "exchange": "MANIFOLD",
+      "title": "Will Reform win the next UK election?",
+      "description": "Will Reform win the next UK election?",
+      "closeTime": "2029-08-15T22:59:00.000Z",
+      "volume24h": 218.09601095109264,
+      "active": true,
+      "metadata": {
+        "creator": "LukeShadwell",
+        "url": "https://manifold.markets/LukeShadwell/will-reform-win-the-next-uk-electio",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 1043.5738316912807,
+          "YES": 1159.7532786673162
+        },
+        "probability": 0.47
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXUKPARTY-29-R",
+    "market2Id": "lq6m4461pk",
+    "correlationScore": 0.6506656710553059
+  },
+  {
+    "id": "KXTRUMPRESIGN_APZqzSQlPQ",
+    "description": "Will President Trump resign before his term is up?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXTRUMPRESIGN",
+      "exchangeId": "KXTRUMPRESIGN",
+      "exchange": "KALSHI",
+      "title": "Will President Trump resign before his term is up?",
+      "description": "Before his term ends",
+      "closeTime": "2029-01-21T15:00:00.000Z",
+      "volume24h": 33,
+      "openInterest": 35872,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXTRUMPRESIGN",
+        "marketType": "binary",
+        "rulesPrimary": "If the President of the United States elected for the 2025-2029 term resigns the office, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 50156.7
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "APZqzSQlPQ",
+      "exchangeId": "APZqzSQlPQ",
+      "exchange": "MANIFOLD",
+      "title": "Will Donald Trump resign as US President during his second term?",
+      "description": "Will Donald Trump resign as US President during his second term?",
+      "closeTime": "2029-01-22T07:59:00.000Z",
+      "volume24h": 250,
+      "active": true,
+      "metadata": {
+        "creator": "cash",
+        "url": "https://manifold.markets/cash/will-donald-trump-resign-as-us-pres",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 271.4971707698312,
+          "YES": 3683.2796347914123
+        },
+        "probability": 0.0686504407500442
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXTRUMPRESIGN",
+    "market2Id": "APZqzSQlPQ",
+    "correlationScore": 0.6760357982668203
+  },
+  {
+    "id": "KXPOLANDSEJM-27-LEFT_u5gs9sl60R",
+    "description": "Who will win the next Polish general election?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXPOLANDSEJM-27-LEFT",
+      "exchangeId": "KXPOLANDSEJM-27-LEFT",
+      "exchange": "KALSHI",
+      "title": "Who will win the next Polish general election?",
+      "description": "The Left",
+      "closeTime": "2028-11-10T15:00:00.000Z",
+      "volume24h": 0,
+      "openInterest": 0,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXPOLANDSEJM-27",
+        "marketType": "binary",
+        "rulesPrimary": "If the winner of the next Polish general election in 2027 is The Left, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 1056.31
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "u5gs9sl60R",
+      "exchangeId": "u5gs9sl60R",
+      "exchange": "MANIFOLD",
+      "title": "Will a Democrat win the 2028 Presidential Election?",
+      "description": "Will a Democrat win the 2028 Presidential Election?",
+      "closeTime": "2028-11-10T06:59:00.000Z",
+      "volume24h": 100,
+      "active": true,
+      "metadata": {
+        "creator": "shplogo",
+        "url": "https://manifold.markets/shplogo/will-a-democrat-win-the-2028-presid-Ry6NpAdLIl",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 1151.338957626655,
+          "YES": 868.5539504902871
+        },
+        "probability": 0.57
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXPOLANDSEJM-27-LEFT",
+    "market2Id": "u5gs9sl60R",
+    "correlationScore": 0.6015905526908965
+  },
+  {
+    "id": "KXPOLANDSEJM-27-CONFED_u5gs9sl60R",
+    "description": "Who will win the next Polish general election?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXPOLANDSEJM-27-CONFED",
+      "exchangeId": "KXPOLANDSEJM-27-CONFED",
+      "exchange": "KALSHI",
+      "title": "Who will win the next Polish general election?",
+      "description": "Confederation",
+      "closeTime": "2028-11-10T15:00:00.000Z",
+      "volume24h": 47,
+      "openInterest": 47,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXPOLANDSEJM-27",
+        "marketType": "binary",
+        "rulesPrimary": "If the winner of the next Polish general election in 2027 is Confederation, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 560.13
+      },
+      "categories": [
+        "politics",
+        "economy"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "u5gs9sl60R",
+      "exchangeId": "u5gs9sl60R",
+      "exchange": "MANIFOLD",
+      "title": "Will a Democrat win the 2028 Presidential Election?",
+      "description": "Will a Democrat win the 2028 Presidential Election?",
+      "closeTime": "2028-11-10T06:59:00.000Z",
+      "volume24h": 100,
+      "active": true,
+      "metadata": {
+        "creator": "shplogo",
+        "url": "https://manifold.markets/shplogo/will-a-democrat-win-the-2028-presid-Ry6NpAdLIl",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 1151.338957626655,
+          "YES": 868.5539504902871
+        },
+        "probability": 0.57
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXPOLANDSEJM-27-CONFED",
+    "market2Id": "u5gs9sl60R",
+    "correlationScore": 0.6031397580018819
+  },
+  {
+    "id": "KXVPRESNOMR-28-JDV_wpdomi6nif",
+    "description": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXVPRESNOMR-28-JDV",
+      "exchangeId": "KXVPRESNOMR-28-JDV",
+      "exchange": "KALSHI",
+      "title": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+      "description": "J.D. Vance",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 26704,
+      "openInterest": 18670,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXVPRESNOMR-28",
+        "marketType": "binary",
+        "rulesPrimary": "If J.D. Vance accepts the nomination for the Vice Presidency for the Republican party, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 485678.14
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXVPRESNOMR-28-JDV",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.6138236579334537
+  },
+  {
+    "id": "KXTRUMPPRES-28_u5gs9sl60R",
+    "description": "Will a Trump family member the 2028 Republican presidential nominee?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXTRUMPPRES-28",
+      "exchangeId": "KXTRUMPPRES-28",
+      "exchange": "KALSHI",
+      "title": "Will a Trump family member the 2028 Republican presidential nominee?",
+      "description": "Before 2028",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 8050,
+      "openInterest": 2263,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXTRUMPPRES-28",
+        "marketType": "binary",
+        "rulesPrimary": "If a member of the Donald J. Trump family (including him personally) is nominated as the 2028 Republican presidential candidate, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 648263.75
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "u5gs9sl60R",
+      "exchangeId": "u5gs9sl60R",
+      "exchange": "MANIFOLD",
+      "title": "Will a Democrat win the 2028 Presidential Election?",
+      "description": "Will a Democrat win the 2028 Presidential Election?",
+      "closeTime": "2028-11-10T06:59:00.000Z",
+      "volume24h": 100,
+      "active": true,
+      "metadata": {
+        "creator": "shplogo",
+        "url": "https://manifold.markets/shplogo/will-a-democrat-win-the-2028-presid-Ry6NpAdLIl",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 1151.338957626655,
+          "YES": 868.5539504902871
+        },
+        "probability": 0.57
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXTRUMPPRES-28",
+    "market2Id": "u5gs9sl60R",
+    "correlationScore": 0.6212341714846109
+  },
+  {
+    "id": "KXPRESNOMR-28-JDV_wpdomi6nif",
+    "description": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+    "exchange1": "KALSHI",
+    "exchange2": "MANIFOLD",
+    "exchangePair": "KALSHI-MANIFOLD",
+    "market1": {
+      "id": "KXPRESNOMR-28-JDV",
+      "exchangeId": "KXPRESNOMR-28-JDV",
+      "exchange": "KALSHI",
+      "title": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+      "description": "J.D. Vance",
+      "closeTime": "2028-11-07T15:00:00.000Z",
+      "volume24h": 2278,
+      "openInterest": 373107,
+      "active": true,
+      "metadata": {
+        "eventTicker": "KXPRESNOMR-28",
+        "marketType": "binary",
+        "rulesPrimary": "If J.D. Vance wins and accepts the nomination for the Presidency for the Republican party, then the market resolves to Yes.",
+        "rulesSecondary": "",
+        "liquidity": 5286574.71
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market2": {
+      "id": "wpdomi6nif",
+      "exchangeId": "wpdomi6nif",
+      "exchange": "MANIFOLD",
+      "title": "Will JD Vance win the 2028 US Presidential Election?",
+      "description": "Will JD Vance win the 2028 US Presidential Election?",
+      "closeTime": "2028-11-08T05:59:00.000Z",
+      "volume24h": 384.5777014594713,
+      "active": true,
+      "metadata": {
+        "creator": "LarsDoucet",
+        "url": "https://manifold.markets/LarsDoucet/will-jd-vance-win-the-2028-us-presi",
+        "mechanism": "cpmm-1",
+        "outcomeType": "BINARY",
+        "pool": {
+          "NO": 81241.59070595892,
+          "YES": 139671.11252416368
+        },
+        "probability": 0.2637787510141126
+      },
+      "categories": [
+        "politics"
+      ],
+      "primaryCategory": "politics"
+    },
+    "market1Id": "KXPRESNOMR-28-JDV",
+    "market2Id": "wpdomi6nif",
+    "correlationScore": 0.620341744466244
+  }
+]

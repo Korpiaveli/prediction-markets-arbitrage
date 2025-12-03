@@ -1,6 +1,11 @@
 export type ExchangeName = 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD' | 'MOCK';
 export type MarketOutcome = 'YES' | 'NO';
-export type ArbitrageDirection = 'KALSHI_YES_POLY_NO' | 'KALSHI_NO_POLY_YES';
+
+export type ArbitrageDirection =
+  | 'EXCHANGE1_YES_EXCHANGE2_NO'
+  | 'EXCHANGE1_NO_EXCHANGE2_YES'
+  | 'KALSHI_YES_POLY_NO'      // Legacy - deprecated
+  | 'KALSHI_NO_POLY_YES';     // Legacy - deprecated
 
 export type MarketCategory = 'politics' | 'sports' | 'crypto' | 'economy' | 'technology' | 'entertainment' | 'science' | 'other';
 
@@ -35,6 +40,29 @@ export interface PriceLevel {
   liquidity?: number;
 }
 
+export interface CrossExchangePair {
+  id: string;
+  description: string;
+  exchange1: ExchangeName;
+  exchange2: ExchangeName;
+  exchangePair: string;
+  market1: Market;
+  market2: Market;
+  market1Id: string;
+  market2Id: string;
+  correlationScore?: number;
+  lastChecked?: Date;
+}
+
+export interface CrossExchangeQuotePair {
+  exchange1: ExchangeName;
+  exchange2: ExchangeName;
+  quote1: Quote;
+  quote2: Quote;
+  timestamp: Date;
+}
+
+/** @deprecated Use CrossExchangePair instead. Kept for backward compatibility. */
 export interface MarketPair {
   id: string;
   description: string;
@@ -46,6 +74,7 @@ export interface MarketPair {
   lastChecked?: Date;
 }
 
+/** @deprecated Use CrossExchangeQuotePair instead. Kept for backward compatibility. */
 export interface QuotePair {
   kalshi: Quote;
   polymarket: Quote;

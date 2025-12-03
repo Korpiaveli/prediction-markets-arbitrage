@@ -1,4 +1,4 @@
-import { Market, MarketPair, IExchange, MarketCategory, categoryDetector } from '@arb/core';
+import { Market, MarketPair, CrossExchangePair, IExchange, MarketCategory, ExchangeName, categoryDetector } from '@arb/core';
 import {
   EmbeddingService,
   getEmbeddingService,
@@ -163,6 +163,116 @@ export class MarketMatcher {
 
     this.logMatchResults(allMatches);
     return pairs;
+  }
+
+  /**
+   * Match markets across any two exchanges using multi-strategy approach
+   */
+  async matchCrossExchangeMarkets(
+    exchange1: IExchange,
+    exchange2: IExchange
+  ): Promise<CrossExchangePair[]> {
+    console.log('[MarketMatcher] Fetching markets from both exchanges...');
+    let [markets1, markets2] = await Promise.all([
+      exchange1.getMarkets(),
+      exchange2.getMarkets()
+    ]);
+
+    console.log(`[MarketMatcher] ${exchange1.name}: ${markets1.length} markets`);
+    console.log(`[MarketMatcher] ${exchange2.name}: ${markets2.length} markets`);
+
+    // Apply category filtering if configured
+    if (this.config.allowedCategories || this.config.excludedCategories) {
+      const before1 = markets1.length;
+      const before2 = markets2.length;
+
+      markets1 = categoryDetector.filterByCategory(
+        markets1,
+        this.config.allowedCategories,
+        this.config.excludedCategories
+      ) as Market[];
+
+      markets2 = categoryDetector.filterByCategory(
+        markets2,
+        this.config.allowedCategories,
+        this.config.excludedCategories
+      ) as Market[];
+
+      console.log(`[MarketMatcher] Category filtering applied:`);
+      console.log(`  ${exchange1.name}: ${before1} → ${markets1.length} markets`);
+      console.log(`  ${exchange2.name}: ${before2} → ${markets2.length} markets`);
+      if (this.config.allowedCategories) {
+        console.log(`  Allowed: ${this.config.allowedCategories.join(', ')}`);
+      }
+      if (this.config.excludedCategories) {
+        console.log(`  Excluded: ${this.config.excludedCategories.join(', ')}`);
+      }
+    }
+
+    await this.initializeEmbeddings();
+
+    console.log('[MarketMatcher] Analyzing matches...\n');
+
+    const pairs: CrossExchangePair[] = [];
+    const allMatches: Array<{ pair: CrossExchangePair; analysis: MatchAnalysis }> = [];
+
+    for (const market1 of markets1) {
+      const match = await this.findBestMatch(market1, markets2);
+
+      if (match && this.shouldIncludeMatch(match.analysis)) {
+        const pair: CrossExchangePair = {
+          id: `${market1.id}_${match.market.id}`,
+          description: market1.title,
+          exchange1: exchange1.name as ExchangeName,
+          exchange2: exchange2.name as ExchangeName,
+          exchangePair: `${exchange1.name}-${exchange2.name}`,
+          market1: market1,
+          market2: match.market,
+          market1Id: market1.id,
+          market2Id: match.market.id,
+          correlationScore: match.analysis.confidence / 100
+        };
+
+        pairs.push(pair);
+        allMatches.push({ pair, analysis: match.analysis });
+      }
+    }
+
+    this.logCrossExchangeMatchResults(allMatches);
+    return pairs;
+  }
+
+  /**
+   * Log cross-exchange match results summary
+   */
+  private logCrossExchangeMatchResults(matches: Array<{ pair: CrossExchangePair; analysis: MatchAnalysis }>) {
+    const byLevel = {
+      high: matches.filter(m => m.analysis.level === 'high'),
+      medium: matches.filter(m => m.analysis.level === 'medium'),
+      low: matches.filter(m => m.analysis.level === 'low'),
+      uncertain: matches.filter(m => m.analysis.level === 'uncertain')
+    };
+
+    console.log('[MarketMatcher] Results:');
+    console.log(`  High confidence (80+):   ${byLevel.high.length} pairs`);
+    console.log(`  Medium confidence (60-79): ${byLevel.medium.length} pairs`);
+    console.log(`  Low confidence (40-59):   ${byLevel.low.length} pairs`);
+    console.log(`  Uncertain (<40):         ${byLevel.uncertain.length} pairs`);
+    console.log(`  Total: ${matches.length} pairs\n`);
+
+    // Show top matches
+    if (matches.length > 0) {
+      const topMatches = matches
+        .sort((a, b) => b.analysis.confidence - a.analysis.confidence)
+        .slice(0, 5);
+
+      console.log('[MarketMatcher] Top matches:');
+      topMatches.forEach((m, i) => {
+        console.log(`  ${i + 1}. [${m.analysis.confidence.toFixed(0)}%] ${m.pair.market1.title}`);
+        console.log(`     → ${m.pair.market2.title}`);
+        console.log(`     Exchange Pair: ${m.pair.exchangePair}`);
+      });
+    }
   }
 
   /**
