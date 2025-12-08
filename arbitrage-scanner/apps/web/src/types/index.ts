@@ -234,3 +234,66 @@ export interface SortState {
   field: SortField;
   direction: SortDirection;
 }
+
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+
+export interface RecommendationScore {
+  overall: number;
+  timeScore: number;
+  profitScore: number;
+  confidenceScore: number;
+  weights: {
+    time: number;
+    profit: number;
+    confidence: number;
+  };
+}
+
+export interface Recommendation {
+  id: string;
+  rank: number;
+  opportunityId: string;
+  score: RecommendationScore;
+  hoursUntilResolution: number | null;
+  resolutionDate: Date | null;
+  profitPercent: number;
+  riskLevel: RiskLevel;
+  riskFactors: string[];
+  reasoning: string[];
+  actionItems: string[];
+}
+
+export interface ReportSummary {
+  avgScore: number;
+  avgProfit: number;
+  avgHoursToResolution: number | null;
+  topCategory: string | null;
+  totalPotentialProfit: number;
+  riskDistribution: Record<RiskLevel, number>;
+}
+
+export interface RecommendationReport {
+  generatedAt: string;
+  totalOpportunities: number;
+  totalRecommended: number;
+  recommendations: Recommendation[];
+  summary: ReportSummary;
+}
+
+export interface RecommendationStats {
+  totalOpportunities: number;
+  totalScored: number;
+  riskDistribution: Record<RiskLevel, number>;
+  scoreDistribution: {
+    excellent: number;
+    good: number;
+    fair: number;
+    poor: number;
+  };
+  avgScores: {
+    overall: number;
+    time: number;
+    profit: number;
+    confidence: number;
+  };
+}

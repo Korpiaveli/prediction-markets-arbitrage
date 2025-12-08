@@ -26,6 +26,7 @@ import { createConfigRoutes } from './routes/config';
 import { createMLRoutes } from './routes/ml';
 import { createStatsRoutes } from './routes/stats';
 import { createPositionRoutes } from './routes/positions';
+import { createRecommendationRoutes } from './routes/recommendations';
 import { createWebSocketHandler } from './websocket';
 import { ApiConfig, ApiContext } from './types';
 
@@ -94,6 +95,7 @@ export class ApiServer {
     this.app.use('/api/ml', createMLRoutes(this.context));
     this.app.use('/api/stats', createStatsRoutes(this.context));
     this.app.use('/api/positions', createPositionRoutes(this.context));
+    this.app.use('/api/recommendations', createRecommendationRoutes(this.context));
 
     // API documentation
     this.app.get('/api', (_req: Request, res: Response) => {
@@ -108,7 +110,8 @@ export class ApiServer {
           config: '/api/config',
           ml: '/api/ml',
           stats: '/api/stats',
-          positions: '/api/positions'
+          positions: '/api/positions',
+          recommendations: '/api/recommendations'
         },
         websocket: {
           enabled: this.config.enableWebSocket,

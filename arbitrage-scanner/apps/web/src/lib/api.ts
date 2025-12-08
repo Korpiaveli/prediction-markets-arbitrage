@@ -102,6 +102,45 @@ class ApiClient {
     const query = params?.period ? `?period=${params.period}` : '';
     return this.fetch(`/api/stats/analytics${query}`);
   }
+
+  async getRecommendations(params?: {
+    top?: number;
+    minScore?: number;
+    minProfit?: number;
+    maxHours?: number;
+    categories?: string[];
+    riskLevels?: string[];
+  }) {
+    const query = new URLSearchParams();
+    if (params?.top) query.set('top', params.top.toString());
+    if (params?.minScore) query.set('minScore', params.minScore.toString());
+    if (params?.minProfit) query.set('minProfit', params.minProfit.toString());
+    if (params?.maxHours) query.set('maxHours', params.maxHours.toString());
+    if (params?.categories?.length) query.set('categories', params.categories.join(','));
+    if (params?.riskLevels?.length) query.set('riskLevels', params.riskLevels.join(','));
+
+    const queryString = query.toString();
+    return this.fetch(`/api/recommendations${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async generateRecommendations(config?: {
+    topN?: number;
+    weights?: { time: number; profit: number; confidence: number };
+    filters?: Record<string, any>;
+  }) {
+    return this.fetch('/api/recommendations/generate', {
+      method: 'POST',
+      body: JSON.stringify(config || {})
+    });
+  }
+
+  async getRecommendation(id: string) {
+    return this.fetch(`/api/recommendations/${id}`);
+  }
+
+  async getRecommendationStats() {
+    return this.fetch('/api/recommendations/stats/summary');
+  }
 }
 
 export const apiClient = new ApiClient(API_URL);
