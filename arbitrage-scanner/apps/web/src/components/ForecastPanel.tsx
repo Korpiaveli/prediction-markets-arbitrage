@@ -1,39 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-interface OpportunityForecast {
-  category: string;
-  expectedCount: number;
-  expectedProfitRange: {
-    min: number;
-    max: number;
-    avg: number;
-  };
-  bestScanTimes: Array<{
-    hour: number;
-    dayOfWeek: number;
-    probability: number;
-  }>;
-}
-
-interface TimingPrediction {
-  nextOpportunityETA: number;
-  confidence: number;
-  reasoning: string[];
-  marketConditions: {
-    volatility: string;
-    volume: string;
-    newsActivity: string;
-  };
-}
+import { ForecastData, ForecastTiming } from '../types';
 
 interface ForecastPanelProps {
-  forecast?: OpportunityForecast;
-  timing?: TimingPrediction;
+  forecast?: ForecastData;
+  timing?: ForecastTiming;
 }
-
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function ForecastPanel({ forecast, timing }: ForecastPanelProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -55,7 +28,7 @@ export function ForecastPanel({ forecast, timing }: ForecastPanelProps) {
           <div className="flex items-center justify-center mb-6">
             <div className="text-center">
               <div className="text-5xl font-bold text-primary-600 mb-2">
-                {formatETA(timing.nextOpportunityETA)}
+                {timing.nextOpportunity}
               </div>
               <div className="text-sm text-gray-500">Estimated Time</div>
             </div>
@@ -74,29 +47,17 @@ export function ForecastPanel({ forecast, timing }: ForecastPanelProps) {
             <span className="text-sm font-medium text-gray-900">{timing.confidence.toFixed(0)}%</span>
           </div>
 
-          {/* Market Conditions */}
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <ConditionBadge label="Volatility" value={timing.marketConditions.volatility} />
-            <ConditionBadge label="Volume" value={timing.marketConditions.volume} />
-            <ConditionBadge label="News" value={timing.marketConditions.newsActivity} />
-          </div>
-
-          {/* Reasoning */}
-          {timing.reasoning.length > 0 && (
-            <div className="bg-gray-50 rounded-md p-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Analysis</h3>
-              <ul className="space-y-1">
-                {timing.reasoning.map((reason, idx) => (
-                  <li key={idx} className="text-sm text-gray-600 flex items-start">
-                    <svg className="h-5 w-5 text-primary-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    {reason}
-                  </li>
-                ))}
-              </ul>
+          {/* Probabilities */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="text-center bg-gray-50 rounded-lg p-3">
+              <div className="text-lg font-semibold text-primary-600">{(timing.probabilities.next1Hour * 100).toFixed(0)}%</div>
+              <div className="text-xs text-gray-500">Next 1 Hour</div>
             </div>
-          )}
+            <div className="text-center bg-gray-50 rounded-lg p-3">
+              <div className="text-lg font-semibold text-primary-600">{(timing.probabilities.next24Hours * 100).toFixed(0)}%</div>
+              <div className="text-xs text-gray-500">Next 24 Hours</div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -105,50 +66,56 @@ export function ForecastPanel({ forecast, timing }: ForecastPanelProps) {
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             24-Hour Forecast
-            <span className="text-sm font-normal text-gray-500 ml-2">({forecast.category})</span>
           </h2>
 
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-primary-50 rounded-lg p-4 text-center">
               <div className="text-3xl font-bold text-primary-600 mb-1">
-                {Math.round(forecast.expectedCount)}
+                {Math.round(forecast.expected)}
               </div>
               <div className="text-sm text-gray-600">Expected Opportunities</div>
             </div>
             <div className="bg-green-50 rounded-lg p-4 text-center">
               <div className="text-3xl font-bold text-green-600 mb-1">
-                {forecast.expectedProfitRange.avg.toFixed(1)}%
+                {((forecast.avgProfit.min + forecast.avgProfit.max) / 2).toFixed(1)}%
               </div>
               <div className="text-sm text-gray-600">Avg Profit</div>
             </div>
             <div className="bg-blue-50 rounded-lg p-4 text-center">
               <div className="text-3xl font-bold text-blue-600 mb-1">
-                {forecast.expectedProfitRange.max.toFixed(1)}%
+                {forecast.maxProfit.max.toFixed(1)}%
               </div>
               <div className="text-sm text-gray-600">Max Profit</div>
             </div>
           </div>
 
-          {/* Best Scan Times */}
-          {forecast.bestScanTimes.length > 0 && (
+          {/* Market Conditions */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <ConditionBadge label="Volatility" value={forecast.marketConditions.volatility} />
+            <ConditionBadge label="Volume" value={forecast.marketConditions.volume} />
+            <ConditionBadge label="News" value={forecast.marketConditions.news} />
+          </div>
+
+          {/* Best Scan Times by Hour */}
+          {forecast.bestScanTimes.byHour.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Optimal Scan Times</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Best Hours to Scan</h3>
               <div className="space-y-2">
-                {forecast.bestScanTimes.slice(0, 5).map((time, idx) => (
+                {forecast.bestScanTimes.byHour.slice(0, 5).map((time, idx) => (
                   <div key={idx} className="flex items-center">
-                    <div className="w-32 text-sm text-gray-600">
-                      {DAY_NAMES[time.dayOfWeek]} {formatHour(time.hour)}
+                    <div className="w-20 text-sm text-gray-600">
+                      {formatHour(time.hour)}
                     </div>
                     <div className="flex-1 mx-4">
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary-500"
-                          style={{ width: `${time.probability}%` }}
+                          style={{ width: `${Math.min(time.avgOpportunities * 20, 100)}%` }}
                         />
                       </div>
                     </div>
                     <div className="w-16 text-right text-sm font-medium text-gray-900">
-                      {time.probability.toFixed(0)}%
+                      {time.avgOpportunities.toFixed(1)}
                     </div>
                   </div>
                 ))}
@@ -156,7 +123,7 @@ export function ForecastPanel({ forecast, timing }: ForecastPanelProps) {
             </div>
           )}
 
-          {forecast.bestScanTimes.length === 0 && (
+          {forecast.bestScanTimes.byHour.length === 0 && (
             <div className="text-center py-6 text-gray-500 text-sm">
               No historical data available for timing predictions.
               Continue scanning to build forecast data.
@@ -194,19 +161,6 @@ function ConditionBadge({ label, value }: { label: string; value: string }) {
       </div>
     </div>
   );
-}
-
-function formatETA(minutes: number): string {
-  if (minutes < 1) return '< 1m';
-  if (minutes < 60) return `${Math.round(minutes)}m`;
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60);
-  if (hours < 24) {
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  const days = Math.floor(hours / 24);
-  const remainingHours = hours % 24;
-  return remainingHours > 0 ? `${days}d ${remainingHours}h` : `${days}d`;
 }
 
 function formatHour(hour: number): string {

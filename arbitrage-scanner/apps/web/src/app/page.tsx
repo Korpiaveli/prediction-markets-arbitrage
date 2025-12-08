@@ -267,7 +267,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-6">
-                <RiskDashboard metrics={riskMetrics} />
+                <RiskDashboard metrics={riskMetrics ?? undefined} />
                 <ForecastPanel forecast={forecast?.forecast} timing={forecast?.timing} />
               </div>
             </div>
