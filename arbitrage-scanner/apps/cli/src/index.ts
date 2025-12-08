@@ -14,6 +14,9 @@ import { ConfigManager } from './config';
 import { createBacktestCommand } from './commands/backtest';
 import { createPatternsCommand } from './commands/patterns';
 import { createFetchHistoricalCommand } from './commands/fetch-historical';
+import { createFetchHistoricalPairsCommand } from './commands/fetch-historical-pairs';
+import { createBacktestHistoricalCommand } from './commands/backtest-historical';
+import { createRecommendCommand } from './commands/recommend';
 import { createExchanges as createExchangesFromFactory, parseExchangeList, getAvailableExchanges } from './utils/exchanges';
 
 const program = new Command();
@@ -607,6 +610,36 @@ fetchHistCmd.options.forEach((opt: any) => {
   program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
 });
 program.commands[program.commands.length - 1].action(fetchHistCmd.action);
+
+// Fetch Historical Pairs command
+const fetchHistPairsCmd = createFetchHistoricalPairsCommand();
+program
+  .command(fetchHistPairsCmd.command)
+  .description(fetchHistPairsCmd.description);
+fetchHistPairsCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(fetchHistPairsCmd.action);
+
+// Backtest Historical command
+const backtestHistCmd = createBacktestHistoricalCommand();
+program
+  .command(backtestHistCmd.command)
+  .description(backtestHistCmd.description);
+backtestHistCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(backtestHistCmd.action);
+
+// Recommend command
+const recommendCmd = createRecommendCommand();
+program
+  .command(recommendCmd.command)
+  .description(recommendCmd.description);
+recommendCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(recommendCmd.action);
 
 // Error handling
 process.on('unhandledRejection', (reason) => {

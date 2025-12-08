@@ -20,10 +20,12 @@ export { ModelService } from './service';
 export { PatternAnalyzer } from './patterns';
 export { LiquidityAnalyzer } from './liquidity';
 export { BacktestEngine } from './backtest';
+export { HistoricalBacktestEngine } from './HistoricalBacktestEngine';
 export { CorrelationDetector } from './correlation';
 export { OpportunityPredictor } from './predictor';
 export { TradingStrategyEvaluator } from './strategy';
 export { EmbeddingService, getEmbeddingService, resetEmbeddingService } from './embeddings';
+export { RecommendationEngine } from './RecommendationEngine';
 
 export type {
   FeatureVector,
@@ -31,7 +33,17 @@ export type {
   MatchingPrediction,
   ResolutionPrediction,
   ModelConfig,
-  ConfidenceInterval
+  ConfidenceInterval,
+  Recommendation,
+  RecommendationReport,
+  RecommendationScore,
+  RecommendationWeights,
+  RecommendationConfig,
+  RecommendationFilters,
+  ReportSummary,
+  CategoryPerformance,
+  SimilarOpportunity,
+  RiskLevel
 } from './types';
 
 export type {
@@ -56,6 +68,14 @@ export type {
   BacktestResult,
   StrategyParams
 } from './backtest';
+
+export type {
+  HistoricalBacktestConfig,
+  HistoricalPosition,
+  HistoricalTrade,
+  WeekResult,
+  HistoricalBacktestResult
+} from './HistoricalBacktestEngine';
 
 export type {
   MarketCorrelation,

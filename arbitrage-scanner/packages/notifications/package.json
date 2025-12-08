@@ -1,0 +1,19 @@
+{
+  "name": "@arb/notifications",
+  "version": "1.0.0",
+  "description": "Modular notification system with email and Discord support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/nodemailer": "^6.4.14",
+    "typescript": "^5.3.3"
+  }
+}
