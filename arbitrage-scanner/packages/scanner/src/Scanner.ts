@@ -5,6 +5,7 @@ import {
   IStorage,
   IPlugin,
   ScannerConfig,
+  AlertManagerInterface,
   ArbitrageOpportunity,
   MarketPair,
   QuotePair,
@@ -22,6 +23,7 @@ export class Scanner extends EventEmitter implements IScanner {
   readonly calculator: IArbitrageCalculator;
   readonly storage?: IStorage;
   readonly plugins: IPlugin[];
+  readonly alertManager?: AlertManagerInterface;
 
   private config: ScannerConfig;
   private running: boolean = false;
@@ -36,6 +38,7 @@ export class Scanner extends EventEmitter implements IScanner {
     this.calculator = config.calculator;
     this.storage = config.storage;
     this.plugins = config.plugins || [];
+    this.alertManager = config.alertManager;
     this.resolutionAnalyzer = new ResolutionAnalyzer();
 
     // Configure resolution threshold if provided
@@ -243,6 +246,14 @@ export class Scanner extends EventEmitter implements IScanner {
       }
 
       this.emit('opportunity:found', opportunity);
+
+      // Send alert if configured and profit meets threshold
+      if (this.alertManager && opportunity.profitPercent >= (this.config.minProfitForAlert || 1.0)) {
+        this.alertManager.sendOpportunityAlert(opportunity).catch(err => {
+          console.error('[Scanner] Alert failed:', err.message);
+        });
+      }
+
       return opportunity;
 
     } catch (error) {

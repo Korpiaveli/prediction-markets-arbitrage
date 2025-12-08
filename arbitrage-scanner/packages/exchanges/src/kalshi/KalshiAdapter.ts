@@ -81,9 +81,9 @@ export class KalshiAdapter extends BaseExchange {
   private readonly filterTypes: string[];
 
   constructor(config: KalshiConfig = {}) {
-    super(config);
+    super({ ...config, timeout: config.timeout || 30000 }); // 30s timeout for pagination
     this.setBaseURL(this.apiUrl);
-    this.filterSports = config.filterSports ?? false; // Default: include ALL markets (sports, politics, etc.)
+    this.filterSports = config.filterSports ?? false;
     this.filterTypes = config.filterTypes ?? ['kxmvementions', 'nflsinglegame', 'nflmultigame'];
   }
 
@@ -101,13 +101,30 @@ export class KalshiAdapter extends BaseExchange {
       console.log(`[${this.name}] Fetching all markets (no limit)...`);
 
       do {
-        const response = await this.queue.add(async () => {
-          const params: any = { limit: pageSize, status: 'open' };
-          if (cursor) params.cursor = cursor;
+        let retries = 0;
+        const maxRetries = 3;
+        let response: KalshiMarketResponse | undefined;
 
-          const { data } = await this.client.get<KalshiMarketResponse>('/markets', { params });
-          return data;
-        });
+        while (retries < maxRetries) {
+          try {
+            const result = await this.queue.add(async () => {
+              const params: any = { limit: pageSize, status: 'open' };
+              if (cursor) params.cursor = cursor;
+              const { data } = await this.client.get<KalshiMarketResponse>('/markets', { params });
+              return data;
+            });
+            response = result as KalshiMarketResponse | undefined;
+            break;
+          } catch (err: any) {
+            retries++;
+            if (err.code === 'ECONNABORTED' && retries < maxRetries) {
+              console.warn(`[${this.name}] Timeout, retry ${retries}/${maxRetries}...`);
+              await new Promise(r => setTimeout(r, 2000 * retries));
+            } else {
+              throw err;
+            }
+          }
+        }
 
         if (!response || !response.markets) {
           break;
@@ -116,9 +133,8 @@ export class KalshiAdapter extends BaseExchange {
         allMarkets.push(...response.markets);
         cursor = response.cursor;
 
-        // Safety limit
-        if (allMarkets.length > 50000) {
-          console.warn(`[${this.name}] Reached safety limit of 50000 markets`);
+        if (allMarkets.length > 60000) {
+          console.warn(`[${this.name}] Reached safety limit of 60000 markets`);
           break;
         }
       } while (cursor);

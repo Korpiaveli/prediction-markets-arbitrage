@@ -1,5 +1,12 @@
-import { CrossExchangeArbitrageOpportunity } from '@arb/core';
+import { CrossExchangeArbitrageOpportunity, CrossExchangePair } from '@arb/core';
 import { EventEmitter } from 'eventemitter3';
+
+export interface ResolutionDivergence {
+  priceDivergence: number;
+  exchange1Price: number;
+  exchange2Price: number;
+  direction: string;
+}
 
 export type AlertPriority = 'critical' | 'high' | 'medium' | 'low';
 export type AlertChannel = 'sms' | 'push' | 'discord' | 'telegram' | 'email';
@@ -127,6 +134,22 @@ export class AlertManager extends EventEmitter {
     if (this.alertHistory.length > 100) {
       this.alertHistory.shift();
     }
+  }
+
+  /**
+   * Send resolution divergence alert
+   */
+  async sendDivergenceAlert(pair: CrossExchangePair, divergence: ResolutionDivergence): Promise<void> {
+    const priority: AlertPriority = divergence.priceDivergence > 0.10 ? 'high' : 'medium';
+    const title = `Resolution Divergence: ${pair.description}`;
+    const message = [
+      `${pair.exchange1}: ${(divergence.exchange1Price * 100).toFixed(1)}%`,
+      `${pair.exchange2}: ${(divergence.exchange2Price * 100).toFixed(1)}%`,
+      `Spread: ${(divergence.priceDivergence * 100).toFixed(2)}%`,
+      `Direction: ${divergence.direction}`
+    ].join('\n');
+
+    await this.sendCustomAlert(title, message, priority, { pair, divergence });
   }
 
   /**

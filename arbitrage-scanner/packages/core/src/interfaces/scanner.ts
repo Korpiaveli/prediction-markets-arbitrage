@@ -44,14 +44,21 @@ export interface IPlugin {
   onError?(error: Error): void;
 }
 
+export interface AlertManagerInterface {
+  sendOpportunityAlert(opportunity: CrossExchangeArbitrageOpportunity): Promise<void>;
+  sendDivergenceAlert?(pair: CrossExchangePair, divergence: any): Promise<void>;
+}
+
 export interface ScannerConfig {
   exchanges: IExchange[];
   calculator: IArbitrageCalculator;
   storage?: IStorage;
   plugins?: IPlugin[];
+  alertManager?: AlertManagerInterface;
   scanInterval?: number;
   maxConcurrent?: number;
   timeout?: number;
   disableResolutionFiltering?: boolean;
   minResolutionScore?: number;
+  minProfitForAlert?: number;
 }
