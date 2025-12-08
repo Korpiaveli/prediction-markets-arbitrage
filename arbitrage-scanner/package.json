@@ -16,6 +16,10 @@
     "test:integration": "vitest run --config vitest.config.integration.ts",
     "test:integration:watch": "vitest --config vitest.config.integration.ts",
     "dev": "npm run dev --workspace=apps/cli",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "start:web": "npm run start --workspace=apps/web",
+    "start:api": "npm run start --workspace=apps/api",
     "clean": "npm run clean --workspaces --if-present",
     "typecheck": "tsc --noEmit"
   },
@@ -29,10 +33,5 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
-  },
-  "dependencies": {
-    "next": "^16.0.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
   }
 }

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { ApiContext, ApiResponse } from '../types';
-import { ArbitrageOpportunity } from '@arb/core';
+import { AnyArbitrageOpportunity } from '@arb/core';
 
 export function createOpportunityRoutes(context: ApiContext): Router {
   const router = Router();
@@ -25,7 +25,7 @@ export function createOpportunityRoutes(context: ApiContext): Router {
 
       const total = opportunities.filter(o => o.profitPercent >= minProfit).length;
 
-      const response: ApiResponse<ArbitrageOpportunity[]> = {
+      const response: ApiResponse<AnyArbitrageOpportunity[]> = {
         success: true,
         data: filtered,
         pagination: {

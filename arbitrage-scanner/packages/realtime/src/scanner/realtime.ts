@@ -149,10 +149,14 @@ export class RealTimeScanner extends EventEmitter<{
       this.metrics.endScan(opportunities.length);
 
       for (const opp of opportunities) {
+        const pair = opp.marketPair;
+        const market1Title = 'kalshiMarket' in pair ? pair.kalshiMarket.title : pair.market1.title;
+        const market2Title = 'polymarketMarket' in pair ? pair.polymarketMarket.title : pair.market2.title;
+
         const alert: ArbitrageAlert = {
           opportunityId: opp.id,
-          kalshiMarket: opp.marketPair.kalshiMarket.title,
-          polymarketMarket: opp.marketPair.polymarketMarket.title,
+          kalshiMarket: market1Title,
+          polymarketMarket: market2Title,
           profitPercent: opp.profitPercent,
           investmentRequired: opp.totalCost,
           direction: opp.direction,

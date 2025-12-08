@@ -1,8 +1,10 @@
-import { ArbitrageOpportunity } from '../types/arbitrage.js';
-import { MarketPair } from '../types/market.js';
+import { ArbitrageOpportunity, CrossExchangeArbitrageOpportunity } from '../types/arbitrage.js';
+import { MarketPair, CrossExchangePair } from '../types/market.js';
 import { IExchange } from './exchange.js';
 import { IArbitrageCalculator } from './calculator.js';
-import { IStorage } from './storage.js';
+import { IStorage, AnyArbitrageOpportunity } from './storage.js';
+
+export type { AnyArbitrageOpportunity };
 
 export interface IScanner {
   readonly exchanges: Map<string, IExchange>;
@@ -16,8 +18,9 @@ export interface IScanner {
   addPlugin(plugin: IPlugin): void;
   removePlugin(name: string): void;
 
-  scan(): Promise<ArbitrageOpportunity[]>;
+  scan(): Promise<AnyArbitrageOpportunity[]>;
   scanPair(pair: MarketPair): Promise<ArbitrageOpportunity | null>;
+  scanCrossExchangePair?(pair: CrossExchangePair): Promise<CrossExchangeArbitrageOpportunity | null>;
 
   start(intervalMs?: number): void;
   stop(): void;
@@ -33,7 +36,7 @@ export interface IPlugin {
   destroy?(): Promise<void>;
 
   beforeScan?(): Promise<void>;
-  afterScan?(opportunities: ArbitrageOpportunity[]): Promise<void>;
+  afterScan?(opportunities: AnyArbitrageOpportunity[]): Promise<void>;
 
   processOpportunity?(opportunity: ArbitrageOpportunity): ArbitrageOpportunity;
   filterOpportunity?(opportunity: ArbitrageOpportunity): boolean;

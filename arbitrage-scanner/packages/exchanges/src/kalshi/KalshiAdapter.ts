@@ -16,44 +16,46 @@ interface KalshiConfig extends ExchangeConfig {
   filterTypes?: string[];
 }
 
+interface KalshiMarket {
+  ticker: string;
+  event_ticker: string;
+  title: string;
+  yes_sub_title?: string;
+  no_sub_title?: string;
+  close_time: string;
+  expiration_time: string;
+  status: string;
+  market_type: string;
+
+  // Prices in cents (1-99)
+  yes_bid: number;
+  yes_ask: number;
+  no_bid: number;
+  no_ask: number;
+
+  // Prices in dollar format
+  yes_bid_dollars: string;
+  yes_ask_dollars: string;
+  no_bid_dollars: string;
+  no_ask_dollars: string;
+
+  last_price: number;
+  previous_price: number;
+  volume: number;
+  volume_24h: number;
+  liquidity: number;
+  liquidity_dollars: string;
+  open_interest?: number;
+
+  // Resolution criteria (often empty)
+  rules_primary?: string;
+  rules_secondary?: string;
+  result?: string | null;
+}
+
 interface KalshiMarketResponse {
   cursor?: string;
-  markets: Array<{
-    ticker: string;
-    event_ticker: string;
-    title: string;
-    yes_sub_title?: string;
-    no_sub_title?: string;
-    close_time: string;
-    expiration_time: string;
-    status: string;
-    market_type: string;
-
-    // Prices in cents (1-99)
-    yes_bid: number;
-    yes_ask: number;
-    no_bid: number;
-    no_ask: number;
-
-    // Prices in dollar format
-    yes_bid_dollars: string;
-    yes_ask_dollars: string;
-    no_bid_dollars: string;
-    no_ask_dollars: string;
-
-    last_price: number;
-    previous_price: number;
-    volume: number;
-    volume_24h: number;
-    liquidity: number;
-    liquidity_dollars: string;
-    open_interest?: number;
-
-    // Resolution criteria (often empty)
-    rules_primary?: string;
-    rules_secondary?: string;
-    result?: string | null;
-  }>;
+  markets: KalshiMarket[];
 }
 
 interface KalshiOrderbookResponse {
@@ -91,19 +93,40 @@ export class KalshiAdapter extends BaseExchange {
     if (cached) return cached;
 
     try {
-      const response = await this.queue.add(async () => {
-        const { data } = await this.client.get<KalshiMarketResponse>('/markets', {
-          params: { limit: 1000, status: 'open' }  // Increased limit to get more markets
-        });
-        return data;
-      });
+      // Fetch ALL markets using cursor pagination (no limit)
+      const allMarkets: KalshiMarket[] = [];
+      let cursor: string | undefined;
+      const pageSize = 1000; // Max per request
 
-      if (!response || !response.markets) {
-        return [];
-      }
+      console.log(`[${this.name}] Fetching all markets (no limit)...`);
+
+      do {
+        const response = await this.queue.add(async () => {
+          const params: any = { limit: pageSize, status: 'open' };
+          if (cursor) params.cursor = cursor;
+
+          const { data } = await this.client.get<KalshiMarketResponse>('/markets', { params });
+          return data;
+        });
+
+        if (!response || !response.markets) {
+          break;
+        }
+
+        allMarkets.push(...response.markets);
+        cursor = response.cursor;
+
+        // Safety limit
+        if (allMarkets.length > 50000) {
+          console.warn(`[${this.name}] Reached safety limit of 50000 markets`);
+          break;
+        }
+      } while (cursor);
+
+      console.log(`[${this.name}] Fetched ${allMarkets.length} total markets`);
 
       // Apply filtering
-      const markets = response.markets
+      const markets = allMarkets
         .filter((m) => {
           // Status filter
           if (m.status !== 'open' && m.status !== 'active') {
@@ -136,7 +159,7 @@ export class KalshiAdapter extends BaseExchange {
         .map((m) => this.enhanceMarketWithCategories(this.transformMarket(m)));
 
       const filterStatus = this.filterSports ? 'ON' : 'OFF';
-      console.log(`[${this.name}] Filtered ${response.markets.length} → ${markets.length} markets (sports filter: ${filterStatus}, removed: ${response.markets.length - markets.length})`);
+      console.log(`[${this.name}] Filtered to ${markets.length} markets (sports filter: ${filterStatus}, removed: ${allMarkets.length - markets.length})`);
 
       this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
       return markets;

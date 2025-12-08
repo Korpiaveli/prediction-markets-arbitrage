@@ -49,6 +49,30 @@ export interface PriceUpdate {
 }
 
 /**
+ * Resolution timing status
+ */
+export interface ResolutionTimingStatus {
+  marketId: string;
+  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD';
+  resolutionDate?: Date;
+  isImminent: boolean;        // Resolution within 24 hours
+  hoursUntilResolution?: number;
+  status: 'active' | 'resolving' | 'resolved' | 'voided';
+}
+
+/**
+ * Resolution event from exchange
+ */
+export interface ResolutionEvent {
+  marketId: string;
+  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD';
+  eventType: 'resolution_imminent' | 'resolved' | 'voided' | 'disputed';
+  timestamp: Date;
+  outcome?: 'YES' | 'NO' | 'VOID';
+  details?: string;
+}
+
+/**
  * WebSocket event types
  */
 export type WebSocketEvent =
@@ -58,7 +82,9 @@ export type WebSocketEvent =
   | { type: 'price_update'; update: PriceUpdate }
   | { type: 'market_update'; market: Market }
   | { type: 'subscribed'; marketId: string }
-  | { type: 'unsubscribed'; marketId: string };
+  | { type: 'unsubscribed'; marketId: string }
+  | { type: 'resolution_event'; event: ResolutionEvent }
+  | { type: 'resolution_imminent'; timing: ResolutionTimingStatus };
 
 /**
  * Cache configuration

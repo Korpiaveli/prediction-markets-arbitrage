@@ -5,7 +5,8 @@ export { ValidationService } from './validation.js';
 export {
   ResolutionAnalyzer,
   type ResolutionCriteria,
-  type ResolutionAlignment
+  type ResolutionAlignment,
+  type ParsedTiming
 } from './resolution.js';
 
 // Convenience exports

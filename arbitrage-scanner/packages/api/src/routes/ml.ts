@@ -30,7 +30,7 @@ router.get('/forecast/:category', async (req: Request, res: Response) => {
     const hours = parseInt(req.query.hours as string) || 24;
 
     const historicalOpps = await context.storage.getOpportunities();
-    predictor.loadHistoricalData(historicalOpps);
+    predictor.loadHistoricalData(historicalOpps as any);
 
     const forecast = predictor.forecast(category, hours);
 
@@ -54,7 +54,7 @@ router.get('/forecast/:category', async (req: Request, res: Response) => {
 router.get('/timing', async (_req: Request, res: Response) => {
   try {
     const historicalOpps = await context.storage.getOpportunities();
-    predictor.loadHistoricalData(historicalOpps);
+    predictor.loadHistoricalData(historicalOpps as any);
 
     const timing = predictor.predictNextOpportunity();
     const probability24h = predictor.probabilityInTimeframe(24);
@@ -264,7 +264,7 @@ router.post('/batch-evaluate', async (req: Request, res: Response) => {
 router.get('/predictions/summary', async (_req: Request, res: Response) => {
   try {
     const historicalOpps = await context.storage.getOpportunities();
-    predictor.loadHistoricalData(historicalOpps);
+    predictor.loadHistoricalData(historicalOpps as any);
 
     const timing = predictor.predictNextOpportunity();
     const politicsForecast = predictor.forecast('politics', 24);

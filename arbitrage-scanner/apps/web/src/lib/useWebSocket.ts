@@ -1,9 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 
-// Use hardcoded URL for client-side - env vars don't work in client components
-const WS_URL = typeof window !== 'undefined'
-  ? 'ws://localhost:3001/ws'
-  : '';
+const getWsUrl = () => {
+  if (typeof window === 'undefined') return '';
+  return process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001/ws';
+};
 
 export function useWebSocket() {
   const [connected, setConnected] = useState(false);
@@ -13,6 +13,7 @@ export function useWebSocket() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const WS_URL = getWsUrl();
     if (!WS_URL) return;
 
     function connect() {

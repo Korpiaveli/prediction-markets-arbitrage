@@ -31,7 +31,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       label: 'Avg Confidence',
-      value: `${(stats.avgConfidence * 100).toFixed(0)}%`,
+      value: `${(stats.avgConfidence || 0).toFixed(0)}%`,
       change: null,
     },
     {

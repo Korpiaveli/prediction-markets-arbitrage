@@ -350,12 +350,13 @@ export class AlertManager extends EventEmitter {
 
     lines.push(`Profit: $${opportunity.profitDollars.toFixed(2)} (${opportunity.profitPercent.toFixed(2)}%)`);
     lines.push(`Market: ${opportunity.marketPair.market1.title.substring(0, 50)}...`);
+    const isExchange1Yes = opportunity.direction === 'EXCHANGE1_YES_EXCHANGE2_NO' || opportunity.direction === 'KALSHI_YES_POLY_NO';
     lines.push(
-      `Buy ${opportunity.marketPair.exchange1} ${opportunity.direction === 'KALSHI_YES_POLYMARKET_NO' ? 'YES' : 'NO'} ` +
+      `Buy ${opportunity.marketPair.exchange1} ${isExchange1Yes ? 'YES' : 'NO'} ` +
       `@ $${opportunity.quotePair.quote1.yes.ask.toFixed(2)}`
     );
     lines.push(
-      `Sell ${opportunity.marketPair.exchange2} ${opportunity.direction === 'KALSHI_YES_POLYMARKET_NO' ? 'NO' : 'YES'} ` +
+      `Sell ${opportunity.marketPair.exchange2} ${isExchange1Yes ? 'NO' : 'YES'} ` +
       `@ $${opportunity.quotePair.quote2.no.ask.toFixed(2)}`
     );
     lines.push(`Size: $${opportunity.maxSize.toFixed(0)} | Confidence: ${opportunity.confidence}%`);

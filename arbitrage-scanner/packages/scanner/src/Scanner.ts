@@ -91,7 +91,7 @@ export class Scanner extends EventEmitter implements IScanner {
     }
   }
 
-  async scan(): Promise<ArbitrageOpportunity[]> {
+  async scan(): Promise<(ArbitrageOpportunity | CrossExchangeArbitrageOpportunity)[]> {
     console.log('[Scanner] Starting scan...');
     this.emit('scan:start');
 
@@ -102,17 +102,18 @@ export class Scanner extends EventEmitter implements IScanner {
       }
     }
 
-    // Get market pairs
+    // Get market pairs (could be MarketPair or CrossExchangePair)
     const marketPairs = await this.getMarketPairs();
     console.log(`[Scanner] Found ${marketPairs.length} market pairs to scan`);
 
     // Scan all pairs in parallel with concurrency limit
+    // Route to appropriate scanner based on pair type
     const scanPromises = marketPairs.map(pair =>
-      this.limit(() => this.scanPair(pair))
+      this.limit(() => this.scanAnyPair(pair))
     );
 
     const results = await Promise.all(scanPromises);
-    const opportunities = results.filter((opp): opp is ArbitrageOpportunity => opp !== null);
+    const opportunities = results.filter((opp): opp is (ArbitrageOpportunity | CrossExchangeArbitrageOpportunity) => opp !== null);
 
     console.log(`[Scanner] Found ${opportunities.length} arbitrage opportunities`);
 
@@ -130,6 +131,17 @@ export class Scanner extends EventEmitter implements IScanner {
 
     this.emit('scan:complete', opportunities);
     return opportunities;
+  }
+
+  private isCrossExchangePair(pair: any): pair is CrossExchangePair {
+    return pair.exchange1 !== undefined && pair.exchange2 !== undefined && pair.market1Id !== undefined;
+  }
+
+  private async scanAnyPair(pair: MarketPair | CrossExchangePair): Promise<ArbitrageOpportunity | CrossExchangeArbitrageOpportunity | null> {
+    if (this.isCrossExchangePair(pair)) {
+      return this.scanCrossExchangePair(pair);
+    }
+    return this.scanPair(pair);
   }
 
   async scanCrossExchangePair(pair: CrossExchangePair): Promise<CrossExchangeArbitrageOpportunity | null> {
@@ -187,7 +199,7 @@ export class Scanner extends EventEmitter implements IScanner {
         quotePair,
         direction: bestResult.direction,
         profitPercent: bestResult.profitPercent,
-        profitDollars: bestResult.profitPercent * maxSize,
+        profitDollars: (bestResult.profitPercent / 100) * maxSize,
         totalCost: bestResult.totalCost,
         maxSize,
         confidence: validation.confidence,
@@ -294,7 +306,7 @@ export class Scanner extends EventEmitter implements IScanner {
         quotePair,
         direction: bestResult.direction,
         profitPercent: bestResult.profitPercent,
-        profitDollars: bestResult.profitPercent * maxSize,
+        profitDollars: (bestResult.profitPercent / 100) * maxSize,
         totalCost: bestResult.totalCost,
         maxSize,
         confidence: validation.confidence,
@@ -376,7 +388,7 @@ export class Scanner extends EventEmitter implements IScanner {
     }
   }
 
-  private async getMarketPairs(): Promise<MarketPair[]> {
+  private async getMarketPairs(): Promise<(MarketPair | CrossExchangePair)[]> {
     // If storage has market pairs, use those
     if (this.storage) {
       const storedPairs = await this.storage.getMarketPairs();

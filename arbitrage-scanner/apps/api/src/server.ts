@@ -1,23 +1,26 @@
 import { ApiServer } from '@arb/api';
-import { KalshiAdapter, PolymarketAdapter } from '@arb/exchanges';
+import { KalshiAdapter, PredictItAdapter, PolymarketAdapter } from '@arb/exchanges';
 import { Scanner } from '@arb/scanner';
 import { JsonStorage } from '@arb/storage';
 import { BacktestEngine, PatternAnalyzer } from '@arb/ml';
 import { ArbitrageCalculator } from '@arb/math';
+import path from 'path';
 
 async function main() {
   console.log('[Server] Starting Arbitrage Scanner API...');
 
-  // Initialize storage
-  const storage = new JsonStorage({
-    dataDir: process.env.DATA_DIR || './data'
-  });
+  // Initialize storage - use absolute path to find data directory
+  const dataDir = process.env.DATA_DIR || path.resolve(__dirname, '../../../data');
+  const storage = new JsonStorage({ dataDir });
   await storage.connect();
 
-  // Initialize exchanges
+  // Initialize exchanges - support Kalshi, PredictIt, and Polymarket
   const exchanges = [
     new KalshiAdapter({
       apiKey: process.env.KALSHI_API_KEY,
+      timeout: 5000
+    }),
+    new PredictItAdapter({
       timeout: 5000
     }),
     new PolymarketAdapter({

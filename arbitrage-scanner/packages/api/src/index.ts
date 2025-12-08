@@ -24,6 +24,8 @@ import { createMarketRoutes } from './routes/markets';
 import { createBacktestRoutes } from './routes/backtest';
 import { createConfigRoutes } from './routes/config';
 import { createMLRoutes } from './routes/ml';
+import { createStatsRoutes } from './routes/stats';
+import { createPositionRoutes } from './routes/positions';
 import { createWebSocketHandler } from './websocket';
 import { ApiConfig, ApiContext } from './types';
 
@@ -90,6 +92,8 @@ export class ApiServer {
     this.app.use('/api/backtest', createBacktestRoutes(this.context));
     this.app.use('/api/config', createConfigRoutes(this.context));
     this.app.use('/api/ml', createMLRoutes(this.context));
+    this.app.use('/api/stats', createStatsRoutes(this.context));
+    this.app.use('/api/positions', createPositionRoutes(this.context));
 
     // API documentation
     this.app.get('/api', (_req: Request, res: Response) => {
@@ -102,7 +106,9 @@ export class ApiServer {
           markets: '/api/markets',
           backtest: '/api/backtest',
           config: '/api/config',
-          ml: '/api/ml'
+          ml: '/api/ml',
+          stats: '/api/stats',
+          positions: '/api/positions'
         },
         websocket: {
           enabled: this.config.enableWebSocket,

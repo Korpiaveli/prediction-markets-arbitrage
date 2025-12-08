@@ -117,32 +117,50 @@ export class PolymarketAdapter extends BaseExchange {
     if (cached) return cached;
 
     try {
-      // Fetch from Gamma API (official market discovery endpoint)
-      const response = await this.queue.add(async () => {
-        const { data } = await this.gammaClient.get('/events', {
-          params: {
-            closed: false,
-            active: true,
-            order: 'id',
-            ascending: false,
-            limit: 100
-          }
+      // Fetch ALL markets from Gamma API using pagination
+      const allEvents: any[] = [];
+      const pageSize = 500; // Max per request
+      let offset = 0;
+      let hasMore = true;
+
+      console.log(`[${this.name}] Fetching all markets from Gamma API (no limit)...`);
+
+      while (hasMore) {
+        const response = await this.queue.add(async () => {
+          const { data } = await this.gammaClient.get('/events', {
+            params: {
+              closed: false,
+              active: true,
+              order: 'id',
+              ascending: false,
+              limit: pageSize,
+              offset: offset
+            }
+          });
+          return data;
         });
-        return data;
-      });
 
-      // Gamma API returns direct array
-      const eventsArray = Array.isArray(response) ? response : [];
+        const events = Array.isArray(response) ? response : [];
+        allEvents.push(...events);
 
-      if (!Array.isArray(eventsArray)) {
-        console.warn(`[${this.name}] Unexpected Gamma API response format`);
-        return [];
+        if (events.length < pageSize) {
+          hasMore = false;
+        } else {
+          offset += pageSize;
+          // Safety limit to prevent infinite loops
+          if (offset > 10000) {
+            console.warn(`[${this.name}] Reached safety limit of 10000 events`);
+            hasMore = false;
+          }
+        }
       }
+
+      console.log(`[${this.name}] Fetched ${allEvents.length} total events`);
 
       // Apply data quality filtering
       const now = new Date();
 
-      const markets = eventsArray
+      const markets = allEvents
         .filter((event: any) => {
           // Basic status checks
           if (!event.active || event.closed || event.archived) {
@@ -163,7 +181,7 @@ export class PolymarketAdapter extends BaseExchange {
           event.markets?.map((m: any) => this.transformGammaMarket(m, event)) || []
         );
 
-      console.log(`[${this.name}] Fetched ${eventsArray.length} events → ${markets.length} active markets from Gamma API`);
+      console.log(`[${this.name}] Filtered to ${markets.length} active markets from Gamma API`);
 
       this.cache.set(cacheKey, markets, 30);
       return markets;

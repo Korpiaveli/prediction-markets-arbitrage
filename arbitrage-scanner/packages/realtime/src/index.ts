@@ -12,8 +12,13 @@ export { CacheManager } from './cache/manager';
 export { AlertService } from './alerts/service';
 export { MetricsTracker } from './metrics/tracker';
 export { RealTimeScanner } from './scanner/realtime';
+export { ResolutionMonitor } from './monitor/ResolutionMonitor';
 
 export type { ArbitrageAlert } from './alerts/service';
+export type {
+  MonitoredPosition,
+  ResolutionAlert
+} from './monitor/ResolutionMonitor';
 export type {
   ConnectionState,
   WebSocketConfig,
@@ -21,5 +26,7 @@ export type {
   WebSocketEvent,
   CacheConfig,
   AlertConfig,
-  PerformanceMetrics
+  PerformanceMetrics,
+  ResolutionTimingStatus,
+  ResolutionEvent
 } from './types';

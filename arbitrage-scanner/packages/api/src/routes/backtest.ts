@@ -44,7 +44,7 @@ export function createBacktestRoutes(context: ApiContext): Router {
         executionDelay: 5
       };
 
-      const result = context.backtester.run(opportunities, config);
+      const result = context.backtester.run(opportunities as any, config);
 
       return res.json({
         success: true,

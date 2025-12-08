@@ -1,4 +1,4 @@
-const API_URL = process.env.API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ApiClient {
   private baseUrl: string;
@@ -61,6 +61,46 @@ class ApiClient {
   async getMarkets(exchange?: string) {
     const query = exchange ? `?exchange=${exchange}` : '';
     return this.fetch(`/api/markets${query}`);
+  }
+
+  async getRiskMetrics() {
+    return this.fetch('/api/stats/risk');
+  }
+
+  async getForecast() {
+    return this.fetch('/api/stats/forecast');
+  }
+
+  async getPositions() {
+    return this.fetch('/api/positions');
+  }
+
+  async createPosition(position: any) {
+    return this.fetch('/api/positions', {
+      method: 'POST',
+      body: JSON.stringify(position)
+    });
+  }
+
+  async updatePosition(id: string, data: any) {
+    return this.fetch(`/api/positions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async getOpportunity(id: string) {
+    return this.fetch(`/api/opportunities/${id}`);
+  }
+
+  async getHistoricalOpportunities(params?: { days?: number }) {
+    const query = params?.days ? `?days=${params.days}` : '';
+    return this.fetch(`/api/opportunities/history${query}`);
+  }
+
+  async getAnalytics(params?: { period?: '7d' | '30d' | '90d' | 'all' }) {
+    const query = params?.period ? `?period=${params.period}` : '';
+    return this.fetch(`/api/stats/analytics${query}`);
   }
 }
 

@@ -1,20 +1,43 @@
-import { ArbitrageOpportunity } from '../types/arbitrage.js';
-import { MarketPair } from '../types/market.js';
+import { ArbitrageOpportunity, CrossExchangeArbitrageOpportunity } from '../types/arbitrage.js';
+import { MarketPair, CrossExchangePair } from '../types/market.js';
+
+export type AnyArbitrageOpportunity = ArbitrageOpportunity | CrossExchangeArbitrageOpportunity;
+export type AnyMarketPair = MarketPair | CrossExchangePair;
+
+export interface PositionRecord {
+  id: string;
+  opportunityId?: string;
+  exchange1: string;
+  exchange1MarketId: string;
+  exchange2: string;
+  exchange2MarketId: string;
+  entryProfit: number;
+  resolutionScore: number;
+  status: 'open' | 'closed' | 'expired';
+  createdAt: string;
+  closedAt?: string;
+  exitProfit?: number;
+  notes?: string;
+}
 
 export interface IStorage {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   isConnected(): boolean;
 
-  saveOpportunity(opportunity: ArbitrageOpportunity): Promise<void>;
-  saveOpportunities(opportunities: ArbitrageOpportunity[]): Promise<void>;
+  saveOpportunity(opportunity: AnyArbitrageOpportunity): Promise<void>;
+  saveOpportunities(opportunities: AnyArbitrageOpportunity[]): Promise<void>;
 
-  getOpportunity(id: string): Promise<ArbitrageOpportunity | null>;
-  getOpportunities(filter?: OpportunityFilter): Promise<ArbitrageOpportunity[]>;
+  getOpportunity(id: string): Promise<AnyArbitrageOpportunity | null>;
+  getOpportunities(filter?: OpportunityFilter): Promise<AnyArbitrageOpportunity[]>;
 
-  saveMarketPair(pair: MarketPair): Promise<void>;
-  getMarketPairs(): Promise<MarketPair[]>;
-  getMarketPair(id: string): Promise<MarketPair | null>;
+  saveMarketPair(pair: AnyMarketPair): Promise<void>;
+  getMarketPairs(): Promise<AnyMarketPair[]>;
+  getMarketPair(id: string): Promise<AnyMarketPair | null>;
+
+  getPositions?(): Promise<PositionRecord[]>;
+  savePosition?(position: PositionRecord): Promise<void>;
+  deletePosition?(id: string): Promise<void>;
 
   clear?(): Promise<void>;
 }
