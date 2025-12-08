@@ -8,6 +8,12 @@
     "apps/*"
   ],
   "scripts": {
+    "setup": "npx tsx scripts/setup.ts",
+    "start:all": "npx tsx scripts/orchestrator.ts",
+    "start:prod": "npm run build && NODE_ENV=production npx tsx scripts/orchestrator.ts",
+    "dev:all": "npx tsx scripts/orchestrator.ts --dev",
+    "status": "npx tsx scripts/orchestrator.ts --status",
+    "stop": "npx tsx scripts/orchestrator.ts --stop",
     "build": "npm run build:packages && npm run build:apps",
     "build:packages": "npm run build -w @arb/math -w @arb/core -w @arb/exchanges -w @arb/storage -w @arb/scanner -w @arb/ml -w @arb/realtime -w @arb/api",
     "build:apps": "npm run build -w @arb/cli -w @arb/app-api -w @arb/app-web",
@@ -37,5 +43,8 @@
   "overrides": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "dependencies": {
+    "yocto-queue": "^1.2.2"
   }
 }
