@@ -4,26 +4,33 @@ import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '../lib/api';
 import { RecommendationReport, Recommendation, RiskLevel, RecommendationStats } from '../types';
 
+type TurnoverStrategy = 'conservative' | 'balanced' | 'aggressive';
+
 interface RecommendationPanelProps {
   initialTop?: number;
   autoRefresh?: boolean;
   refreshInterval?: number;
+  showTurnoverMetrics?: boolean;
 }
 
 export function RecommendationPanel({
   initialTop = 10,
   autoRefresh = false,
-  refreshInterval = 60000
+  refreshInterval = 60000,
+  showTurnoverMetrics = true
 }: RecommendationPanelProps) {
   const [report, setReport] = useState<RecommendationReport | null>(null);
   const [stats, setStats] = useState<RecommendationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [strategy, setStrategy] = useState<TurnoverStrategy>('balanced');
   const [filters, setFilters] = useState({
     top: initialTop,
     minScore: 0,
     minProfit: 0,
     maxHours: 720,
+    maxDays: 90,
+    minAnnualizedReturn: 0,
     riskLevels: [] as RiskLevel[]
   });
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -244,6 +251,7 @@ export function RecommendationPanel({
                   recommendation={rec}
                   expanded={expanded === rec.id}
                   onToggle={() => setExpanded(expanded === rec.id ? null : rec.id)}
+                  showTurnoverMetrics={showTurnoverMetrics}
                 />
               ))
             )}
@@ -257,13 +265,22 @@ export function RecommendationPanel({
 function RecommendationCard({
   recommendation,
   expanded,
-  onToggle
+  onToggle,
+  showTurnoverMetrics = true
 }: {
   recommendation: Recommendation;
   expanded: boolean;
   onToggle: () => void;
+  showTurnoverMetrics?: boolean;
 }) {
   const { score, riskLevel, profitPercent, hoursUntilResolution, reasoning, actionItems, riskFactors } = recommendation;
+
+  // Calculate turnover metrics
+  const daysToResolution = hoursUntilResolution !== null ? hoursUntilResolution / 24 : null;
+  const turnsPerYear = daysToResolution ? 365 / Math.max(1, daysToResolution) : null;
+  const annualizedReturn = turnsPerYear && profitPercent
+    ? ((Math.pow(1 + profitPercent / 100, turnsPerYear) - 1) * 100)
+    : null;
 
   return (
     <div className="px-6 py-4 hover:bg-gray-50 transition-colors">
@@ -273,22 +290,28 @@ function RecommendationCard({
             #{recommendation.rank}
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <ScoreBadge score={score.overall} />
               <RiskBadge level={riskLevel} />
+              {showTurnoverMetrics && annualizedReturn !== null && (
+                <AnnualizedReturnBadge return_={annualizedReturn} />
+              )}
               <span className="text-sm text-gray-500">ID: {recommendation.opportunityId.slice(0, 8)}...</span>
             </div>
-            <div className="mt-1 flex items-center gap-4 text-sm">
+            <div className="mt-1 flex items-center gap-4 text-sm flex-wrap">
               <span className="text-green-600 font-semibold">{profitPercent.toFixed(2)}% profit</span>
               {hoursUntilResolution !== null && (
                 <span className="text-gray-600">Resolves in {formatHours(hoursUntilResolution)}</span>
+              )}
+              {showTurnoverMetrics && daysToResolution !== null && (
+                <span className="text-blue-600">{turnsPerYear?.toFixed(1)} turns/yr</span>
               )}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <ScoreBreakdown score={score} />
+            <ScoreBreakdown score={score} showAnnualized={showTurnoverMetrics} annualizedReturn={annualizedReturn} />
           </div>
           <svg
             className={`w-5 h-5 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`}
@@ -303,6 +326,35 @@ function RecommendationCard({
 
       {expanded && (
         <div className="mt-4 pl-14 space-y-4">
+          {/* Turnover Metrics Section */}
+          {showTurnoverMetrics && daysToResolution !== null && (
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Capital Turnover Analysis</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-bold text-gray-900">{daysToResolution.toFixed(1)}d</div>
+                  <div className="text-xs text-gray-500">Days to Resolution</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-blue-600">{turnsPerYear?.toFixed(1)}</div>
+                  <div className="text-xs text-gray-500">Turns/Year</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-green-600">
+                    {annualizedReturn !== null ? `${annualizedReturn.toFixed(0)}%` : 'N/A'}
+                  </div>
+                  <div className="text-xs text-gray-500">Annualized Return</div>
+                </div>
+                <div>
+                  <div className="text-lg font-bold text-purple-600">
+                    {profitPercent.toFixed(2)}%
+                  </div>
+                  <div className="text-xs text-gray-500">Per-Trade Profit</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {reasoning.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Reasoning</h4>
@@ -377,9 +429,46 @@ function RiskBadge({ level }: { level: RiskLevel }) {
   );
 }
 
-function ScoreBreakdown({ score }: { score: Recommendation['score'] }) {
+function AnnualizedReturnBadge({ return_ }: { return_: number }) {
+  const getReturnColor = (r: number) => {
+    if (r >= 200) return 'bg-green-500 text-white';
+    if (r >= 100) return 'bg-green-400 text-white';
+    if (r >= 50) return 'bg-green-100 text-green-800';
+    if (r >= 0) return 'bg-blue-100 text-blue-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  const formatReturn = (r: number) => {
+    if (r >= 1000) return `${(r / 1000).toFixed(0)}K%`;
+    return `${r.toFixed(0)}%`;
+  };
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getReturnColor(return_)}`}>
+      {formatReturn(return_)} APY
+    </span>
+  );
+}
+
+function ScoreBreakdown({
+  score,
+  showAnnualized = false,
+  annualizedReturn
+}: {
+  score: Recommendation['score'];
+  showAnnualized?: boolean;
+  annualizedReturn?: number | null;
+}) {
   return (
     <div className="flex gap-2 text-xs">
+      {showAnnualized && annualizedReturn != null && (
+        <div className="text-center border-r border-gray-200 pr-2">
+          <div className="font-semibold text-green-600">
+            {annualizedReturn >= 1000 ? `${(annualizedReturn / 1000).toFixed(0)}K` : annualizedReturn.toFixed(0)}%
+          </div>
+          <div className="text-gray-500">Annual</div>
+        </div>
+      )}
       <div className="text-center">
         <div className="font-semibold text-gray-900">{score.timeScore.toFixed(0)}</div>
         <div className="text-gray-500">Time</div>

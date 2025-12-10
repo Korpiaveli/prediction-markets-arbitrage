@@ -19,6 +19,7 @@ export class FeatureExtractor {
     'has', 'had', 'do', 'does', 'did', 'this', 'that'
   ]);
 
+
   private embeddingService?: EmbeddingService;
 
   constructor(embeddingService?: EmbeddingService) {
@@ -82,34 +83,37 @@ export class FeatureExtractor {
     const temporalDistance = this.calculateTemporalDistance(kalshiMarket, polyMarket);
     const outcomeMatch = this.checkOutcomeMatch(kalshiMarket, polyMarket) ? 1 : 0;
 
+    // Critical: Check geographic/subject scope match
+    const subjectMatch = this.checkSubjectMatch(kalshiMarket, polyMarket);
+
     return {
-      titleSimilarity,
-      descriptionSimilarity,
-      keywordOverlap,
-      categoryMatch,
+      titleSimilarity: subjectMatch.match ? titleSimilarity : titleSimilarity * 0.3,
+      descriptionSimilarity: subjectMatch.match ? descriptionSimilarity : descriptionSimilarity * 0.3,
+      keywordOverlap: subjectMatch.match ? keywordOverlap : keywordOverlap * 0.3,
+      categoryMatch: subjectMatch.match ? categoryMatch : 0, // Hard fail if different subjects
       timingMatch,
       sourcesMatch,
-      alignmentScore,
+      alignmentScore: subjectMatch.match ? alignmentScore : Math.min(alignmentScore, 40),
       volumeRatio,
       priceCorrelation,
       lengthRatio,
       avgWordCount,
-      embeddingSimilarity,
+      embeddingSimilarity: subjectMatch.match ? embeddingSimilarity : embeddingSimilarity * 0.3,
       temporalDistance,
       outcomeMatch,
       featureConfidence: {
-        titleSimilarity: 1.0,
-        descriptionSimilarity: 1.0,
-        keywordOverlap: 1.0,
-        categoryMatch: 1.0,
+        titleSimilarity: subjectMatch.match ? 1.0 : 0.3,
+        descriptionSimilarity: subjectMatch.match ? 1.0 : 0.3,
+        keywordOverlap: subjectMatch.match ? 1.0 : 0.3,
+        categoryMatch: subjectMatch.match ? 1.0 : 0.1,
         timingMatch: 1.0,
         sourcesMatch: 1.0,
-        alignmentScore: 1.0,
+        alignmentScore: subjectMatch.match ? 1.0 : 0.3,
         volumeRatio: 1.0,
         priceCorrelation: 1.0,
         lengthRatio: 1.0,
         avgWordCount: 1.0,
-        embeddingSimilarity: embeddingConfidence,
+        embeddingSimilarity: subjectMatch.match ? embeddingConfidence : 0.1,
         temporalDistance: 1.0,
         outcomeMatch: 1.0
       }
@@ -369,6 +373,270 @@ export class FeatureExtractor {
     if (lengthRatio < 0.3) score -= 15;
 
     return Math.max(0, score);
+  }
+
+  /**
+   * Check if markets have matching subjects (countries, people, events)
+   * This is CRITICAL for preventing false positives like:
+   * - "US President" matching "Honduras President"
+   * - "Trump" matching "Biden"
+   * Returns { match: boolean, reason: string }
+   */
+  private checkSubjectMatch(
+    market1: Market,
+    market2: Market
+  ): { match: boolean; reason: string; countries1: string[]; countries2: string[] } {
+    const text1 = (market1.title + ' ' + (market1.description || '') + ' ' +
+      (market1.metadata?.rulesPrimary || '')).toLowerCase();
+    const text2 = (market2.title + ' ' + (market2.description || '') + ' ' +
+      (market2.metadata?.rulesPrimary || '')).toLowerCase();
+
+    // Extract countries mentioned in each market
+    const countries1 = this.extractCountries(text1);
+    const countries2 = this.extractCountries(text2);
+
+
+    // If both markets mention countries, they should match
+    if (countries1.length > 0 && countries2.length > 0) {
+      // Check for any overlap
+      const hasOverlap = countries1.some(c1 =>
+        countries2.some(c2 => this.countriesMatch(c1, c2))
+      );
+
+      if (!hasOverlap) {
+        return {
+          match: false,
+          reason: `Geographic mismatch: ${countries1.join(', ')} vs ${countries2.join(', ')}`,
+          countries1,
+          countries2
+        };
+      }
+    }
+
+    // Check if one is US-specific and other is not
+    const isUs1 = this.isUsContext(text1);
+    const isUs2 = this.isUsContext(text2);
+
+    // If one clearly references US and other references different country
+    if (isUs1 && countries2.length > 0 && !countries2.some(c => this.isUsCountry(c))) {
+      return {
+        match: false,
+        reason: `US market vs non-US country: ${countries2.join(', ')}`,
+        countries1: ['united states'],
+        countries2
+      };
+    }
+    if (isUs2 && countries1.length > 0 && !countries1.some(c => this.isUsCountry(c))) {
+      return {
+        match: false,
+        reason: `Non-US country vs US market: ${countries1.join(', ')}`,
+        countries1,
+        countries2: ['united states']
+      };
+    }
+
+    // Extract person names (capitalized words that aren't common)
+    const peopleText1 = market1.title + ' ' + (market1.metadata?.rulesPrimary || '');
+    const peopleText2 = market2.title + ' ' + (market2.metadata?.rulesPrimary || '');
+    const people1 = this.extractPeople(peopleText1);
+    const people2 = this.extractPeople(peopleText2);
+
+    // If both mention specific people, at least one should match
+    if (people1.length > 0 && people2.length > 0) {
+      const hasPersonOverlap = people1.some(p1 =>
+        people2.some(p2 => this.namesMatch(p1, p2))
+      );
+
+      if (!hasPersonOverlap) {
+        // Different people mentioned - likely different markets
+        return {
+          match: false,
+          reason: `Different subjects: ${people1.join(', ')} vs ${people2.join(', ')}`,
+          countries1,
+          countries2
+        };
+      }
+    }
+
+    return { match: true, reason: 'Subjects compatible', countries1, countries2 };
+  }
+
+  /**
+   * Extract countries from text
+   */
+  private extractCountries(text: string): string[] {
+    const found: string[] = [];
+    const normalized = text.toLowerCase();
+
+    // Multi-word countries first
+    const multiWordCountries = [
+      'united states', 'united kingdom', 'north korea', 'south korea', 'south africa'
+    ];
+    for (const country of multiWordCountries) {
+      if (normalized.includes(country)) {
+        found.push(country);
+      }
+    }
+
+    // Single word countries
+    const singleWordCountries = [
+      'honduras', 'mexico', 'canada', 'britain', 'france', 'germany', 'china',
+      'russia', 'brazil', 'india', 'japan', 'australia', 'argentina', 'venezuela',
+      'colombia', 'peru', 'chile', 'israel', 'ukraine', 'iran', 'taiwan',
+      'philippines', 'indonesia', 'vietnam', 'thailand', 'poland', 'italy',
+      'spain', 'netherlands', 'belgium', 'sweden', 'norway', 'denmark',
+      'finland', 'switzerland', 'austria', 'greece', 'turkey', 'egypt', 'nigeria', 'kenya'
+    ];
+    for (const country of singleWordCountries) {
+      if (new RegExp(`\\b${country}\\b`, 'i').test(normalized)) {
+        found.push(country);
+      }
+    }
+
+    // Country adjectives/demonyms
+    const demonymMap: Record<string, string> = {
+      'american': 'united states',
+      'british': 'united kingdom',
+      'french': 'france',
+      'german': 'germany',
+      'chinese': 'china',
+      'russian': 'russia',
+      'brazilian': 'brazil',
+      'indian': 'india',
+      'japanese': 'japan',
+      'australian': 'australia',
+      'mexican': 'mexico',
+      'canadian': 'canada',
+      'italian': 'italy',
+      'spanish': 'spain',
+      'turkish': 'turkey',
+      'israeli': 'israel',
+      'iranian': 'iran',
+      'ukrainian': 'ukraine',
+      'honduran': 'honduras'
+    };
+    for (const [demonym, country] of Object.entries(demonymMap)) {
+      if (new RegExp(`\\b${demonym}\\b`, 'i').test(normalized) && !found.includes(country)) {
+        found.push(country);
+      }
+    }
+
+    // USA abbreviations
+    if (/\b(usa|u\.s\.a\.?|u\.s\.)\b/i.test(normalized) && !found.includes('united states')) {
+      found.push('united states');
+    }
+
+    return [...new Set(found)];
+  }
+
+  /**
+   * Check if text has US-specific context
+   */
+  private isUsContext(text: string): boolean {
+    const usIndicators = [
+      'president of the united states',
+      'us president',
+      'american president',
+      'white house',
+      'congress',
+      'senate',
+      'house of representatives',
+      'democrat',
+      'republican',
+      'gop',
+      'dnc',
+      'rnc',
+      'federal reserve',
+      'scotus',
+      'supreme court'
+    ];
+    return usIndicators.some(indicator => text.includes(indicator));
+  }
+
+  /**
+   * Check if a country reference is US
+   */
+  private isUsCountry(country: string): boolean {
+    return ['united states', 'usa', 'america', 'american'].includes(country.toLowerCase());
+  }
+
+  /**
+   * Check if two country references match (accounting for aliases)
+   */
+  private countriesMatch(c1: string, c2: string): boolean {
+    const n1 = c1.toLowerCase();
+    const n2 = c2.toLowerCase();
+
+    if (n1 === n2) return true;
+
+    // US aliases
+    const usAliases = ['united states', 'usa', 'us', 'america', 'american'];
+    if (usAliases.includes(n1) && usAliases.includes(n2)) return true;
+
+    // UK aliases
+    const ukAliases = ['united kingdom', 'uk', 'britain', 'british'];
+    if (ukAliases.includes(n1) && ukAliases.includes(n2)) return true;
+
+    return false;
+  }
+
+  /**
+   * Extract person names from text (simple heuristic)
+   */
+  private extractPeople(text: string): string[] {
+    const commonWords = new Set([
+      'will', 'the', 'president', 'of', 'united', 'states', 'before', 'after',
+      'become', 'win', 'next', 'who', 'which', 'what', 'when', 'how', 'yes', 'no',
+      'january', 'february', 'march', 'april', 'may', 'june', 'july', 'august',
+      'september', 'october', 'november', 'december', 'monday', 'tuesday',
+      'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+    ]);
+
+    // Find capitalized words that might be names
+    const words = text.split(/\s+/);
+    const people: string[] = [];
+
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i].replace(/[^a-zA-Z]/g, '');
+      if (word.length < 3) continue;
+
+      // Check if capitalized (not at sentence start unless also has capital inside)
+      if (/^[A-Z][a-z]+$/.test(word) && !commonWords.has(word.toLowerCase())) {
+        // Likely a name - also grab next word if capitalized (full name)
+        let name = word;
+        if (i + 1 < words.length) {
+          const nextWord = words[i + 1].replace(/[^a-zA-Z]/g, '');
+          if (/^[A-Z][a-z]+$/.test(nextWord) && !commonWords.has(nextWord.toLowerCase())) {
+            name = word + ' ' + nextWord;
+            i++; // Skip next word
+          }
+        }
+        people.push(name.toLowerCase());
+      }
+    }
+
+    return [...new Set(people)];
+  }
+
+  /**
+   * Check if two names match (accounting for first/last name only)
+   */
+  private namesMatch(name1: string, name2: string): boolean {
+    const n1 = name1.toLowerCase();
+    const n2 = name2.toLowerCase();
+
+    if (n1 === n2) return true;
+
+    // Check if one is a substring of the other (e.g., "Trump" matches "Donald Trump")
+    if (n1.includes(n2) || n2.includes(n1)) return true;
+
+    // Check last names
+    const parts1 = n1.split(' ');
+    const parts2 = n2.split(' ');
+    const last1 = parts1[parts1.length - 1];
+    const last2 = parts2[parts2.length - 1];
+
+    return last1 === last2 && last1.length > 3;
   }
 
   /**
