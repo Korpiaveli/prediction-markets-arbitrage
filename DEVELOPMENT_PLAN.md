@@ -563,7 +563,7 @@ arbitrage-scanner/
 
 **Next Steps**:
 - Phase 2: Reality Check (24-48h continuous scanning to measure arbitrage frequency)
-- Phase 3: Multi-Exchange Expansion (PredictIt, Manifold Markets)
+- Phase 3: Multi-Exchange Expansion (PredictIt integrated, Manifold removed - play money)
 - Phase 4: Real-time optimization if opportunities are frequent
 
 **Implementation Time**: ~2 hours (as planned)
@@ -593,6 +593,106 @@ arbitrage-scanner/
 - ✅ Trump vs Biden markets - Correctly rejected
 - ✅ Same person different formats - Correctly matched
 
+### December 10, 2025 (Exchange Cleanup & Research)
+
+**Changes Made**:
+1. ✅ Removed Manifold Markets (play money only) from entire codebase
+2. ✅ Verified PredictIt adapter working (537 active contracts)
+3. ✅ Tested 3-exchange scan (Kalshi + Polymarket + PredictIt)
+4. ✅ Found 339 market pairs, 339 opportunities (with lower resolution threshold)
+5. ✅ Comprehensive exchange research completed
+
+**Files Modified**:
+- `packages/core/src/types/market.ts` - Removed MANIFOLD from ExchangeName
+- `packages/exchanges/src/index.ts` - Removed Manifold exports
+- `packages/exchanges/src/manifold/` - Deleted directory
+- `apps/cli/src/utils/exchanges.ts` - Removed Manifold references
+- `apps/cli/src/utils/exchange-factory.ts` - Removed Manifold case
+- `apps/web/src/types/index.ts` - Removed MANIFOLD type
+- `apps/web/src/components/OpportunityFilters.tsx` - Removed from filters
+- `apps/web/src/app/page.tsx` - Removed from default filters
+- `packages/realtime/src/types.ts` - Removed from union types
+
+**New Documentation**:
+- `INTEGRATION_PRIORITIES_SUMMARY.md` - Exchange priorities & roadmap
+- `PREDICTION_MARKET_RESEARCH_2025.md` - Full research report
+
+**Current Integrated Exchanges**:
+- ✅ Kalshi - CFTC-regulated, working
+- ✅ Polymarket - Gamma API, working
+- ✅ PredictIt - API working, 537 active contracts
+
+---
+
+## Next Steps (Priority Order)
+
+### Phase 5: Production Readiness
+
+#### Immediate (Week 1)
+1. **Fix Resolution Score Display Issue** 🔴 HIGH
+   - 339 opportunities found but showing "No profitable opportunities"
+   - Issue: Opportunities being filtered but not displayed
+   - Action: Debug CLI output logic
+
+2. **Lower Resolution Threshold for Testing** 🟡 MEDIUM
+   - Current: 65 (too strict for most matches)
+   - Many valid opportunities filtered at 45-60 scores
+   - Action: Add configurable thresholds per exchange pair
+
+3. **24-48h Continuous Scan** 🟡 MEDIUM
+   - Run scanner continuously to measure real arbitrage frequency
+   - Capture timing patterns (best scan times)
+   - Build historical dataset
+
+#### Near-Term (Week 2-3)
+4. **Robinhood Partnership Outreach** 🔴 HIGH
+   - Highest arbitrage potential (retail vs institutional pricing)
+   - No public API - requires partnership
+   - Draft outreach email
+
+5. **Crypto.com Research** 🟡 MEDIUM
+   - Research prediction market API availability
+   - May require partnership
+
+6. **Improve Market Matching Accuracy** 🟡 MEDIUM
+   - Current: 80% accuracy
+   - Target: 90%+ accuracy
+   - Add more entity extraction patterns
+
+#### Future (Month 2+)
+7. **International Expansion (Betfair/Smarkets)** 📋 PLANNED
+   - Requires international entity or partnership
+   - Strong political market overlap
+
+8. **Parlay Arbitrage System** 📋 PLANNED
+   - Multi-leg arbitrage detection
+   - Higher complexity, Phase 2+ priority
+
+---
+
+## Exchange Integration Roadmap
+
+### Phase 1: Core Prediction Markets ✅ COMPLETE
+- ✅ Kalshi (CFTC-regulated)
+- ✅ Polymarket (Gamma API)
+- ✅ PredictIt (CFTC-approved)
+
+### Phase 2: Expansion (Q1 2026)
+- ⏳ Robinhood (needs partnership)
+- ⏳ Crypto.com (needs API research)
+- ⏳ Azuro Protocol (Q4 2025 cross-chain launch)
+
+### Phase 3: International (Q2 2026)
+- 📋 Betfair (UK/EU only)
+- 📋 Smarkets (UK/EU only)
+- 📋 Matchbook
+
+### Phase 4: Sports Betting (Q3-Q4 2026)
+- 📋 Parlay arbitrage system
+- 📋 DraftKings/FanDuel (if APIs available)
+
+---
+
 ## Git Repository Status
 
 ✅ **Repository Active** - Regular commits tracking progress
@@ -602,7 +702,9 @@ arbitrage-scanner/
 - Commit 4: Phase 2 real-time infrastructure (@arb/realtime)
 - Commit 5: Phase 3 ML module (@arb/ml) with market matching & resolution prediction
 - Commit 6: Phase 4 complete - REST API + Next.js dashboard
-- **Current**: Fix cross-platform market matching false positives
+- Commit 7: Fix cross-platform market matching false positives
+- Commit 8: ML enhancements and capital turnover optimization
+- **Current**: Remove Manifold, add exchange research documentation
 
 ## Commands to Run
 
