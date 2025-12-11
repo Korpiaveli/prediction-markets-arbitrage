@@ -10,7 +10,7 @@ interface OpportunityFiltersProps {
   onSortChange: (sort: SortState) => void;
 }
 
-const EXCHANGES: ExchangeName[] = ['KALSHI', 'POLYMARKET', 'PREDICTIT', 'MANIFOLD'];
+const EXCHANGES: ExchangeName[] = ['KALSHI', 'POLYMARKET', 'PREDICTIT'];
 
 export function OpportunityFilters({ filters, sort, onFiltersChange, onSortChange }: OpportunityFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);

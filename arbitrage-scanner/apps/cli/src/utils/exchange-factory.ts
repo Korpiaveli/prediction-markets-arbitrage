@@ -1,5 +1,5 @@
 import { IExchange } from '@arb/core';
-import { KalshiAdapter, PolymarketAdapter, PredictItAdapter, ManifoldAdapter } from '@arb/exchanges';
+import { KalshiAdapter, PolymarketAdapter, PredictItAdapter } from '@arb/exchanges';
 
 export interface ExchangeFactoryOptions {
   exchanges?: string[];
@@ -7,7 +7,7 @@ export interface ExchangeFactoryOptions {
   testMode?: boolean;
 }
 
-export type ExchangeName = 'kalshi' | 'polymarket' | 'predictit' | 'manifold';
+export type ExchangeName = 'kalshi' | 'polymarket' | 'predictit';
 
 export class ExchangeFactory {
   private static readonly AVAILABLE_EXCHANGES: Record<ExchangeName, {
@@ -31,12 +31,6 @@ export class ExchangeFactory {
     predictit: {
       name: 'PredictIt',
       description: 'CFTC-approved political prediction market (US politics only)',
-      supportsHistorical: false,
-      usAccessible: true
-    },
-    manifold: {
-      name: 'Manifold Markets',
-      description: 'Play-money prediction market (10K+ diverse markets)',
       supportsHistorical: false,
       usAccessible: true
     }
@@ -93,12 +87,6 @@ export class ExchangeFactory {
       case 'predictit':
         return new PredictItAdapter({
           testMode
-        });
-
-      case 'manifold':
-        return new ManifoldAdapter({
-          excludeResolved: true,
-          minVolume: 100
         });
 
       default:

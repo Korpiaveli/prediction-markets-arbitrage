@@ -53,7 +53,7 @@ export interface PriceUpdate {
  */
 export interface ResolutionTimingStatus {
   marketId: string;
-  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD';
+  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT';
   resolutionDate?: Date;
   isImminent: boolean;        // Resolution within 24 hours
   hoursUntilResolution?: number;
@@ -65,7 +65,7 @@ export interface ResolutionTimingStatus {
  */
 export interface ResolutionEvent {
   marketId: string;
-  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT' | 'MANIFOLD';
+  exchange: 'KALSHI' | 'POLYMARKET' | 'PREDICTIT';
   eventType: 'resolution_imminent' | 'resolved' | 'voided' | 'disputed';
   timestamp: Date;
   outcome?: 'YES' | 'NO' | 'VOID';

@@ -20,7 +20,7 @@ const DEFAULT_FILTERS: FilterState = {
   minProfit: 0,
   maxProfit: 100,
   minConfidence: 0,
-  exchanges: ['KALSHI', 'POLYMARKET', 'PREDICTIT', 'MANIFOLD'],
+  exchanges: ['KALSHI', 'POLYMARKET', 'PREDICTIT'],
   minResolutionDays: 0,
   searchQuery: ''
 };
