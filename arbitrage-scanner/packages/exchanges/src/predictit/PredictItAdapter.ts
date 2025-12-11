@@ -7,7 +7,10 @@ import {
   OrderRequest,
   OrderResult,
   OrderStatus,
-  Balance
+  Balance,
+  PositionType,
+  EventType,
+  PoliticalParty
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -49,6 +52,19 @@ export class PredictItAdapter extends BaseExchange {
     requestsPerMinute: 60,
     burstLimit: 10
   };
+
+  private readonly vpPatterns = [
+    /vice[- ]?president/i,
+    /vice[- ]?presidential/i,
+    /\bvp\b(?:\s|$)/i,
+    /running\s+mate/i
+  ];
+
+  private readonly presidentPatterns = [
+    /\bpresident(?!.*vice)/i,
+    /\bpresidential(?!.*vice)/i,
+    /\bpotus\b/i
+  ];
 
   constructor(config: ExchangeConfig = {}) {
     super(config);
@@ -299,16 +315,29 @@ export class PredictItAdapter extends BaseExchange {
       ? `${market.shortName}: ${contract.shortName}`
       : market.shortName;
 
+    const marketId = `${market.id}-${contract.id}`;
+    const fullText = `${title} ${market.name}`;
+
+    // Parse structured fields inline
+    const positionType = this.parsePositionType(fullText);
+    const eventType = this.parseEventType(fullText);
+    const year = this.parseYear(fullText);
+    const party = this.parseParty(fullText);
+
     return {
-      id: `${market.id}-${contract.id}`,
-      exchangeId: `${market.id}-${contract.id}`,
+      id: marketId,
+      exchangeId: marketId,
       exchange: this.name,
       title,
       description: market.name,
       closeTime,
-      volume24h: 0, // PredictIt doesn't expose volume in this endpoint
+      volume24h: 0,
       openInterest: 0,
       active: contract.status === 'Open' && market.status === 'Open',
+      positionType: positionType !== 'OTHER' ? positionType : undefined,
+      eventType: eventType !== 'OTHER' ? eventType : undefined,
+      year: year ?? undefined,
+      party: party ?? undefined,
       metadata: {
         marketId: market.id,
         contractId: contract.id,
@@ -323,6 +352,42 @@ export class PredictItAdapter extends BaseExchange {
         category: this.extractCategory(market.name)
       }
     };
+  }
+
+  private parsePositionType(text: string): PositionType {
+    const isVp = this.vpPatterns.some(p => p.test(text));
+    if (isVp) return 'VICE_PRESIDENT';
+
+    const isPresident = this.presidentPatterns.some(p => p.test(text));
+    if (isPresident) return 'PRESIDENT';
+
+    if (/\bsenate\b|\bsenator\b/i.test(text)) return 'SENATE';
+    if (/\bhouse\b|\bcongress(?:man|woman|person)?\b/i.test(text)) return 'HOUSE';
+    if (/\bgovernor\b/i.test(text)) return 'GOVERNOR';
+    if (/\bmayor\b/i.test(text)) return 'MAYOR';
+
+    return 'OTHER';
+  }
+
+  private parseEventType(text: string): EventType {
+    if (/\bnomin/i.test(text)) return 'NOMINEE';
+    if (/\bwin|winner|elect(?:ed|ion)\b/i.test(text)) return 'WINNER';
+    if (/electoral\s+vote/i.test(text)) return 'ELECTORAL_VOTES';
+    if (/popular\s+vote/i.test(text)) return 'POPULAR_VOTE';
+    if (/approval|rating/i.test(text)) return 'APPROVAL_RATING';
+    return 'OTHER';
+  }
+
+  private parseYear(text: string): number | null {
+    const match = text.match(/\b(20[2-3]\d)\b/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  private parseParty(text: string): PoliticalParty {
+    if (/\brepublican|GOP\b/i.test(text)) return 'REPUBLICAN';
+    if (/\bdemocrat(?:ic)?\b/i.test(text)) return 'DEMOCRAT';
+    if (/\bindependent\b/i.test(text)) return 'INDEPENDENT';
+    return null;
   }
 
   private extractCategory(text: string): string {
