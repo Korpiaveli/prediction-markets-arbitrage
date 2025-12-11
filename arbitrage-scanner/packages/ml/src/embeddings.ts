@@ -3,9 +3,12 @@
  *
  * Generates semantic embeddings for market text using sentence-transformers.
  * Uses transformers.js (@xenova/transformers) for Node.js compatibility.
+ * Optionally integrates with ChromaDB for persistent vector storage.
  */
 
 import { pipeline, env } from '@xenova/transformers';
+import { Market } from '@arb/core';
+import { ChromaVectorStore, SimilarMarket, VectorFilters } from './vector/ChromaVectorStore.js';
 
 // Disable remote model loading progress bars in production
 env.allowLocalModels = true;
@@ -13,6 +16,12 @@ env.allowRemoteModels = true;
 
 export interface EmbeddingCache {
   [key: string]: number[];
+}
+
+export interface EmbeddingServiceConfig {
+  useVectorDB?: boolean;
+  chromaPath?: string;
+  collectionName?: string;
 }
 
 export class EmbeddingService {
@@ -23,10 +32,22 @@ export class EmbeddingService {
   private initializationAttempts = 0;
   private readonly maxRetries = 3;
   private lastHealthCheck: Date | null = null;
+  private vectorStore: ChromaVectorStore | null = null;
+  private vectorStoreEnabled = false;
+  private readonly config: EmbeddingServiceConfig;
+
+  constructor(config: EmbeddingServiceConfig = {}) {
+    this.config = {
+      useVectorDB: config.useVectorDB ?? false,
+      chromaPath: config.chromaPath ?? 'http://localhost:8000',
+      collectionName: config.collectionName ?? 'market_embeddings'
+    };
+  }
 
   /**
    * Initialize the embedding model with retry logic
    * Downloads model on first run (~80MB), cached locally after
+   * If useVectorDB is enabled, also initializes ChromaDB connection
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
@@ -42,6 +63,12 @@ export class EmbeddingService {
         this.initializationAttempts = attempt;
         this.lastHealthCheck = new Date();
         console.log('[EmbeddingService] Model loaded successfully');
+
+        // Initialize ChromaDB if enabled
+        if (this.config.useVectorDB) {
+          await this.initializeVectorStore();
+        }
+
         return;
       } catch (error) {
         lastError = error as Error;
@@ -64,6 +91,32 @@ export class EmbeddingService {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Initialize ChromaDB vector store
+   */
+  private async initializeVectorStore(): Promise<void> {
+    try {
+      this.vectorStore = new ChromaVectorStore({
+        path: this.config.chromaPath,
+        collectionName: this.config.collectionName
+      });
+      await this.vectorStore.initialize();
+      this.vectorStoreEnabled = true;
+      console.log('[EmbeddingService] ChromaDB vector store initialized');
+    } catch (error) {
+      console.warn('[EmbeddingService] ChromaDB initialization failed, continuing without vector store:', error);
+      this.vectorStore = null;
+      this.vectorStoreEnabled = false;
+    }
+  }
+
+  /**
+   * Check if vector store is available
+   */
+  isVectorStoreReady(): boolean {
+    return this.vectorStoreEnabled && this.vectorStore !== null && this.vectorStore.isReady();
   }
 
   /**
@@ -235,6 +288,106 @@ export class EmbeddingService {
     console.log(`[EmbeddingService] Pre-warming cache with ${texts.length} texts...`);
     await this.embedBatch(texts);
     console.log(`[EmbeddingService] Cache pre-warmed. Size: ${Object.keys(this.cache).length}`);
+  }
+
+  /**
+   * Embed and store a market in the vector database
+   * Returns the embedding vector
+   */
+  async embedAndStore(market: Market): Promise<number[]> {
+    const text = `${market.title} ${market.description || ''}`;
+    const embedding = await this.embed(text);
+
+    if (this.vectorStore && this.vectorStoreEnabled) {
+      try {
+        await this.vectorStore.upsertMarket(market, embedding);
+      } catch (error) {
+        console.warn('[EmbeddingService] Failed to store market in vector DB:', error);
+      }
+    }
+
+    return embedding;
+  }
+
+  /**
+   * Embed and store multiple markets in batch
+   */
+  async embedAndStoreMarkets(markets: Market[]): Promise<number[][]> {
+    const texts = markets.map(m => `${m.title} ${m.description || ''}`);
+    const embeddings = await this.embedBatch(texts);
+
+    if (this.vectorStore && this.vectorStoreEnabled) {
+      try {
+        await this.vectorStore.upsertMarkets(markets, embeddings);
+        console.log(`[EmbeddingService] Stored ${markets.length} markets in vector DB`);
+      } catch (error) {
+        console.warn('[EmbeddingService] Failed to store markets in vector DB:', error);
+      }
+    }
+
+    return embeddings;
+  }
+
+  /**
+   * Find markets similar to a given market
+   * Uses vector database if available, otherwise falls back to in-memory comparison
+   */
+  async findSimilarMarkets(
+    market: Market,
+    nResults: number = 10,
+    filters?: VectorFilters
+  ): Promise<SimilarMarket[]> {
+    if (!this.vectorStore || !this.vectorStoreEnabled) {
+      console.warn('[EmbeddingService] Vector store not available for similarity search');
+      return [];
+    }
+
+    try {
+      const text = `${market.title} ${market.description || ''}`;
+      const embedding = await this.embed(text);
+      return await this.vectorStore.findSimilar(embedding, nResults, filters);
+    } catch (error) {
+      console.error('[EmbeddingService] Failed to find similar markets:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get markets similar to a market already in the database
+   */
+  async getSimilarMarkets(
+    marketId: string,
+    nResults: number = 10,
+    samePositionOnly: boolean = true
+  ): Promise<SimilarMarket[]> {
+    if (!this.vectorStore || !this.vectorStoreEnabled) {
+      console.warn('[EmbeddingService] Vector store not available for similarity search');
+      return [];
+    }
+
+    try {
+      return await this.vectorStore.getSimilarMarkets(marketId, nResults, samePositionOnly);
+    } catch (error) {
+      console.error('[EmbeddingService] Failed to get similar markets:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get vector store count
+   */
+  async getVectorStoreCount(): Promise<number> {
+    if (!this.vectorStore || !this.vectorStoreEnabled) {
+      return 0;
+    }
+    return await this.vectorStore.getCount();
+  }
+
+  /**
+   * Get the vector store instance (for advanced usage)
+   */
+  getVectorStore(): ChromaVectorStore | null {
+    return this.vectorStore;
   }
 }
 

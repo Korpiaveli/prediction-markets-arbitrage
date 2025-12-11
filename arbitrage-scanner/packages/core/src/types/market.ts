@@ -9,6 +9,26 @@ export type ArbitrageDirection =
 
 export type MarketCategory = 'politics' | 'sports' | 'crypto' | 'economy' | 'technology' | 'entertainment' | 'science' | 'other';
 
+export type PositionType =
+  | 'PRESIDENT'
+  | 'VICE_PRESIDENT'
+  | 'SENATE'
+  | 'HOUSE'
+  | 'GOVERNOR'
+  | 'MAYOR'
+  | 'PARTY_NOMINEE'
+  | 'OTHER';
+
+export type EventType =
+  | 'NOMINEE'
+  | 'WINNER'
+  | 'ELECTORAL_VOTES'
+  | 'POPULAR_VOTE'
+  | 'APPROVAL_RATING'
+  | 'OTHER';
+
+export type PoliticalParty = 'REPUBLICAN' | 'DEMOCRAT' | 'INDEPENDENT' | 'ANY' | null;
+
 export interface Market {
   id: string;
   exchangeId: string;
@@ -21,6 +41,10 @@ export interface Market {
   active: boolean;
   categories?: MarketCategory[];
   primaryCategory?: MarketCategory;
+  positionType?: PositionType;
+  eventType?: EventType;
+  year?: number;
+  party?: PoliticalParty;
   metadata?: Record<string, any>; // Exchange-specific data (resolution criteria, fees, etc.)
 }
 

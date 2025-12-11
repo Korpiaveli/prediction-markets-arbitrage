@@ -29,6 +29,12 @@ export { RecommendationEngine } from './RecommendationEngine';
 export { PositionSizer } from './PositionSizer';
 export { ConfidenceTracker } from './ConfidenceTracker';
 export { MonteCarloSimulator } from './MonteCarloSimulator';
+export { KalshiTickerParser, kalshiTickerParser } from './parsers';
+export type { ParsedKalshiTicker } from './parsers';
+export { HardBlockerValidator, hardBlockerValidator } from './validators';
+export type { HardBlockerResult, BlockerSeverity } from './validators';
+export { ChromaVectorStore, getVectorStore, resetVectorStore } from './vector';
+export type { SimilarMarket, VectorFilters, ChromaVectorStoreConfig } from './vector';
 
 export type {
   FeatureVector,

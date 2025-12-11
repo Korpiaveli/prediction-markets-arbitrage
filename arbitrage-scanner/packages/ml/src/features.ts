@@ -458,7 +458,61 @@ export class FeatureExtractor {
       }
     }
 
+    // Check for position type mismatch (President vs Vice President)
+    const positionMismatch = this.checkPositionMismatch(text1, text2);
+    if (positionMismatch) {
+      return {
+        match: false,
+        reason: positionMismatch,
+        countries1,
+        countries2
+      };
+    }
+
     return { match: true, reason: 'Subjects compatible', countries1, countries2 };
+  }
+
+  /**
+   * Check if markets have incompatible position types (e.g., President vs VP)
+   *
+   * This is CRITICAL for preventing false matches like:
+   * - KXVPRESNOMR-28-JDV (VP nominee) vs "Republican presidential nominee 2028"
+   * - "Vice Presidency" vs "Presidential election"
+   */
+  private checkPositionMismatch(text1: string, text2: string): string | null {
+    // VP indicators - check FIRST (more specific takes priority)
+    // Must detect: "Vice Presidency", "vice president", "vice presidential", "VP", "running mate"
+    const vpPatterns = [
+      /vice[- ]?president/i,
+      /vice[- ]?presidential/i,
+      /vice[- ]?presidency/i,
+      /\bvp\b(?![a-z])/i,
+      /running[- ]?mate/i,
+      /vp[- ]?nomin/i
+    ];
+
+    // President-only indicators (explicitly NOT VP)
+    // Must detect: "president", "presidential nominee", "presidential election"
+    // Note: We check VP first, so these only match if NOT already VP
+    const presidentPatterns = [
+      /\bpresident/i,
+      /\bpresidential/i
+    ];
+
+    const isVp1 = vpPatterns.some(p => p.test(text1));
+    const isVp2 = vpPatterns.some(p => p.test(text2));
+
+    // Only check president if NOT already detected as VP
+    // This ensures "vice president" doesn't also trigger president detection
+    const isPres1 = !isVp1 && presidentPatterns.some(p => p.test(text1));
+    const isPres2 = !isVp2 && presidentPatterns.some(p => p.test(text2));
+
+    // Cross-mismatch: One is VP, other is President = BLOCK
+    if ((isVp1 && isPres2) || (isVp2 && isPres1)) {
+      return 'Position type mismatch: Vice President vs President';
+    }
+
+    return null;
   }
 
   /**

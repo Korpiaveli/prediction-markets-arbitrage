@@ -704,7 +704,89 @@ arbitrage-scanner/
 - Commit 6: Phase 4 complete - REST API + Next.js dashboard
 - Commit 7: Fix cross-platform market matching false positives
 - Commit 8: ML enhancements and capital turnover optimization
-- **Current**: Remove Manifold, add exchange research documentation
+- Commit 9: Remove Manifold, add exchange research documentation
+- **Current**: Market Matching Overhaul - VP vs President fix, hard blockers, ChromaDB
+
+### December 10, 2025 (Market Matching Overhaul Session)
+
+**Problem Solved**: VP nominee vs President nominee false matches causing 40-47% fake arbitrage signals
+
+**Root Cause Analysis**:
+1. `checkPositionMismatch()` regex in features.ts was too weak - incorrectly excluded "presidential nominee"
+2. Kalshi ticker format (KXVPRESNOMR = VP) was not being decoded
+3. No structured position type in Market interface
+
+**Solution Implemented**:
+1. ✅ Fixed `checkPositionMismatch()` regex patterns - VP patterns now take priority
+2. ✅ Added `PositionType`, `EventType`, `PoliticalParty` types to Market interface
+3. ✅ Created `KalshiTickerParser` - decodes KXVPRESNOMR-28-JDV → VP NOMINEE 2028
+4. ✅ Created `HardBlockerValidator` - multi-layer validation with 5 blockers:
+   - Position Type Blocker (VP vs President = CRITICAL)
+   - Geographic Blocker (US vs Honduras = CRITICAL)
+   - Temporal Year Blocker (2024 vs 2028 = HIGH)
+   - Opposite Outcome Blocker (Republican vs Democrat = HIGH)
+   - Event Type Blocker (Nominee vs Winner = HIGH)
+5. ✅ Integrated hard blockers into MarketMatcher (fast rejection before feature extraction)
+6. ✅ Added ChromaDB vector store for persistent embeddings with metadata filtering
+7. ✅ Integrated ChromaDB into EmbeddingService
+
+**Files Created** (5 new):
+- `packages/ml/src/parsers/KalshiTickerParser.ts` (~200 lines)
+- `packages/ml/src/parsers/index.ts`
+- `packages/ml/src/validators/HardBlockerValidator.ts` (~350 lines)
+- `packages/ml/src/validators/index.ts`
+- `packages/ml/src/vector/ChromaVectorStore.ts` (~280 lines)
+- `packages/ml/src/vector/index.ts`
+- `packages/ml/src/__tests__/position-type.test.ts` (~300 lines, 21 tests)
+
+**Files Modified** (5):
+- `packages/core/src/types/market.ts` - Added PositionType, EventType, PoliticalParty
+- `packages/ml/src/features.ts` - Fixed checkPositionMismatch regex
+- `packages/ml/src/embeddings.ts` - ChromaDB integration
+- `packages/ml/src/index.ts` - Export new modules
+- `packages/exchanges/src/kalshi/KalshiAdapter.ts` - Ticker parsing integration
+- `packages/scanner/src/MarketMatcher.ts` - Hard blocker validation
+
+**Test Results**:
+- 21 new tests, all passing
+- VP vs President correctly blocked
+- Geographic mismatches correctly blocked
+- Year mismatches correctly blocked
+- Party mismatches correctly blocked
+
+**New Dependency**:
+- `chromadb` - Local vector database for persistent embeddings
+
+**ChromaDB Usage**:
+```typescript
+// Initialize with vector store
+const embeddingService = new EmbeddingService({ useVectorDB: true });
+await embeddingService.initialize();
+
+// Store markets with embeddings
+await embeddingService.embedAndStoreMarkets(markets);
+
+// Find similar markets with metadata filtering
+const similar = await embeddingService.findSimilarMarkets(market, 10, {
+  positionType: 'PRESIDENT',
+  year: 2028
+});
+```
+
+**Architecture**:
+```
+Layer 1: Structured Parsing (Kalshi ticker → position type)
+    ↓
+Layer 2: Hard Blockers (fast rejection for mismatches)
+    ↓
+Layer 3: Feature Extraction (ML features)
+    ↓
+Layer 4: ChromaDB (persistent embeddings + metadata filtering)
+    ↓
+Layer 5: Scoring (weighted confidence)
+```
+
+---
 
 ## Commands to Run
 

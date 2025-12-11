@@ -30,7 +30,8 @@
     "@arb/core": "^1.0.0",
     "@arb/math": "^1.0.0",
     "@xenova/transformers": "^2.6.0",
-    "axios": "^1.6.2"
+    "axios": "^1.6.2",
+    "chromadb": "^3.1.7"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

@@ -11,6 +11,7 @@ import {
   PriceHistory
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
+import { KalshiTickerParser } from '@arb/ml';
 
 interface KalshiConfig extends ExchangeConfig {
   filterSports?: boolean;
@@ -222,17 +223,20 @@ export class KalshiAdapter extends BaseExchange {
         return data;
       });
 
+      // API returns data nested under 'market' key
+      const marketData = response.market || response;
+
       const quote: Quote = {
         marketId,
         exchange: this.name,
         timestamp: new Date(),
         yes: this.normalizePriceLevel(
-          parseFloat(response.yes_bid_dollars || '0'),
-          parseFloat(response.yes_ask_dollars || '0')
+          parseFloat(marketData.yes_bid_dollars || '0'),
+          parseFloat(marketData.yes_ask_dollars || '0')
         ),
         no: this.normalizePriceLevel(
-          parseFloat(response.no_bid_dollars || '0'),
-          parseFloat(response.no_ask_dollars || '0')
+          parseFloat(marketData.no_bid_dollars || '0'),
+          parseFloat(marketData.no_ask_dollars || '0')
         ),
         lastUpdate: new Date()
       };
@@ -426,7 +430,11 @@ export class KalshiAdapter extends BaseExchange {
     }
   }
 
+  private tickerParser = new KalshiTickerParser();
+
   private transformMarket(data: any): Market {
+    const parsed = this.tickerParser.parse(data.ticker);
+
     return {
       id: data.ticker,
       exchangeId: data.ticker,
@@ -437,12 +445,18 @@ export class KalshiAdapter extends BaseExchange {
       volume24h: data.volume_24h || data.volume,
       openInterest: data.open_interest,
       active: data.status === 'open' || data.status === 'active',
+      positionType: parsed.positionType !== 'OTHER' ? parsed.positionType : undefined,
+      eventType: parsed.eventType !== 'OTHER' ? parsed.eventType : undefined,
+      year: parsed.year ?? undefined,
+      party: parsed.party ?? undefined,
       metadata: {
         eventTicker: data.event_ticker,
         marketType: data.market_type,
         rulesPrimary: data.rules_primary || '',
         rulesSecondary: data.rules_secondary || '',
-        liquidity: parseFloat(data.liquidity_dollars || '0')
+        liquidity: parseFloat(data.liquidity_dollars || '0'),
+        tickerParseConfidence: parsed.confidence,
+        candidateCode: parsed.candidateCode
       }
     };
   }

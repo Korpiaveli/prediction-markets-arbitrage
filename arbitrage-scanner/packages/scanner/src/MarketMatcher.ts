@@ -3,7 +3,8 @@ import {
   EmbeddingService,
   getEmbeddingService,
   FeatureExtractor,
-  FeatureVector
+  FeatureVector,
+  HardBlockerValidator
 } from '@arb/ml';
 import {
   ScoringStrategy,
@@ -48,6 +49,7 @@ export class MarketMatcher {
   private readonly kalshiNormalizer: ExchangeNormalizer;
   private readonly polymarketNormalizer: ExchangeNormalizer;
   private readonly featureExtractor: FeatureExtractor;
+  private readonly hardBlockerValidator: HardBlockerValidator;
 
   constructor(config: MatcherConfig = {}) {
     this.config = {
@@ -60,6 +62,7 @@ export class MarketMatcher {
     this.strategy = config.strategy ?? new KalshiPolymarketStrategy();
     this.kalshiNormalizer = config.kalshiNormalizer ?? new KalshiNormalizer();
     this.polymarketNormalizer = config.polymarketNormalizer ?? new PolymarketNormalizer();
+    this.hardBlockerValidator = new HardBlockerValidator();
 
     if (this.config.useEmbeddings) {
       this.embeddingService = getEmbeddingService();
@@ -346,12 +349,34 @@ export class MarketMatcher {
 
   /**
    * Comprehensive match analysis using normalizers, feature extraction, and scoring strategy
+   * Now includes hard blocker validation BEFORE expensive feature extraction
    */
   private async analyzeMatch(
     market1: Market,
     market2: Market,
     customStrategy?: ScoringStrategy
   ): Promise<MatchAnalysis> {
+    // LAYER 1: Hard blocker validation (fast rejection)
+    const blockResult = this.hardBlockerValidator.validate(market1, market2);
+    if (blockResult.blocked) {
+      console.log(`\n[BLOCKED] ${market1.title.substring(0, 40)} vs ${market2.title.substring(0, 40)}`);
+      console.log(`  Reason: ${blockResult.reason}`);
+      console.log(`  Severity: ${blockResult.severity}`);
+
+      return {
+        titleSimilarity: 0,
+        descriptionSimilarity: 0,
+        keywordOverlap: 0,
+        embeddingSimilarity: 0,
+        categoryMatch: false,
+        timingMatch: false,
+        confidence: 0,
+        level: 'uncertain',
+        reasons: [`BLOCKED: ${blockResult.reason}`]
+      };
+    }
+
+    // LAYER 2: Normalize markets
     const normalizedMarket1: Market = {
       ...market1,
       title: this.kalshiNormalizer.normalizeTitle(market1.title),
@@ -364,11 +389,13 @@ export class MarketMatcher {
       description: this.polymarketNormalizer.normalizeDescription(market2.description || '')
     };
 
+    // LAYER 3: Feature extraction
     const features: FeatureVector = await this.featureExtractor.extractFeatures(
       normalizedMarket1,
       normalizedMarket2
     );
 
+    // LAYER 4: Scoring
     const strategy = customStrategy ?? this.strategy;
     const confidence = strategy.calculateScore(features, market1, market2);
     const reasons = this.generateReasons(features, market1, market2);
