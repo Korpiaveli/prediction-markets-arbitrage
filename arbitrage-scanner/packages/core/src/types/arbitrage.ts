@@ -18,6 +18,40 @@ export interface CrossExchangeArbitrageOpportunity {
   resolutionAlignment?: ResolutionAlignment;
   valid: boolean;
   executionNotes?: string[];
+  turnoverMetrics?: TurnoverMetrics;
+}
+
+/**
+ * Capital turnover metrics for compounding return optimization.
+ * Prioritizes: Confidence > Resolution Time > Profit per trade
+ */
+export interface TurnoverMetrics {
+  /** Days until market resolution */
+  daysToResolution: number;
+  /** Number of times capital can turn over in a year (365 / daysToResolution) */
+  turnsPerYear: number;
+  /** Projected annual return with compounding: ((1 + profit%)^turns - 1) * 100 */
+  annualizedReturn: number;
+  /** Composite score prioritizing confidence, time, then profit (0-100) */
+  capitalTurnoverScore: number;
+  /** Expected win rate based on confidence bucket */
+  expectedWinRate: number;
+  /** Position sizing recommendation */
+  positionSizing?: PositionSizing;
+}
+
+/**
+ * Kelly criterion-based position sizing recommendation
+ */
+export interface PositionSizing {
+  /** Optimal position size (full Kelly) as % of bankroll */
+  kellyPercent: number;
+  /** Conservative position size (half Kelly) as % of bankroll */
+  halfKellyPercent: number;
+  /** Recommended dollar amount based on user's capital */
+  recommendedAmount?: number;
+  /** Maximum risk amount based on drawdown tolerance */
+  maxRiskAmount?: number;
 }
 
 export interface CrossExchangeArbitrageResult {

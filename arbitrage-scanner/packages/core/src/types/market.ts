@@ -80,3 +80,45 @@ export interface QuotePair {
   polymarket: Quote;
   timestamp: Date;
 }
+
+export interface PriceHistory {
+  timestamp: Date;
+  price: number;
+}
+
+export interface HistoricalSnapshot {
+  timestamp: Date;
+  marketPairId: string;
+  exchange1: {
+    marketId: string;
+    yesPrice: number;
+    noPrice: number;
+    volume?: number;
+  };
+  exchange2: {
+    marketId: string;
+    yesPrice: number;
+    noPrice: number;
+    volume?: number;
+  };
+  arbitrage: {
+    exists: boolean;
+    profitPercent: number;
+    direction: ArbitrageDirection;
+    totalCost: number;
+  };
+}
+
+export interface HistoricalResolution {
+  marketPairId: string;
+  resolvedAt: Date;
+  exchange1: {
+    outcome: MarketOutcome;
+    result: string;
+  };
+  exchange2: {
+    outcome: MarketOutcome;
+    result: string;
+  };
+  sameOutcome: boolean;
+}

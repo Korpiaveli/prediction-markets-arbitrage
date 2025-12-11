@@ -7,7 +7,8 @@ import {
   OrderRequest,
   OrderResult,
   OrderStatus,
-  Balance
+  Balance,
+  PriceHistory
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -476,6 +477,67 @@ export class PolymarketAdapter extends BaseExchange {
         return 'rejected';
       default:
         return 'pending';
+    }
+  }
+
+  async getHistoricalPrices(
+    tokenId: string,
+    startTs: number,
+    endTs: number,
+    fidelityMinutes: number = 5
+  ): Promise<PriceHistory[]> {
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get('/prices-history', {
+          params: {
+            market: tokenId,
+            startTs,
+            endTs,
+            fidelity: fidelityMinutes
+          }
+        });
+        return data;
+      });
+
+      if (!response?.history || !Array.isArray(response.history)) {
+        console.warn(`[${this.name}] No historical data for token ${tokenId}`);
+        return [];
+      }
+
+      return response.history.map((h: { t: number; p: number }) => ({
+        timestamp: new Date(h.t * 1000),
+        price: h.p
+      }));
+    } catch (error) {
+      console.error(`[${this.name}] Failed to fetch historical prices for ${tokenId}:`, error);
+      throw error;
+    }
+  }
+
+  async getMarketResolution(marketId: string): Promise<{ resolved: boolean; outcome?: 'YES' | 'NO'; resolvedAt?: Date } | null> {
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.gammaClient.get(`/markets/${marketId}`);
+        return data;
+      });
+
+      if (!response) return null;
+
+      const tokens = response.tokens || [];
+      const winnerToken = tokens.find((t: any) => t.winner === true);
+
+      if (!winnerToken) {
+        return { resolved: false };
+      }
+
+      return {
+        resolved: true,
+        outcome: winnerToken.outcome === 'Yes' ? 'YES' : 'NO',
+        resolvedAt: response.end_date_iso ? new Date(response.end_date_iso) : undefined
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Failed to fetch resolution for ${marketId}:`, error);
+      return null;
     }
   }
 

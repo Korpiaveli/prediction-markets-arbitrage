@@ -18,6 +18,14 @@ export interface BacktestConfig {
   minProfitPercent: number;
   slippageModel: 'conservative' | 'realistic' | 'optimistic';
   executionDelay: number; // Seconds between detection and execution
+  compoundingMode?: 'true' | 'fresh_capital' | 'hybrid';
+  turnoverConfig?: {
+    strategy: 'conservative' | 'balanced' | 'aggressive';
+    minConfidence: number;
+    maxDaysToResolution: number;
+    minProfitPercent?: number;
+    reinvestPercent: number; // What % of profits to reinvest (0-100)
+  };
 }
 
 export interface Trade {
@@ -59,6 +67,19 @@ export interface BacktestResult {
   trades: Trade[];
   equity: { timestamp: Date; value: number }[];
   insights: string[];
+  compoundingMetrics?: CompoundingBacktestMetrics;
+}
+
+export interface CompoundingBacktestMetrics {
+  compoundingMode: 'true' | 'fresh_capital' | 'hybrid';
+  capitalTurns: number;
+  avgDaysPerTurn: number;
+  annualizedReturn: number;
+  compoundingFactor: number;
+  winRateByConfidenceBucket: Record<string, { wins: number; losses: number; winRate: number }>;
+  capitalGrowthPath: { day: number; capital: number; cumulativeReturn: number }[];
+  reinvestedProfits: number;
+  projectedAnnualReturn: number;
 }
 
 export interface StrategyParams {
@@ -70,8 +91,24 @@ export interface StrategyParams {
 }
 
 export class BacktestEngine {
+  private confidenceBuckets: Map<string, { wins: number; losses: number }> = new Map();
+
   constructor() {
-    // Future: integrate liquidity analyzer
+    this.initConfidenceBuckets();
+  }
+
+  private initConfidenceBuckets(): void {
+    this.confidenceBuckets.set('95-100', { wins: 0, losses: 0 });
+    this.confidenceBuckets.set('85-94', { wins: 0, losses: 0 });
+    this.confidenceBuckets.set('75-84', { wins: 0, losses: 0 });
+    this.confidenceBuckets.set('<75', { wins: 0, losses: 0 });
+  }
+
+  private getConfidenceBucket(confidence: number): string {
+    if (confidence >= 95) return '95-100';
+    if (confidence >= 85) return '85-94';
+    if (confidence >= 75) return '75-84';
+    return '<75';
   }
 
   /**
@@ -82,12 +119,20 @@ export class BacktestEngine {
     config: BacktestConfig,
     strategyParams?: StrategyParams
   ): BacktestResult {
+    this.initConfidenceBuckets();
     const filtered = this.filterOpportunities(opportunities, config);
     const trades: Trade[] = [];
     const equity: { timestamp: Date; value: number }[] = [];
+    const capitalGrowthPath: { day: number; capital: number; cumulativeReturn: number }[] = [];
 
     let capital = config.initialCapital;
+    let reinvestedProfits = 0;
+    const startTime = config.startDate.getTime();
     equity.push({ timestamp: config.startDate, value: capital });
+    capitalGrowthPath.push({ day: 0, capital, cumulativeReturn: 0 });
+
+    const compoundingMode = config.compoundingMode || 'fresh_capital';
+    const reinvestPercent = config.turnoverConfig?.reinvestPercent ?? 100;
 
     for (const opp of filtered) {
       // Apply strategy filters
@@ -97,6 +142,15 @@ export class BacktestEngine {
         continue;
       }
 
+      // Apply turnover config filters
+      if (config.turnoverConfig) {
+        const confidence = opp.resolutionAlignment?.score || 70;
+        if (confidence < config.turnoverConfig.minConfidence) {
+          trades.push(this.createSkippedTrade(opp, `Confidence ${confidence} below minimum ${config.turnoverConfig.minConfidence}`));
+          continue;
+        }
+      }
+
       // Check liquidity
       const liquidityCheck = this.checkLiquidity(opp, config.maxPositionSize);
       if (!liquidityCheck.canExecute) {
@@ -104,17 +158,210 @@ export class BacktestEngine {
         continue;
       }
 
-      // Execute trade
-      const trade = this.executeTrade(opp, capital, config, liquidityCheck.maxSize);
+      // Execute trade with compounding mode
+      const effectiveCapital = this.getEffectiveCapital(
+        capital,
+        config.initialCapital,
+        compoundingMode,
+        reinvestPercent
+      );
+
+      const trade = this.executeTrade(opp, effectiveCapital, config, liquidityCheck.maxSize);
       trades.push(trade);
 
       if (trade.executed) {
-        capital += trade.actualProfit - trade.fees;
+        const netProfit = trade.actualProfit - trade.fees;
+
+        // Track confidence bucket performance
+        const bucket = this.getConfidenceBucket(opp.resolutionAlignment?.score || 70);
+        const bucketStats = this.confidenceBuckets.get(bucket)!;
+        if (trade.outcome === 'win') {
+          bucketStats.wins++;
+        } else if (trade.outcome === 'loss') {
+          bucketStats.losses++;
+        }
+
+        // Apply compounding based on mode
+        if (compoundingMode === 'true') {
+          capital += netProfit;
+          reinvestedProfits += netProfit > 0 ? netProfit : 0;
+        } else if (compoundingMode === 'hybrid') {
+          const toReinvest = netProfit > 0 ? netProfit * (reinvestPercent / 100) : netProfit;
+          capital += toReinvest;
+          reinvestedProfits += toReinvest > 0 ? toReinvest : 0;
+        }
+        // 'fresh_capital' mode doesn't compound
+
         equity.push({ timestamp: trade.timestamp, value: capital });
+
+        const daysSinceStart = (trade.timestamp.getTime() - startTime) / (1000 * 60 * 60 * 24);
+        capitalGrowthPath.push({
+          day: Math.round(daysSinceStart),
+          capital,
+          cumulativeReturn: ((capital - config.initialCapital) / config.initialCapital) * 100
+        });
       }
     }
 
-    return this.calculateResults(trades, equity, config);
+    const baseResult = this.calculateResults(trades, equity, config);
+
+    // Add compounding metrics
+    if (config.compoundingMode) {
+      baseResult.compoundingMetrics = this.calculateCompoundingMetrics(
+        trades,
+        capitalGrowthPath,
+        config,
+        reinvestedProfits
+      );
+    }
+
+    return baseResult;
+  }
+
+  private getEffectiveCapital(
+    currentCapital: number,
+    initialCapital: number,
+    mode: 'true' | 'fresh_capital' | 'hybrid',
+    reinvestPercent: number
+  ): number {
+    switch (mode) {
+      case 'true':
+        return currentCapital;
+      case 'fresh_capital':
+        return initialCapital;
+      case 'hybrid':
+        const profits = currentCapital - initialCapital;
+        const reinvested = profits > 0 ? profits * (reinvestPercent / 100) : 0;
+        return initialCapital + reinvested;
+    }
+  }
+
+  private calculateCompoundingMetrics(
+    trades: Trade[],
+    capitalGrowthPath: { day: number; capital: number; cumulativeReturn: number }[],
+    config: BacktestConfig,
+    reinvestedProfits: number
+  ): CompoundingBacktestMetrics {
+    const executed = trades.filter(t => t.executed);
+    const totalDays = (config.endDate.getTime() - config.startDate.getTime()) / (1000 * 60 * 60 * 24);
+    const capitalTurns = executed.length;
+    const avgDaysPerTurn = capitalTurns > 0 ? totalDays / capitalTurns : totalDays;
+
+    const finalCapital = capitalGrowthPath.length > 0
+      ? capitalGrowthPath[capitalGrowthPath.length - 1].capital
+      : config.initialCapital;
+
+    const totalReturn = (finalCapital - config.initialCapital) / config.initialCapital;
+    const compoundingFactor = finalCapital / config.initialCapital;
+
+    // Annualize based on actual period
+    const yearsElapsed = totalDays / 365;
+    const annualizedReturn = yearsElapsed > 0
+      ? (Math.pow(compoundingFactor, 1 / yearsElapsed) - 1) * 100
+      : totalReturn * 100;
+
+    // Calculate projected annual return based on turnover rate
+    const turnsPerYear = 365 / avgDaysPerTurn;
+    const avgProfitPerTurn = capitalTurns > 0 ? totalReturn / capitalTurns : 0;
+    const projectedAnnualReturn = (Math.pow(1 + avgProfitPerTurn, turnsPerYear) - 1) * 100;
+
+    // Build win rate by confidence bucket
+    const winRateByConfidenceBucket: Record<string, { wins: number; losses: number; winRate: number }> = {};
+    this.confidenceBuckets.forEach((stats, bucket) => {
+      const total = stats.wins + stats.losses;
+      winRateByConfidenceBucket[bucket] = {
+        ...stats,
+        winRate: total > 0 ? stats.wins / total : 0
+      };
+    });
+
+    return {
+      compoundingMode: config.compoundingMode || 'fresh_capital',
+      capitalTurns,
+      avgDaysPerTurn: Math.round(avgDaysPerTurn * 10) / 10,
+      annualizedReturn: Math.round(annualizedReturn * 100) / 100,
+      compoundingFactor: Math.round(compoundingFactor * 1000) / 1000,
+      winRateByConfidenceBucket,
+      capitalGrowthPath,
+      reinvestedProfits: Math.round(reinvestedProfits * 100) / 100,
+      projectedAnnualReturn: Math.round(projectedAnnualReturn * 100) / 100
+    };
+  }
+
+  /**
+   * Run compounding-specific backtest with strategy configuration
+   */
+  runCompoundingBacktest(
+    opportunities: ArbitrageOpportunity[],
+    config: Omit<BacktestConfig, 'compoundingMode'> & {
+      compoundingMode: 'true' | 'fresh_capital' | 'hybrid';
+      turnoverConfig: NonNullable<BacktestConfig['turnoverConfig']>;
+    }
+  ): BacktestResult {
+    const strategyParams: StrategyParams = {
+      minProfit: config.turnoverConfig.minProfitPercent ?? config.minProfitPercent,
+      maxRisk: 0.5,
+      requireResolutionAlignment: true,
+      minResolutionScore: config.turnoverConfig.minConfidence
+    };
+
+    return this.run(opportunities, config, strategyParams);
+  }
+
+  /**
+   * Compare compounding modes
+   */
+  compareCompoundingModes(
+    opportunities: ArbitrageOpportunity[],
+    baseConfig: Omit<BacktestConfig, 'compoundingMode'>
+  ): {
+    trueCompounding: BacktestResult;
+    freshCapital: BacktestResult;
+    hybrid: BacktestResult;
+    comparison: {
+      mode: string;
+      finalCapital: number;
+      returnPercent: number;
+      annualizedReturn: number;
+      capitalTurns: number;
+    }[];
+  } {
+    const trueCompounding = this.run(opportunities, { ...baseConfig, compoundingMode: 'true' });
+    const freshCapital = this.run(opportunities, { ...baseConfig, compoundingMode: 'fresh_capital' });
+    const hybrid = this.run(opportunities, {
+      ...baseConfig,
+      compoundingMode: 'hybrid',
+      turnoverConfig: { ...baseConfig.turnoverConfig!, reinvestPercent: 50 }
+    });
+
+    return {
+      trueCompounding,
+      freshCapital,
+      hybrid,
+      comparison: [
+        {
+          mode: 'True Compounding',
+          finalCapital: trueCompounding.finalCapital,
+          returnPercent: trueCompounding.returnPercent,
+          annualizedReturn: trueCompounding.compoundingMetrics?.annualizedReturn || 0,
+          capitalTurns: trueCompounding.compoundingMetrics?.capitalTurns || 0
+        },
+        {
+          mode: 'Fresh Capital',
+          finalCapital: freshCapital.finalCapital,
+          returnPercent: freshCapital.returnPercent,
+          annualizedReturn: freshCapital.compoundingMetrics?.annualizedReturn || 0,
+          capitalTurns: freshCapital.compoundingMetrics?.capitalTurns || 0
+        },
+        {
+          mode: 'Hybrid (50%)',
+          finalCapital: hybrid.finalCapital,
+          returnPercent: hybrid.returnPercent,
+          annualizedReturn: hybrid.compoundingMetrics?.annualizedReturn || 0,
+          capitalTurns: hybrid.compoundingMetrics?.capitalTurns || 0
+        }
+      ]
+    };
   }
 
   /**

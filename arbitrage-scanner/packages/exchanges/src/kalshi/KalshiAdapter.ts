@@ -7,7 +7,8 @@ import {
   OrderRequest,
   OrderResult,
   OrderStatus,
-  Balance
+  Balance,
+  PriceHistory
 } from '@arb/core';
 import { BaseExchange } from '../base/BaseExchange.js';
 
@@ -444,6 +445,86 @@ export class KalshiAdapter extends BaseExchange {
         liquidity: parseFloat(data.liquidity_dollars || '0')
       }
     };
+  }
+
+  async getHistoricalPrices(
+    marketId: string,
+    startTs: number,
+    endTs: number,
+    fidelityMinutes: number = 5
+  ): Promise<PriceHistory[]> {
+    try {
+      const allTrades: any[] = [];
+      let cursor: string | undefined;
+
+      do {
+        const result = await this.getHistoricalTrades(marketId, {
+          minTimestamp: new Date(startTs * 1000),
+          maxTimestamp: new Date(endTs * 1000),
+          cursor,
+          limit: 1000
+        });
+        allTrades.push(...result.trades);
+        cursor = result.cursor;
+      } while (cursor);
+
+      if (allTrades.length === 0) {
+        return [];
+      }
+
+      const bucketMs = fidelityMinutes * 60 * 1000;
+      const buckets: Map<number, { total: number; count: number }> = new Map();
+
+      for (const trade of allTrades) {
+        const ts = new Date(trade.created_time).getTime();
+        const bucket = Math.floor(ts / bucketMs) * bucketMs;
+        const price = trade.yes_price / 100;
+
+        const existing = buckets.get(bucket);
+        if (existing) {
+          existing.total += price;
+          existing.count += 1;
+        } else {
+          buckets.set(bucket, { total: price, count: 1 });
+        }
+      }
+
+      return Array.from(buckets.entries())
+        .map(([ts, { total, count }]) => ({
+          timestamp: new Date(ts),
+          price: total / count
+        }))
+        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get historical prices for ${marketId}:`, error);
+      throw error;
+    }
+  }
+
+  async getMarketResolution(marketId: string): Promise<{ resolved: boolean; outcome?: 'YES' | 'NO'; resolvedAt?: Date } | null> {
+    try {
+      const response = await this.queue.add(async () => {
+        const { data } = await this.client.get(`/markets/${marketId}`);
+        return data;
+      });
+
+      if (!response) return null;
+
+      const isClosed = response.status === 'closed' || response.status === 'settled';
+
+      if (!isClosed || !response.result) {
+        return { resolved: false };
+      }
+
+      return {
+        resolved: true,
+        outcome: response.result === 'yes' ? 'YES' : 'NO',
+        resolvedAt: response.close_time ? new Date(response.close_time) : undefined
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Failed to get resolution for ${marketId}:`, error);
+      return null;
+    }
   }
 
   // WebSocket subscription for real-time updates

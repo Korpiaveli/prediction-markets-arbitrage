@@ -26,6 +26,9 @@ export { OpportunityPredictor } from './predictor';
 export { TradingStrategyEvaluator } from './strategy';
 export { EmbeddingService, getEmbeddingService, resetEmbeddingService } from './embeddings';
 export { RecommendationEngine } from './RecommendationEngine';
+export { PositionSizer } from './PositionSizer';
+export { ConfidenceTracker } from './ConfidenceTracker';
+export { MonteCarloSimulator } from './MonteCarloSimulator';
 
 export type {
   FeatureVector,
@@ -43,7 +46,23 @@ export type {
   ReportSummary,
   CategoryPerformance,
   SimilarOpportunity,
-  RiskLevel
+  RiskLevel,
+  // Capital turnover types
+  TurnoverStrategyType,
+  TurnoverScoringWeights,
+  TurnoverStrategyConfig,
+  ConfidenceBucketStats,
+  CompoundingProjectionResult,
+  MonteCarloConfig,
+  MonteCarloResults,
+  KellyPositionSize,
+  CompoundingBacktestConfig,
+  CompoundingBacktestResult
+} from './types';
+
+export {
+  DEFAULT_TURNOVER_STRATEGIES,
+  DEFAULT_WIN_RATES
 } from './types';
 
 export type {
@@ -66,8 +85,23 @@ export type {
   BacktestConfig,
   Trade,
   BacktestResult,
-  StrategyParams
+  StrategyParams,
+  CompoundingBacktestMetrics
 } from './backtest';
+
+export type {
+  ConfidenceBucket,
+  BucketPerformance,
+  TrackedTrade,
+  CalibrationMetrics,
+  PerformanceSummary
+} from './ConfidenceTracker';
+
+export type {
+  SimulationPath,
+  EnhancedMonteCarloConfig,
+  StrategyComparison
+} from './MonteCarloSimulator';
 
 export type {
   HistoricalBacktestConfig,

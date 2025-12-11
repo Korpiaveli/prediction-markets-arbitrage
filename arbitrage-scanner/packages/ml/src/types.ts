@@ -277,3 +277,214 @@ export interface RecommendationReport {
   filters: RecommendationFilters;
   config: RecommendationConfig;
 }
+
+// ============================================================================
+// CAPITAL TURNOVER OPTIMIZATION TYPES
+// ============================================================================
+
+/**
+ * Strategy preset names for capital turnover optimization
+ */
+export type TurnoverStrategyType = 'conservative' | 'balanced' | 'aggressive';
+
+/**
+ * Weight configuration for turnover scoring (must sum to 1.0)
+ * Priority: Confidence > Time > Profit
+ */
+export interface TurnoverScoringWeights {
+  confidence: number;  // Weight for confidence/risk minimization (default: 0.40)
+  time: number;        // Weight for faster resolution/turnover (default: 0.35)
+  profit: number;      // Weight for profit per trade (default: 0.25)
+}
+
+/**
+ * Configuration for a turnover strategy preset
+ */
+export interface TurnoverStrategyConfig {
+  name: TurnoverStrategyType;
+  description: string;
+  weights: TurnoverScoringWeights;
+  minConfidence: number;           // Minimum confidence score (0-100)
+  maxDaysToResolution: number;     // Maximum days to include
+  minProfitPercent: number;        // Minimum profit % per trade
+}
+
+/**
+ * Default strategy presets
+ */
+export const DEFAULT_TURNOVER_STRATEGIES: Record<TurnoverStrategyType, TurnoverStrategyConfig> = {
+  conservative: {
+    name: 'conservative',
+    description: 'High confidence, lower risk - prioritizes certainty over speed',
+    weights: { confidence: 0.50, time: 0.30, profit: 0.20 },
+    minConfidence: 90,
+    maxDaysToResolution: 30,
+    minProfitPercent: 1.5
+  },
+  balanced: {
+    name: 'balanced',
+    description: 'Balanced approach - good mix of confidence, turnover, and profit',
+    weights: { confidence: 0.40, time: 0.35, profit: 0.25 },
+    minConfidence: 80,
+    maxDaysToResolution: 60,
+    minProfitPercent: 1.0
+  },
+  aggressive: {
+    name: 'aggressive',
+    description: 'Maximum turnover - prioritizes fast resolution for compounding',
+    weights: { confidence: 0.30, time: 0.45, profit: 0.25 },
+    minConfidence: 70,
+    maxDaysToResolution: 14,
+    minProfitPercent: 0.5
+  }
+};
+
+/**
+ * Win rate expectations by confidence bucket
+ */
+export interface ConfidenceBucketStats {
+  bucket: string;              // e.g., "95-100", "85-94", "75-84", "<75"
+  minConfidence: number;
+  maxConfidence: number;
+  totalTrades: number;
+  wins: number;
+  losses: number;
+  winRate: number;             // 0-1
+  avgProfit: number;           // Average profit % on wins
+  avgLoss: number;             // Average loss % on losses
+  avgDaysToResolution: number;
+}
+
+/**
+ * Default win rate expectations (will be refined with historical data)
+ */
+export const DEFAULT_WIN_RATES: ConfidenceBucketStats[] = [
+  { bucket: '95-100', minConfidence: 95, maxConfidence: 100, totalTrades: 0, wins: 0, losses: 0, winRate: 0.99, avgProfit: 2.0, avgLoss: 50, avgDaysToResolution: 14 },
+  { bucket: '85-94', minConfidence: 85, maxConfidence: 94, totalTrades: 0, wins: 0, losses: 0, winRate: 0.95, avgProfit: 2.0, avgLoss: 50, avgDaysToResolution: 21 },
+  { bucket: '75-84', minConfidence: 75, maxConfidence: 84, totalTrades: 0, wins: 0, losses: 0, winRate: 0.90, avgProfit: 2.5, avgLoss: 50, avgDaysToResolution: 30 },
+  { bucket: '<75', minConfidence: 0, maxConfidence: 74, totalTrades: 0, wins: 0, losses: 0, winRate: 0.80, avgProfit: 3.0, avgLoss: 50, avgDaysToResolution: 45 }
+];
+
+/**
+ * Compounding projection for a given capital and strategy
+ */
+export interface CompoundingProjectionResult {
+  startingCapital: number;
+  endingCapital: number;
+  totalReturn: number;
+  returnPercent: number;
+  annualizedReturn: number;
+  expectedTrades: number;
+  expectedWins: number;
+  expectedLosses: number;
+  avgDaysPerTrade: number;
+  confidenceInterval: {
+    p5: number;      // 5th percentile (worst case)
+    p25: number;     // 25th percentile
+    p50: number;     // Median
+    p75: number;     // 75th percentile
+    p95: number;     // 95th percentile (best case)
+  };
+  period: 'monthly' | 'quarterly' | 'annual';
+  strategy: TurnoverStrategyType;
+}
+
+/**
+ * Monte Carlo simulation configuration
+ */
+export interface MonteCarloConfig {
+  simulations: number;         // Number of simulation runs (default: 1000)
+  period: 'monthly' | 'quarterly' | 'annual';
+  capital: number;             // Starting capital
+  strategy: TurnoverStrategyType;
+  useHistoricalWinRates: boolean;  // Use tracked win rates vs defaults
+}
+
+/**
+ * Monte Carlo simulation results
+ */
+export interface MonteCarloResults {
+  config: MonteCarloConfig;
+  profitDistribution: {
+    min: number;
+    max: number;
+    mean: number;
+    median: number;
+    stdDev: number;
+    percentiles: Record<number, number>;  // percentile -> value
+  };
+  riskMetrics: {
+    probabilityOfLoss: number;       // 0-1
+    probabilityOfDoubling: number;   // 0-1
+    expectedMaxDrawdown: number;     // As percentage
+    worstDrawdown: number;           // Worst observed in sims
+    sharpeRatio: number;
+  };
+  tradeMetrics: {
+    avgTradesPerPeriod: number;
+    avgWinRate: number;
+    avgProfitPerTrade: number;
+  };
+}
+
+/**
+ * Position sizing recommendation using Kelly criterion
+ */
+export interface KellyPositionSize {
+  fullKellyPercent: number;      // Full Kelly as % of bankroll
+  halfKellyPercent: number;      // Conservative half-Kelly
+  quarterKellyPercent: number;   // Very conservative quarter-Kelly
+  recommendedPercent: number;    // Strategy-appropriate recommendation
+  recommendedAmount: number;     // Dollar amount based on bankroll
+  maxRiskAmount: number;         // Maximum risk exposure
+  reasoning: string;             // Human-readable explanation
+}
+
+/**
+ * Backtest configuration for true compounding mode
+ */
+export interface CompoundingBacktestConfig {
+  startDate: Date;
+  endDate: Date;
+  initialCapital: number;
+  strategy: TurnoverStrategyType;
+  customWeights?: TurnoverScoringWeights;
+  positionSizing: 'kelly' | 'half_kelly' | 'fixed_percent';
+  fixedPositionPercent?: number;  // If using fixed_percent
+  reinvestProfits: boolean;       // True = compound, false = flat
+  maxPositionPercent: number;     // Max % of capital per trade
+  slippageModel: 'conservative' | 'realistic' | 'optimistic';
+}
+
+/**
+ * Backtest result with compounding metrics
+ */
+export interface CompoundingBacktestResult {
+  config: CompoundingBacktestConfig;
+  trades: {
+    opportunityId: string;
+    timestamp: Date;
+    positionSize: number;
+    profitPercent: number;
+    outcome: 'win' | 'loss';
+    capitalBefore: number;
+    capitalAfter: number;
+    confidenceBucket: string;
+  }[];
+  summary: {
+    totalTrades: number;
+    wins: number;
+    losses: number;
+    winRate: number;
+    totalProfit: number;
+    finalCapital: number;
+    returnPercent: number;
+    maxDrawdown: number;
+    maxDrawdownPercent: number;
+    sharpeRatio: number;
+    avgDaysPerTrade: number;
+    capitalTurns: number;
+  };
+  confidenceBucketStats: ConfidenceBucketStats[];
+  equityCurve: { timestamp: Date; capital: number }[];
+}

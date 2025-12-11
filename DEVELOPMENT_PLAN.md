@@ -568,6 +568,31 @@ arbitrage-scanner/
 
 **Implementation Time**: ~2 hours (as planned)
 
+### December 9, 2025 (Cross-Platform Matching Fix)
+
+**Problem Identified**: Market matching algorithm producing false positives
+- Example: "US President" markets matching "Honduras President" markets
+- Root cause: Category matching too broad, no geographic/subject scope checking
+
+**Solution Implemented**:
+1. ✅ Added geographic scope checking (country extraction and comparison)
+2. ✅ Added person name extraction and matching
+3. ✅ Penalize scores when geographic/subject mismatch detected
+4. ✅ Fixed web app build error (annualizedReturn undefined)
+5. ✅ Added comprehensive test suite (5 tests, all passing)
+
+**Files Modified**:
+- `packages/ml/src/features.ts` - Added subject matching logic (~250 lines)
+- `packages/ml/src/__tests__/subject-match.test.ts` - New test file
+- `apps/web/src/components/RecommendationPanel.tsx` - Fixed undefined handling
+
+**Test Results**:
+- ✅ US vs Honduras President - Correctly rejected (categoryMatch: 0)
+- ✅ Same US President markets - Correctly matched (categoryMatch: 1)
+- ✅ Mexico vs US markets - Correctly rejected
+- ✅ Trump vs Biden markets - Correctly rejected
+- ✅ Same person different formats - Correctly matched
+
 ## Git Repository Status
 
 ✅ **Repository Active** - Regular commits tracking progress
@@ -576,7 +601,8 @@ arbitrage-scanner/
 - Commit 3: Validation fixes and end-to-end testing
 - Commit 4: Phase 2 real-time infrastructure (@arb/realtime)
 - Commit 5: Phase 3 ML module (@arb/ml) with market matching & resolution prediction
-- **Next commit**: Phase 4 complete - REST API + Next.js dashboard
+- Commit 6: Phase 4 complete - REST API + Next.js dashboard
+- **Current**: Fix cross-platform market matching false positives
 
 ## Commands to Run
 
