@@ -1,2 +1,52 @@
 [
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXPRESPARTY-2028-R",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8181-32067",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 95,
+    "notes": "2028 Presidential Election - Republican Party Win"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXPRESPARTY-2028-D",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8181-32068",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 95,
+    "notes": "2028 Presidential Election - Democratic Party Win"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-SBES",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32113",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Bessent"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-RREI",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32283",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Rieder"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-PJEF",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32259",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Jefferson"
+  }
 ]

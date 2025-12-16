@@ -334,7 +334,7 @@ export class PredictItAdapter extends BaseExchange {
     const year = this.parseYear(fullText);
     const party = this.parseParty(fullText);
 
-    return {
+    const baseMarket: Market = {
       id: marketId,
       exchangeId: marketId,
       exchange: this.name,
@@ -369,6 +369,8 @@ export class PredictItAdapter extends BaseExchange {
         timestamp: new Date()
       }
     };
+
+    return this.enhanceMarketWithCategories(baseMarket);
   }
 
   private parsePositionType(text: string): PositionType {
