@@ -17,7 +17,8 @@ export interface VectorFilters {
 }
 
 export interface ChromaVectorStoreConfig {
-  path?: string;
+  host?: string;
+  port?: number;
   collectionName?: string;
 }
 
@@ -29,7 +30,10 @@ export class ChromaVectorStore {
 
   constructor(config: ChromaVectorStoreConfig = {}) {
     this.collectionName = config.collectionName ?? 'market_embeddings';
-    this.client = new ChromaClient({ path: config.path ?? 'http://localhost:8000' });
+    this.client = new ChromaClient({
+      host: config.host ?? 'localhost',
+      port: config.port ?? 8000
+    });
   }
 
   async initialize(): Promise<void> {

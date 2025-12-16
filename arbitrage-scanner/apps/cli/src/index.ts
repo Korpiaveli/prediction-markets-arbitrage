@@ -198,6 +198,7 @@ program
   .option('--all-exchanges', 'Include all available exchanges', false)
   .option('--categories <list>', 'Comma-separated allowed categories: politics,sports,crypto,economy,technology,entertainment,science,other')
   .option('--exclude-categories <list>', 'Comma-separated excluded categories')
+  .option('--max-markets <n>', 'Limit markets per exchange (for testing)', '0')
   .action(async (options) => {
     const spinner = ora('Finding market pairs...').start();
 
@@ -238,12 +239,14 @@ program
 
           spinner.text = `Matching ${exchange1.name} ⟷ ${exchange2.name}...`;
 
+          const maxMarkets = parseInt(options.maxMarkets);
           const matcher = new MarketMatcher({
             minConfidence: parseFloat(options.minConfidence),
             includeLowConfidence: options.includeLow,
             includeUncertain: options.includeUncertain,
             allowedCategories,
-            excludedCategories
+            excludedCategories,
+            maxMarketsPerExchange: maxMarkets > 0 ? maxMarkets : undefined
           });
 
           const pairs = await matcher.matchCrossExchangeMarkets(exchange1, exchange2);

@@ -20,7 +20,8 @@ export interface EmbeddingCache {
 
 export interface EmbeddingServiceConfig {
   useVectorDB?: boolean;
-  chromaPath?: string;
+  chromaHost?: string;
+  chromaPort?: number;
   collectionName?: string;
 }
 
@@ -39,7 +40,8 @@ export class EmbeddingService {
   constructor(config: EmbeddingServiceConfig = {}) {
     this.config = {
       useVectorDB: config.useVectorDB ?? false,
-      chromaPath: config.chromaPath ?? 'http://localhost:8000',
+      chromaHost: config.chromaHost ?? 'localhost',
+      chromaPort: config.chromaPort ?? 8000,
       collectionName: config.collectionName ?? 'market_embeddings'
     };
   }
@@ -99,7 +101,8 @@ export class EmbeddingService {
   private async initializeVectorStore(): Promise<void> {
     try {
       this.vectorStore = new ChromaVectorStore({
-        path: this.config.chromaPath,
+        host: this.config.chromaHost,
+        port: this.config.chromaPort,
         collectionName: this.config.collectionName
       });
       await this.vectorStore.initialize();

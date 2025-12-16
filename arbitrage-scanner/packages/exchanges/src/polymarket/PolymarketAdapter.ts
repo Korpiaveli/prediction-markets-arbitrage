@@ -118,13 +118,13 @@ export class PolymarketAdapter extends BaseExchange {
     // Create separate client for data API
     this.dataClient = axios.create({
       baseURL: this.dataApiUrl,
-      timeout: config.timeout || 5000
+      timeout: config.timeout || 30000
     });
 
     // Create Gamma API client for market discovery
     this.gammaClient = axios.create({
       baseURL: this.gammaApiUrl,
-      timeout: config.timeout || 5000
+      timeout: config.timeout || 30000
     });
   }
 

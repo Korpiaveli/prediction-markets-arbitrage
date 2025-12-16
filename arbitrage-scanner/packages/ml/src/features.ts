@@ -7,11 +7,21 @@
  * 2. Whether they will resolve identically (low resolution risk)
  */
 
-import { Market, MarketPair } from '@arb/core';
+import { Market, MarketPair, ExchangeName } from '@arb/core';
 import { FeatureVector } from './types';
 import { EmbeddingService } from './embeddings';
 
 export class FeatureExtractor {
+  private readonly usDefaultExchanges: ExchangeName[] = ['KALSHI', 'PREDICTIT'];
+
+  private readonly usPoliticians = [
+    'trump', 'biden', 'harris', 'vance', 'desantis', 'newsom', 'pence',
+    'mcconnell', 'pelosi', 'schumer', 'jeffries', 'obama', 'clinton',
+    'sanders', 'warren', 'buttigieg', 'booker', 'klobuchar', 'haley',
+    'ramaswamy', 'christie', 'scott', 'burgum', 'vivek', 'rfk', 'kennedy',
+    'aoc', 'ocasio-cortez', 'cruz', 'rubio', 'cotton', 'hawley', 'gaetz'
+  ];
+
   private readonly stopWords = new Set([
     'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at',
     'to', 'for', 'of', 'with', 'by', 'from', 'will', 'be',
@@ -391,12 +401,26 @@ export class FeatureExtractor {
     const text2 = (market2.title + ' ' + (market2.description || '') + ' ' +
       (market2.metadata?.rulesPrimary || '')).toLowerCase();
 
-    // Extract countries mentioned in each market
-    const countries1 = this.extractCountries(text1);
-    const countries2 = this.extractCountries(text2);
+    let countries1 = this.extractCountries(text1);
+    let countries2 = this.extractCountries(text2);
 
+    const hasUsPolitician1 = this.usPoliticians.some(p => text1.includes(p));
+    const hasUsPolitician2 = this.usPoliticians.some(p => text2.includes(p));
 
-    // If both markets mention countries, they should match
+    if (hasUsPolitician1 && countries1.length === 0) {
+      countries1 = ['united states'];
+    }
+    if (hasUsPolitician2 && countries2.length === 0) {
+      countries2 = ['united states'];
+    }
+
+    if (countries1.length === 0 && this.usDefaultExchanges.includes(market1.exchange)) {
+      countries1 = ['united states'];
+    }
+    if (countries2.length === 0 && this.usDefaultExchanges.includes(market2.exchange)) {
+      countries2 = ['united states'];
+    }
+
     if (countries1.length > 0 && countries2.length > 0) {
       // Check for any overlap
       const hasOverlap = countries1.some(c1 =>

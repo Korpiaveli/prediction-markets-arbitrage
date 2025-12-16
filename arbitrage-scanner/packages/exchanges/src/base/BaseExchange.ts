@@ -33,7 +33,7 @@ export abstract class BaseExchange implements IExchange {
 
     // Initialize HTTP client (apiUrl will be set by subclass)
     this.client = axios.create({
-      timeout: config.timeout || 5000,
+      timeout: config.timeout || 30000,
       headers: this.getHeaders()
     });
 

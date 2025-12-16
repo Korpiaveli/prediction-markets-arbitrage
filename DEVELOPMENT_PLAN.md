@@ -628,16 +628,17 @@ arbitrage-scanner/
 
 ### Phase 5: Production Readiness
 
-#### Immediate (Week 1)
-1. **Fix Resolution Score Display Issue** 🔴 HIGH
-   - 339 opportunities found but showing "No profitable opportunities"
-   - Issue: Opportunities being filtered but not displayed
-   - Action: Debug CLI output logic
+#### Immediate (This Week)
+1. **Run Continuous Scan with ChromaDB** 🔴 HIGH
+   - ChromaDB server running at localhost:8000
+   - Test semantic matching with persistent embeddings
+   - Measure improvement in matching accuracy
+   - Command: `npm run dev match-markets --min-confidence 60`
 
-2. **Lower Resolution Threshold for Testing** 🟡 MEDIUM
-   - Current: 65 (too strict for most matches)
-   - Many valid opportunities filtered at 45-60 scores
-   - Action: Add configurable thresholds per exchange pair
+2. **Validate Geographic Blocker in Production** 🔴 HIGH
+   - Run `match-markets` and verify no US vs foreign country matches
+   - Check blocked pairs log for false negatives
+   - Fine-tune US politician list if needed
 
 3. **24-48h Continuous Scan** 🟡 MEDIUM
    - Run scanner continuously to measure real arbitrage frequency
@@ -705,7 +706,44 @@ arbitrage-scanner/
 - Commit 7: Fix cross-platform market matching false positives
 - Commit 8: ML enhancements and capital turnover optimization
 - Commit 9: Remove Manifold, add exchange research documentation
-- **Current**: Market Matching Overhaul - VP vs President fix, hard blockers, ChromaDB
+- Commit 10: Geographic blocker US default fix, ChromaDB setup, ManualWhitelist
+- **Current**: Production testing with ChromaDB vector store
+
+### December 15, 2025 (Geographic Blocker Fix & ChromaDB Setup)
+
+**Problem Solved**: GeographicBlocker was allowing US vs Honduras matches because:
+- Condition `if (countries1.length > 0 && countries2.length > 0)` fails when one side has implicit US context
+- Kalshi/PredictIt markets about US politics don't explicitly mention "United States"
+
+**Solution Implemented**:
+1. ✅ Added US default assumption for Kalshi/PredictIt exchanges
+2. ✅ Added US politician detection (Trump, Biden, Harris, etc. → US context)
+3. ✅ Added blocked pairs logging for debugging
+4. ✅ Created 20 new tests for geographic blocking
+5. ✅ Updated features.ts with same US default logic
+6. ✅ Created ManualWhitelist system for verified market pairs
+7. ✅ Set up ChromaDB server on localhost:8000
+8. ✅ Fixed ChromaDB config to use host/port instead of deprecated path
+
+**Files Created/Modified**:
+- `packages/ml/src/validators/HardBlockerValidator.ts` - Enhanced with US defaults
+- `packages/ml/src/validators/ManualWhitelist.ts` - NEW whitelist system
+- `packages/ml/src/__tests__/geographic-blocker.test.ts` - NEW 20 tests
+- `packages/ml/src/features.ts` - Added US default logic
+- `packages/ml/src/vector/ChromaVectorStore.ts` - Fixed config API
+- `packages/ml/src/embeddings.ts` - Fixed ChromaDB config
+- `config/verified_pairs.json` - NEW whitelist data file
+
+**Environment Setup**:
+- Python 3.10 at: `C:\Users\korpe\AppData\Local\Programs\Python\Python310\`
+- ChromaDB installed via pip
+- ChromaDB server running: `chroma run --path ./data/chroma_data`
+- Server accessible at: http://localhost:8000
+
+**Test Results**:
+- 46/46 ML package tests pass
+- Original bug validated as fixed (US vs Honduras → BLOCKED)
+- ChromaDB integration test passed
 
 ### December 10, 2025 (Market Matching Overhaul Session)
 

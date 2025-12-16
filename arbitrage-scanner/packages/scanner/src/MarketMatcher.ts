@@ -39,6 +39,7 @@ export interface MatcherConfig {
   polymarketNormalizer?: ExchangeNormalizer;
   allowedCategories?: MarketCategory[];
   excludedCategories?: MarketCategory[];
+  maxMarketsPerExchange?: number;
 }
 
 export class MarketMatcher {
@@ -134,14 +135,7 @@ export class MarketMatcher {
 
     await this.initializeEmbeddings();
 
-    // Diagnostic logging for embedding service status
-    console.log('[DEBUG] Embedding service status:', {
-      available: !!this.embeddingService,
-      initialized: this.embeddingsInitialized,
-      ready: this.embeddingService?.isReady() ?? false
-    });
-
-    console.log('[MarketMatcher] Analyzing matches...\n');
+    console.log('[MarketMatcher] Analyzing matches...');
 
     const pairs: MarketPair[] = [];
     const allMatches: Array<{ pair: MarketPair; analysis: MatchAnalysis }> = [];
@@ -216,9 +210,22 @@ export class MarketMatcher {
       }
     }
 
+    // Apply market limit if configured (for testing/memory management)
+    if (this.config.maxMarketsPerExchange) {
+      const limit = this.config.maxMarketsPerExchange;
+      if (markets1.length > limit) {
+        console.log(`[MarketMatcher] Limiting ${exchange1.name}: ${markets1.length} → ${limit} markets`);
+        markets1 = markets1.slice(0, limit);
+      }
+      if (markets2.length > limit) {
+        console.log(`[MarketMatcher] Limiting ${exchange2.name}: ${markets2.length} → ${limit} markets`);
+        markets2 = markets2.slice(0, limit);
+      }
+    }
+
     await this.initializeEmbeddings();
 
-    console.log('[MarketMatcher] Analyzing matches...\n');
+    console.log('[MarketMatcher] Analyzing matches...');
 
     const pairs: CrossExchangePair[] = [];
     const allMatches: Array<{ pair: CrossExchangePair; analysis: MatchAnalysis }> = [];
@@ -359,10 +366,6 @@ export class MarketMatcher {
     // LAYER 1: Hard blocker validation (fast rejection)
     const blockResult = this.hardBlockerValidator.validate(market1, market2);
     if (blockResult.blocked) {
-      console.log(`\n[BLOCKED] ${market1.title.substring(0, 40)} vs ${market2.title.substring(0, 40)}`);
-      console.log(`  Reason: ${blockResult.reason}`);
-      console.log(`  Severity: ${blockResult.severity}`);
-
       return {
         titleSimilarity: 0,
         descriptionSimilarity: 0,
@@ -405,14 +408,6 @@ export class MarketMatcher {
     else if (confidence >= 60) level = 'medium';
     else if (confidence >= 40) level = 'low';
     else level = 'uncertain';
-
-    // Diagnostic logging for feature-level analysis
-    console.log(`\n[DEBUG] ${market1.title.substring(0, 40)} vs ${market2.title.substring(0, 40)}`);
-    console.log(`  titleSimilarity: ${features.titleSimilarity.toFixed(1)}% (conf: ${features.featureConfidence.titleSimilarity.toFixed(2)})`);
-    console.log(`  keywordOverlap: ${features.keywordOverlap.toFixed(1)}% (conf: ${features.featureConfidence.keywordOverlap.toFixed(2)})`);
-    console.log(`  embeddingSimilarity: ${features.embeddingSimilarity?.toFixed(1) ?? 'N/A'}% (conf: ${features.featureConfidence.embeddingSimilarity?.toFixed(2) ?? 'N/A'})`);
-    console.log(`  categoryMatch: ${features.categoryMatch} (conf: ${features.featureConfidence.categoryMatch.toFixed(2)})`);
-    console.log(`  → Final confidence: ${confidence.toFixed(1)}% (level: ${level})`);
 
     return {
       titleSimilarity: features.titleSimilarity,

@@ -1,7 +1,14 @@
-import { Market, PositionType, EventType } from '@arb/core';
+import { Market, PositionType, EventType, ExchangeName } from '@arb/core';
 import { KalshiTickerParser } from '../parsers/KalshiTickerParser.js';
 
 export type BlockerSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM';
+
+interface GeographyResult {
+  countries: string[];
+  isUs: boolean;
+  defaultApplied: boolean;
+  confidence: number;
+}
 
 export interface HardBlockerResult {
   blocked: boolean;
@@ -136,38 +143,62 @@ class GeographicBlocker implements HardBlocker {
   name = 'GeographicBlocker';
   severity: BlockerSeverity = 'CRITICAL';
 
+  private readonly usDefaultExchanges: ExchangeName[] = ['KALSHI', 'PREDICTIT'];
+
   private readonly countries = [
     'united states', 'honduras', 'mexico', 'canada', 'brazil', 'argentina',
     'united kingdom', 'france', 'germany', 'italy', 'spain', 'poland',
     'ukraine', 'russia', 'china', 'japan', 'india', 'australia',
-    'israel', 'iran', 'turkey', 'egypt', 'nigeria', 'south africa'
+    'israel', 'iran', 'turkey', 'egypt', 'nigeria', 'south africa',
+    'venezuela', 'colombia', 'peru', 'chile', 'guatemala', 'el salvador',
+    'nicaragua', 'costa rica', 'panama', 'cuba', 'dominican republic',
+    'south korea', 'north korea', 'taiwan', 'philippines', 'indonesia',
+    'thailand', 'vietnam', 'malaysia', 'singapore', 'pakistan', 'bangladesh',
+    'saudi arabia', 'uae', 'qatar', 'iraq', 'syria', 'lebanon', 'jordan'
   ];
 
   private readonly usIndicators = [
     'white house', 'congress', 'senate', 'house of representatives',
     'supreme court', 'scotus', 'federal reserve', 'us president',
-    'american president', 'republican', 'democrat', 'gop', 'dnc', 'rnc'
+    'american president', 'republican', 'democrat', 'gop', 'dnc', 'rnc',
+    'electoral college', 'super tuesday', 'primary', 'caucus', 'inauguration'
   ];
+
+  private readonly usPoliticians = [
+    'trump', 'biden', 'harris', 'vance', 'desantis', 'newsom', 'pence',
+    'mcconnell', 'pelosi', 'schumer', 'jeffries', 'obama', 'clinton',
+    'sanders', 'warren', 'buttigieg', 'booker', 'klobuchar', 'haley',
+    'ramaswamy', 'christie', 'scott', 'burgum', 'vivek', 'rfk', 'kennedy',
+    'aoc', 'ocasio-cortez', 'cruz', 'rubio', 'cotton', 'hawley', 'gaetz'
+  ];
+
+  private static DEBUG = process.env.DEBUG_GEO_BLOCKER === 'true';
 
   check(market1: Market, market2: Market): HardBlockerResult {
     const geo1 = this.extractGeography(market1);
     const geo2 = this.extractGeography(market2);
 
+    // Primary check: If both markets have detected countries, they must overlap
     if (geo1.countries.length > 0 && geo2.countries.length > 0) {
       const overlap = geo1.countries.some(c1 =>
         geo2.countries.some(c2 => this.countriesMatch(c1, c2))
       );
 
       if (!overlap) {
+        const reason = `Geographic mismatch: ${geo1.countries.join(', ')} vs ${geo2.countries.join(', ')}`;
+        if (GeographicBlocker.DEBUG) {
+          console.log(`[GeographicBlocker] BLOCKED: ${reason}`);
+        }
         return {
           blocked: true,
-          reason: `Geographic mismatch: ${geo1.countries.join(', ')} vs ${geo2.countries.join(', ')}`,
+          reason,
           severity: 'CRITICAL',
           blocker: this.name
         };
       }
     }
 
+    // Secondary check: US market (by indicators) vs explicit non-US country
     if (geo1.isUs && geo2.countries.length > 0 && !geo2.countries.some(c => this.isUsCountry(c))) {
       return {
         blocked: true,
@@ -189,9 +220,11 @@ class GeographicBlocker implements HardBlocker {
     return { blocked: false, reason: null, severity: 'MEDIUM' };
   }
 
-  private extractGeography(market: Market): { countries: string[]; isUs: boolean } {
+  private extractGeography(market: Market): GeographyResult {
     const text = `${market.title} ${market.description || ''} ${market.metadata?.rulesPrimary || ''}`.toLowerCase();
     const countries: string[] = [];
+    let defaultApplied = false;
+    let confidence = 1.0;
 
     for (const country of this.countries) {
       if (text.includes(country)) {
@@ -205,10 +238,28 @@ class GeographicBlocker implements HardBlocker {
       }
     }
 
-    const isUs = this.usIndicators.some(ind => text.includes(ind)) ||
+    let isUs = this.usIndicators.some(ind => text.includes(ind)) ||
       countries.some(c => this.isUsCountry(c));
 
-    return { countries, isUs };
+    const hasUsPolitician = this.usPoliticians.some(p => text.includes(p));
+    if (hasUsPolitician && !isUs) {
+      isUs = true;
+      if (!countries.some(c => this.isUsCountry(c))) {
+        countries.push('united states');
+        confidence = 0.9;
+      }
+    }
+
+    if (countries.length === 0 && !isUs) {
+      if (this.usDefaultExchanges.includes(market.exchange)) {
+        countries.push('united states');
+        isUs = true;
+        defaultApplied = true;
+        confidence = 0.7;
+      }
+    }
+
+    return { countries, isUs, defaultApplied, confidence };
   }
 
   private countriesMatch(c1: string, c2: string): boolean {
@@ -336,6 +387,16 @@ class EventTypeBlocker implements HardBlocker {
   }
 }
 
+export interface BlockedPairLog {
+  market1: string;
+  market2: string;
+  market1Title: string;
+  market2Title: string;
+  blocker: string;
+  reason: string;
+  timestamp: Date;
+}
+
 export class HardBlockerValidator {
   private readonly blockers: HardBlocker[] = [
     new PositionTypeBlocker(),
@@ -345,10 +406,21 @@ export class HardBlockerValidator {
     new EventTypeBlocker()
   ];
 
+  private blockedLog: BlockedPairLog[] = [];
+
   validate(market1: Market, market2: Market): HardBlockerResult {
     for (const blocker of this.blockers) {
       const result = blocker.check(market1, market2);
       if (result.blocked) {
+        this.blockedLog.push({
+          market1: `${market1.exchange}:${market1.id}`,
+          market2: `${market2.exchange}:${market2.id}`,
+          market1Title: market1.title.slice(0, 80),
+          market2Title: market2.title.slice(0, 80),
+          blocker: result.blocker || blocker.name,
+          reason: result.reason || 'Unknown',
+          timestamp: new Date()
+        });
         return result;
       }
     }
@@ -358,6 +430,14 @@ export class HardBlockerValidator {
       reason: null,
       severity: 'MEDIUM'
     };
+  }
+
+  getBlockedPairs(): BlockedPairLog[] {
+    return [...this.blockedLog];
+  }
+
+  clearBlockedLog(): void {
+    this.blockedLog = [];
   }
 
   validateWithDetails(market1: Market, market2: Market): {
