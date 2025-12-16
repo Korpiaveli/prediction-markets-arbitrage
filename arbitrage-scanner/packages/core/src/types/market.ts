@@ -29,6 +29,14 @@ export type EventType =
 
 export type PoliticalParty = 'REPUBLICAN' | 'DEMOCRAT' | 'INDEPENDENT' | 'ANY' | null;
 
+export interface PriceSnapshot {
+  yesAsk: number;
+  yesBid: number;
+  noAsk: number;
+  noBid: number;
+  timestamp: Date;
+}
+
 export interface Market {
   id: string;
   exchangeId: string;
@@ -45,7 +53,8 @@ export interface Market {
   eventType?: EventType;
   year?: number;
   party?: PoliticalParty;
-  metadata?: Record<string, any>; // Exchange-specific data (resolution criteria, fees, etc.)
+  metadata?: Record<string, any>;
+  priceSnapshot?: PriceSnapshot;
 }
 
 export interface Quote {

@@ -824,6 +824,90 @@ Layer 4: ChromaDB (persistent embeddings + metadata filtering)
 Layer 5: Scoring (weighted confidence)
 ```
 
+### December 16, 2025 (Price-First Arbitrage Scanner)
+
+**Problem Solved**: Semantic-first matching approach is backwards for arbitrage detection
+- Current system: Matches semantically first → then checks prices → 0 results
+- Root cause: 70% embedding similarity → 18% final score due to 0.3x × 0.1 = 97% reduction
+- Issue: Expensive semantic matching wasted on pairs with no price opportunity
+
+**Solution Implemented**: Price-First Arbitrage Detection
+
+**New Architecture**:
+```
+OLD: Fetch → Semantic Match (expensive) → Check Prices → 0 results
+NEW: Fetch + Prices → Price Screen (fast) → Light Validation → Real Opportunities
+```
+
+**Phases Completed**:
+1. ✅ **Phase 1: Price Data Integration**
+   - Added `PriceSnapshot` interface to `Market` type
+   - Updated `KalshiAdapter.transformMarket()` with price data
+   - Updated `PolymarketAdapter.transformGammaMarket()` with token prices
+   - Updated `PredictItAdapter.transformContract()` with contract prices
+
+2. ✅ **Phase 2: Price-First Scanner**
+   - Created scanner types (`PriceCandidate`, `PriceScreenConfig`, `ArbitrageOpportunity`)
+   - Created `PriceFirstScanner` class with O(n×m) price screening
+   - Integrated `HardBlockerValidator` for fast rejection
+
+3. ✅ **Phase 3: Light Semantic Validation**
+   - Entity extraction (politicians, years, event keywords)
+   - Category overlap checking
+   - Year mismatch detection
+   - No expensive embeddings required
+
+4. ✅ **Phase 4: CLI Integration**
+   - Added `scan-arb` command with options:
+     - `--threshold <n>` - Max total cost (default: 1.02)
+     - `--min-profit <n>` - Minimum net profit % (default: 0.5)
+     - `--exchanges <list>` - Exchange selection
+     - `--categories <list>` - Category filter
+     - `--max-markets <n>` - Markets per exchange limit
+     - `--continuous` - Run continuously
+     - `-o, --output <file>` - Save results
+
+**Files Created** (4 new):
+- `packages/scanner/src/types.ts` - Scanner types
+- `packages/scanner/src/PriceFirstScanner.ts` - Main scanner class (~250 lines)
+
+**Files Modified** (6):
+- `packages/core/src/types/market.ts` - Added PriceSnapshot interface
+- `packages/exchanges/src/kalshi/KalshiAdapter.ts` - priceSnapshot in transformMarket
+- `packages/exchanges/src/polymarket/PolymarketAdapter.ts` - priceSnapshot in transformGammaMarket
+- `packages/exchanges/src/predictit/PredictItAdapter.ts` - priceSnapshot in transformContract
+- `packages/scanner/src/index.ts` - Export new types and scanner
+- `apps/cli/src/index.ts` - Added scan-arb command
+
+**Test Results**:
+```
+$ arb-scan scan-arb --max-markets 100 --exchanges kalshi,polymarket
+[PriceFirstScanner] KALSHI: 100 markets, 100 with prices
+[PriceFirstScanner] POLYMARKET: 100 markets, 100 with prices
+[PriceFirstScanner] Found 9800 price-qualified candidates
+[PriceFirstScanner] 184 passed validation
+[PriceFirstScanner] 176 final opportunities
+[PriceFirstScanner] Scan completed in 3155ms
+```
+
+**Performance Improvement**:
+| Metric | Before (Semantic-First) | After (Price-First) |
+|--------|-------------------------|---------------------|
+| Scan time | 7+ hours (timeout) | 3.1 seconds |
+| Candidates screened | 0 (scoring too strict) | 9800 price-qualified |
+| Final opportunities | 0 | 176 (needs validation refinement) |
+
+**Known Limitations**:
+- Light validation still passes some false positives (unrelated markets)
+- Need to tighten entity matching for better precision
+- Consider embedding validation only for top candidates
+
+**Next Steps**:
+- Phase 5: Write unit tests for PriceFirstScanner
+- Tighten entity extraction for better precision
+- Add verified pair whitelist integration
+- Consider hybrid approach: price-first + embedding for top 50 candidates
+
 ---
 
 ## Commands to Run

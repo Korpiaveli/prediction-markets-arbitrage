@@ -359,6 +359,95 @@ program
     }
   });
 
+// Scan-arb command (price-first arbitrage scanner)
+program
+  .command('scan-arb')
+  .description('Scan for arbitrage using price-first approach (fast, efficient)')
+  .option('--threshold <n>', 'Max total cost (e.g., 1.02 = 2% profit threshold)', '1.02')
+  .option('--min-profit <n>', 'Minimum net profit % after fees', '0.5')
+  .option('--exchanges <list>', `Comma-separated: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket,predictit')
+  .option('--categories <list>', 'Filter categories: politics,economy,crypto', 'politics')
+  .option('--max-markets <n>', 'Max markets per exchange', '2000')
+  .option('-o, --output <file>', 'Save results to JSON file')
+  .option('--continuous', 'Run continuously with interval')
+  .option('--interval <ms>', 'Scan interval in milliseconds', '30000')
+  .action(async (options) => {
+    const spinner = ora('Initializing price-first scanner...').start();
+
+    try {
+      const { PriceFirstScanner } = await import('@arb/scanner');
+
+      const exchangeOptions = parseExchangeList(options.exchanges);
+      const exchanges = createExchangesFromFactory({
+        ...exchangeOptions,
+        filterSports: true
+      });
+
+      if (exchanges.length < 2) {
+        throw new Error('Need at least 2 exchanges. Use --exchanges');
+      }
+
+      spinner.text = `Connecting to ${exchanges.length} exchanges...`;
+      await Promise.all(exchanges.map(e => e.connect()));
+
+      const scanner = new PriceFirstScanner();
+
+      const categories = options.categories
+        ? options.categories.split(',').map((c: string) => c.trim() as MarketCategory)
+        : ['politics'];
+
+      const config = {
+        maxTotalCost: parseFloat(options.threshold),
+        minGrossArbitrage: parseFloat(options.minProfit) / 100,
+        includeCategories: categories,
+        maxMarketsPerExchange: parseInt(options.maxMarkets)
+      };
+
+      const runScan = async () => {
+        spinner.text = 'Scanning for arbitrage...';
+        const result = await scanner.scan(exchanges, config);
+
+        spinner.succeed(`Scan complete in ${result.scanTime}ms`);
+
+        displayPriceFirstResults(result, parseFloat(options.minProfit));
+
+        if (options.output) {
+          const fs = require('fs');
+          fs.writeFileSync(options.output, JSON.stringify(result, null, 2));
+          console.log(chalk.green(`\n💾 Saved to: ${options.output}`));
+        }
+
+        return result;
+      };
+
+      if (options.continuous) {
+        console.log(chalk.blue(`\n🔄 Running continuously (interval: ${options.interval}ms)\n`));
+
+        const interval = parseInt(options.interval);
+        const runLoop = async () => {
+          await runScan();
+          setTimeout(runLoop, interval);
+        };
+
+        await runLoop();
+
+        process.on('SIGINT', async () => {
+          console.log(chalk.yellow('\n\n⏹ Shutting down...'));
+          await Promise.all(exchanges.map(e => e.disconnect()));
+          process.exit(0);
+        });
+      } else {
+        await runScan();
+        await Promise.all(exchanges.map(e => e.disconnect()));
+      }
+
+    } catch (error) {
+      spinner.fail('Scan failed');
+      console.error(chalk.red(error));
+      process.exit(1);
+    }
+  });
+
 // History command
 program
   .command('history')
@@ -515,6 +604,92 @@ function displayResults(opportunities: any[], minProfit: number) {
   }
 
   console.log('');
+}
+
+function displayPriceFirstResults(result: any, minProfit: number) {
+  console.log(chalk.cyan('\n═══════════════════════════════════════════════════════════'));
+  console.log(chalk.cyan.bold('              PRICE-FIRST ARBITRAGE SCAN                   '));
+  console.log(chalk.cyan('═══════════════════════════════════════════════════════════'));
+
+  // Summary
+  console.log(chalk.white('\n📊 Scan Summary:'));
+  Object.entries(result.marketsScanned).forEach(([exchange, count]) => {
+    console.log(`  ${exchange}: ${count} markets`);
+  });
+  console.log(`  Price-qualified candidates: ${result.candidates.length}`);
+  console.log(`  Passed validation: ${result.validated.length}`);
+  console.log(`  Final opportunities: ${result.opportunities.length}`);
+  console.log(`  Scan time: ${result.scanTime}ms`);
+
+  if (result.opportunities.length === 0) {
+    console.log(chalk.yellow('\n  No profitable opportunities found above threshold\n'));
+
+    if (result.candidates.length > 0) {
+      console.log(chalk.gray('  Top price-qualified candidates (before validation):'));
+      result.candidates.slice(0, 5).forEach((c: any) => {
+        const m1 = c.market1;
+        const m2 = c.market2;
+        console.log(chalk.gray(`    • ${c.exchange1}/${c.exchange2}: ${c.priceSignal.combo}`));
+        console.log(chalk.gray(`      ${m1.title.substring(0, 40)}...`));
+        console.log(chalk.gray(`      ${m2.title.substring(0, 40)}...`));
+        console.log(chalk.gray(`      Total cost: ${c.priceSignal.totalCost.toFixed(4)}, Gross: ${(c.priceSignal.grossArbitrage * 100).toFixed(2)}%`));
+      });
+    }
+    return;
+  }
+
+  // Opportunities table
+  const table = new Table({
+    head: [
+      chalk.bold('Exchanges'),
+      chalk.bold('Direction'),
+      chalk.bold('Gross %'),
+      chalk.bold('Net %'),
+      chalk.bold('Cost'),
+      chalk.bold('Fees'),
+      chalk.bold('Conf')
+    ],
+    colWidths: [18, 10, 10, 10, 10, 10, 8]
+  });
+
+  const filtered = result.opportunities.filter((o: any) => o.netProfitPercent >= minProfit);
+
+  for (const opp of filtered.slice(0, 15)) {
+    const netColor = opp.netProfitPercent >= 2 ? chalk.green :
+                     opp.netProfitPercent >= 1 ? chalk.yellow :
+                     chalk.white;
+
+    table.push([
+      `${opp.candidate.exchange1}/${opp.candidate.exchange2}`,
+      opp.direction,
+      `${opp.grossProfitPercent.toFixed(2)}%`,
+      netColor(`${opp.netProfitPercent.toFixed(2)}%`),
+      `$${opp.totalCost.toFixed(3)}`,
+      `$${opp.fees.total.toFixed(3)}`,
+      `${opp.confidence}%`
+    ]);
+  }
+
+  console.log(chalk.white('\n💰 Opportunities:\n'));
+  console.log(table.toString());
+
+  // Show market details for top opportunities
+  console.log(chalk.white('\n📝 Market Details:\n'));
+  for (const opp of filtered.slice(0, 5)) {
+    const m1 = opp.candidate.market1;
+    const m2 = opp.candidate.market2;
+    const ps1 = m1.priceSnapshot;
+    const ps2 = m2.priceSnapshot;
+
+    console.log(chalk.cyan(`  ${opp.candidate.exchange1}/${opp.candidate.exchange2} - ${opp.direction} (${opp.netProfitPercent.toFixed(2)}% net)`));
+    console.log(`    ${opp.candidate.exchange1}: ${m1.title.substring(0, 60)}`);
+    console.log(chalk.gray(`      ID: ${m1.id}`));
+    console.log(chalk.gray(`      YES: ${ps1?.yesAsk?.toFixed(3) || 'N/A'} | NO: ${ps1?.noAsk?.toFixed(3) || 'N/A'}`));
+    console.log(`    ${opp.candidate.exchange2}: ${m2.title.substring(0, 60)}`);
+    console.log(chalk.gray(`      ID: ${m2.id}`));
+    console.log(chalk.gray(`      YES: ${ps2?.yesAsk?.toFixed(3) || 'N/A'} | NO: ${ps2?.noAsk?.toFixed(3) || 'N/A'}`));
+    console.log('');
+  }
 }
 
 function displayAnalysis(kalshiQuote: any, polyQuote: any, results: any[]) {

@@ -384,7 +384,23 @@ export class PolymarketAdapter extends BaseExchange {
         })) || [],
         tags: event?.tags || data.tags || [],
         category: event?.category || data.category
-      }
+      },
+      priceSnapshot: this.extractPriceSnapshot(data.tokens)
+    };
+  }
+
+  private extractPriceSnapshot(tokens: any[] | undefined): { yesAsk: number; yesBid: number; noAsk: number; noBid: number; timestamp: Date } {
+    const yesToken = tokens?.find((t: any) => t.outcome === 'Yes');
+    const noToken = tokens?.find((t: any) => t.outcome === 'No');
+    const yesPrice = yesToken?.price ?? 0.5;
+    const noPrice = noToken?.price ?? 0.5;
+
+    return {
+      yesAsk: yesPrice,
+      yesBid: yesPrice * 0.98,
+      noAsk: noPrice,
+      noBid: noPrice * 0.98,
+      timestamp: new Date()
     };
   }
 

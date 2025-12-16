@@ -360,6 +360,13 @@ export class PredictItAdapter extends BaseExchange {
         bestSellNoCost: contract.bestSellNoCost,
         lastClosePrice: contract.lastClosePrice,
         category: this.extractCategory(market.name)
+      },
+      priceSnapshot: {
+        yesAsk: contract.bestBuyYesCost ?? 0.5,
+        yesBid: contract.bestSellYesCost ?? 0.5,
+        noAsk: contract.bestBuyNoCost ?? 0.5,
+        noBid: contract.bestSellNoCost ?? 0.5,
+        timestamp: new Date()
       }
     };
   }

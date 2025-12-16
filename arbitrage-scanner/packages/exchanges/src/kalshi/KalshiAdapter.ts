@@ -451,6 +451,13 @@ export class KalshiAdapter extends BaseExchange {
         liquidity: parseFloat(data.liquidity_dollars || '0'),
         tickerParseConfidence: parsed.confidence,
         candidateCode: parsed.candidateCode
+      },
+      priceSnapshot: {
+        yesAsk: parseFloat(data.yes_ask_dollars || '0') || data.yes_ask / 100 || 0,
+        yesBid: parseFloat(data.yes_bid_dollars || '0') || data.yes_bid / 100 || 0,
+        noAsk: parseFloat(data.no_ask_dollars || '0') || data.no_ask / 100 || 0,
+        noBid: parseFloat(data.no_bid_dollars || '0') || data.no_bid / 100 || 0,
+        timestamp: new Date()
       }
     };
   }

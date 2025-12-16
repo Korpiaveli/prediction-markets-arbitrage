@@ -15,6 +15,17 @@ export {
   type TurnoverScore,
   type CompoundingProjection
 } from './CapitalTurnoverRanker.js';
+export {
+  type PriceCandidate,
+  type PriceScreenConfig,
+  type PriceSignal,
+  type PriceCombo,
+  type ValidationResult,
+  type ArbitrageScanResult,
+  type ArbitrageOpportunity,
+  DEFAULT_PRICE_SCREEN_CONFIG
+} from './types.js';
+export { PriceFirstScanner } from './PriceFirstScanner.js';
 
 // Factory function
 import { ScannerConfig } from '@arb/core';
