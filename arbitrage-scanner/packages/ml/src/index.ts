@@ -31,8 +31,8 @@ export { ConfidenceTracker } from './ConfidenceTracker';
 export { MonteCarloSimulator } from './MonteCarloSimulator';
 export { KalshiTickerParser, kalshiTickerParser, PredictItParser, predictItParser } from './parsers';
 export type { ParsedKalshiTicker, ParsedPredictItMarket } from './parsers';
-export { HardBlockerValidator, hardBlockerValidator } from './validators';
-export type { HardBlockerResult, BlockerSeverity } from './validators';
+export { HardBlockerValidator, hardBlockerValidator, ManualWhitelist, manualWhitelist } from './validators';
+export type { HardBlockerResult, BlockerSeverity, WhitelistEntry } from './validators';
 export { ChromaVectorStore, getVectorStore, resetVectorStore } from './vector';
 export type { SimilarMarket, VectorFilters, ChromaVectorStoreConfig } from './vector';
 

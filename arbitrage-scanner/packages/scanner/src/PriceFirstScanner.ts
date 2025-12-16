@@ -4,7 +4,7 @@ import {
   IExchange,
   FeeStructure
 } from '@arb/core';
-import { HardBlockerValidator } from '@arb/ml';
+import { HardBlockerValidator, ManualWhitelist } from '@arb/ml';
 import {
   PriceCandidate,
   PriceScreenConfig,
@@ -28,11 +28,17 @@ const DEFAULT_FEES: FeeStructure = {
 
 export class PriceFirstScanner {
   private validator: HardBlockerValidator;
+  private whitelist: ManualWhitelist;
   private fees: FeeStructure;
 
   constructor(fees: FeeStructure = DEFAULT_FEES) {
     this.validator = new HardBlockerValidator();
+    this.whitelist = new ManualWhitelist();
     this.fees = fees;
+  }
+
+  async loadWhitelist(filePath: string): Promise<void> {
+    await this.whitelist.loadFromFile(filePath);
   }
 
   async scan(
@@ -182,6 +188,10 @@ export class PriceFirstScanner {
 
   private validateCandidates(candidates: PriceCandidate[]): PriceCandidate[] {
     return candidates.filter(candidate => {
+      if (this.whitelist.isWhitelisted(candidate.market1.id, candidate.market2.id)) {
+        return true;
+      }
+
       const result = this.validator.validate(candidate.market1, candidate.market2);
 
       if (result.blocked) {

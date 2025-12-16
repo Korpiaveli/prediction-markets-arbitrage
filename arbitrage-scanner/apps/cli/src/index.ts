@@ -368,6 +368,7 @@ program
   .option('--exchanges <list>', `Comma-separated: ${getAvailableExchanges().join(', ')}`, 'kalshi,polymarket,predictit')
   .option('--categories <list>', 'Filter categories: politics,economy,crypto', 'politics')
   .option('--max-markets <n>', 'Max markets per exchange', '2000')
+  .option('--whitelist <file>', 'Load verified pairs whitelist from JSON file')
   .option('-o, --output <file>', 'Save results to JSON file')
   .option('--continuous', 'Run continuously with interval')
   .option('--interval <ms>', 'Scan interval in milliseconds', '30000')
@@ -391,6 +392,11 @@ program
       await Promise.all(exchanges.map(e => e.connect()));
 
       const scanner = new PriceFirstScanner();
+
+      if (options.whitelist) {
+        spinner.text = 'Loading whitelist...';
+        await scanner.loadWhitelist(path.resolve(options.whitelist));
+      }
 
       const categories = options.categories
         ? options.categories.split(',').map((c: string) => c.trim() as MarketCategory)
