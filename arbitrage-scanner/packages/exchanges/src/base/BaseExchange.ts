@@ -10,8 +10,12 @@ import {
   OrderRequest,
   OrderResult,
   OrderStatus,
-  Balance
+  Balance,
+  MarketCategory,
+  GetMarketsOptions
 } from '@arb/core';
+
+export type { GetMarketsOptions };
 import axios, { AxiosInstance } from 'axios';
 import PQueue from 'p-queue';
 import NodeCache from 'node-cache';
@@ -129,7 +133,7 @@ export abstract class BaseExchange implements IExchange {
   }
 
   // Abstract methods that must be implemented by subclasses
-  abstract getMarkets(): Promise<Market[]>;
+  abstract getMarkets(options?: GetMarketsOptions): Promise<Market[]>;
   abstract getMarket(marketId: string): Promise<Market | null>;
   abstract getQuote(marketId: string): Promise<Quote>;
   abstract placeOrder(order: OrderRequest): Promise<OrderResult>;
@@ -177,5 +181,45 @@ export abstract class BaseExchange implements IExchange {
       categories,
       primaryCategory
     };
+  }
+
+  protected matchesKeywords(market: Market, keywords: string[]): boolean {
+    if (!keywords || keywords.length === 0) return true;
+    const text = `${market.title} ${market.description || ''}`.toLowerCase();
+    return keywords.some(kw => text.includes(kw.toLowerCase()));
+  }
+
+  protected matchesCategories(market: Market, categories: MarketCategory[]): boolean {
+    if (!categories || categories.length === 0) return true;
+    if (!market.categories || market.categories.length === 0) return false;
+
+    // When filtering for politics, exclude markets that are primarily sports
+    // (e.g., "Austin Peay Governors vs Loyola" matches "governor" but is sports)
+    if (categories.includes('politics') && !categories.includes('sports')) {
+      if (market.categories.includes('sports') && this.isSportsContext(market)) {
+        return false;
+      }
+    }
+
+    return market.categories.some(cat => categories.includes(cat));
+  }
+
+  protected isSportsContext(market: Market): boolean {
+    const text = `${market.title} ${market.description || ''}`.toLowerCase();
+    const sportsPatterns = [
+      /\bvs\.?\b/i,
+      /\bgame\b.*\b(over|under)\b/i,
+      /\b(spread|moneyline|o\/u)\b/i,
+      /\b(finals|playoffs|championship|tournament|bowl)\b/i,
+      /\b(team|league|season|match)\b/i
+    ];
+    return sportsPatterns.some(p => p.test(text));
+  }
+
+  protected shouldIncludeMarket(market: Market, options?: GetMarketsOptions): boolean {
+    if (!options) return true;
+    if (options.keywords && !this.matchesKeywords(market, options.keywords)) return false;
+    if (options.categories && !this.matchesCategories(market, options.categories)) return false;
+    return true;
   }
 }

@@ -161,6 +161,7 @@ export class CategoryDetector {
     // Extract from metadata tags if available
     if (metadata?.tags && Array.isArray(metadata.tags)) {
       for (const tag of metadata.tags) {
+        if (typeof tag !== 'string') continue;
         const tagLower = tag.toLowerCase();
         const matchingPattern = CATEGORY_PATTERNS.find(p =>
           p.keywords.some(k => tagLower.includes(k.toLowerCase()))

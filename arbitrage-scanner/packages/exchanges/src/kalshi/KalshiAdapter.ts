@@ -10,7 +10,7 @@ import {
   Balance,
   PriceHistory
 } from '@arb/core';
-import { BaseExchange } from '../base/BaseExchange.js';
+import { BaseExchange, GetMarketsOptions } from '../base/BaseExchange.js';
 import { KalshiTickerParser } from '@arb/ml';
 
 interface KalshiConfig extends ExchangeConfig {
@@ -89,18 +89,20 @@ export class KalshiAdapter extends BaseExchange {
     this.filterTypes = config.filterTypes ?? ['kxmvementions', 'nflsinglegame', 'nflmultigame'];
   }
 
-  async getMarkets(): Promise<Market[]> {
-    const cacheKey = this.getCacheKey('markets');
+  async getMarkets(options?: GetMarketsOptions): Promise<Market[]> {
+    const cacheKey = this.getCacheKey('markets', options ? JSON.stringify(options) : undefined);
     const cached = this.cache.get<Market[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      // Fetch ALL markets using cursor pagination (no limit)
-      const allMarkets: KalshiMarket[] = [];
+      const filteredMarkets: Market[] = [];
       let cursor: string | undefined;
-      const pageSize = 1000; // Max per request
+      let totalFetched = 0;
+      const pageSize = 1000;
+      const maxMarkets = options?.maxMarkets || 60000;
 
-      console.log(`[${this.name}] Fetching all markets (no limit)...`);
+      const hasFilters = options?.keywords?.length || options?.categories?.length;
+      console.log(`[${this.name}] Fetching markets${hasFilters ? ' with pre-filtering' : ''}${options?.maxMarkets ? ` (limit: ${options.maxMarkets})` : ''}...`);
 
       do {
         let retries = 0;
@@ -132,55 +134,47 @@ export class KalshiAdapter extends BaseExchange {
           break;
         }
 
-        allMarkets.push(...response.markets);
+        totalFetched += response.markets.length;
+
+        for (const m of response.markets) {
+          if (m.status !== 'open' && m.status !== 'active') continue;
+
+          if (this.filterSports) {
+            const title = m.title.toLowerCase();
+            const ticker = m.ticker.toLowerCase();
+            let skip = false;
+            for (const filterType of this.filterTypes) {
+              if (ticker.includes(filterType)) { skip = true; break; }
+            }
+            if (skip) continue;
+            if (/\d+\+/.test(title) || /yards|points scored|touchdowns|completions/i.test(title)) continue;
+          }
+
+          const market = this.enhanceMarketWithCategories(this.transformMarket(m));
+
+          if (this.shouldIncludeMarket(market, options)) {
+            filteredMarkets.push(market);
+          }
+
+          if (filteredMarkets.length >= maxMarkets) {
+            console.log(`[${this.name}] Reached target of ${maxMarkets} matching markets`);
+            break;
+          }
+        }
+
         cursor = response.cursor;
 
-        if (allMarkets.length > 60000) {
-          console.warn(`[${this.name}] Reached safety limit of 60000 markets`);
+        if (filteredMarkets.length >= maxMarkets) break;
+        if (totalFetched > 60000) {
+          console.warn(`[${this.name}] Reached safety limit of 60000 total markets fetched`);
           break;
         }
       } while (cursor);
 
-      console.log(`[${this.name}] Fetched ${allMarkets.length} total markets`);
+      console.log(`[${this.name}] Fetched ${totalFetched} total, kept ${filteredMarkets.length} matching markets`);
 
-      // Apply filtering
-      const markets = allMarkets
-        .filter((m) => {
-          // Status filter
-          if (m.status !== 'open' && m.status !== 'active') {
-            return false;
-          }
-
-          // Only apply sports filtering if enabled
-          if (!this.filterSports) {
-            return true;
-          }
-
-          // Filter out pure NFL/sports prop bets (commentator mentions, player stats)
-          const title = m.title.toLowerCase();
-          const ticker = m.ticker.toLowerCase();
-
-          // Exclude specific ticker types from filterTypes config
-          for (const filterType of this.filterTypes) {
-            if (ticker.includes(filterType)) {
-              return false;
-            }
-          }
-
-          // Exclude detailed player stat props
-          if (/\d+\+/.test(title) || /yards|points scored|touchdowns|completions/i.test(title)) {
-            return false;
-          }
-
-          return true;
-        })
-        .map((m) => this.enhanceMarketWithCategories(this.transformMarket(m)));
-
-      const filterStatus = this.filterSports ? 'ON' : 'OFF';
-      console.log(`[${this.name}] Filtered to ${markets.length} markets (sports filter: ${filterStatus}, removed: ${allMarkets.length - markets.length})`);
-
-      this.cache.set(cacheKey, markets, 30); // Cache for 30 seconds
-      return markets;
+      this.cache.set(cacheKey, filteredMarkets, 30);
+      return filteredMarkets;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch markets:`, error);
       throw error;

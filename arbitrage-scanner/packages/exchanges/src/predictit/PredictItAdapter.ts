@@ -12,7 +12,7 @@ import {
   EventType,
   PoliticalParty
 } from '@arb/core';
-import { BaseExchange } from '../base/BaseExchange.js';
+import { BaseExchange, GetMarketsOptions } from '../base/BaseExchange.js';
 
 interface PredictItContract {
   id: number;
@@ -71,8 +71,8 @@ export class PredictItAdapter extends BaseExchange {
     this.setBaseURL(this.apiUrl);
   }
 
-  async getMarkets(): Promise<Market[]> {
-    const cacheKey = this.getCacheKey('markets');
+  async getMarkets(options?: GetMarketsOptions): Promise<Market[]> {
+    const cacheKey = this.getCacheKey('markets', options ? JSON.stringify(options) : undefined);
     const cached = this.cache.get<Market[]>(cacheKey);
     if (cached) return cached;
 
@@ -82,16 +82,26 @@ export class PredictItAdapter extends BaseExchange {
         return data;
       }) as PredictItResponse;
 
-      // Filter and transform markets
-      const markets = response.markets
-        .filter((m: PredictItMarket) => m.status === 'Open' && m.contracts.length > 0)
-        .flatMap((m: PredictItMarket) => this.transformMarket(m))
-        .filter((m: Market | null): m is Market => m !== null);
+      const maxMarkets = options?.maxMarkets || Infinity;
+      const filteredMarkets: Market[] = [];
 
-      console.log(`[${this.name}] Fetched ${response.markets.length} markets → ${markets.length} active contracts`);
+      for (const m of response.markets) {
+        if (m.status !== 'Open' || m.contracts.length === 0) continue;
 
-      this.cache.set(cacheKey, markets, 60); // Cache for 1 minute
-      return markets;
+        const transformed = this.transformMarket(m);
+        for (const market of transformed) {
+          if (market && this.shouldIncludeMarket(market, options)) {
+            filteredMarkets.push(market);
+            if (filteredMarkets.length >= maxMarkets) break;
+          }
+        }
+        if (filteredMarkets.length >= maxMarkets) break;
+      }
+
+      console.log(`[${this.name}] Fetched ${response.markets.length} markets → ${filteredMarkets.length} matching contracts`);
+
+      this.cache.set(cacheKey, filteredMarkets, 60);
+      return filteredMarkets;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch markets:`, error);
       throw error;

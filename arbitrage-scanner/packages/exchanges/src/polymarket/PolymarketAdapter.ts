@@ -13,7 +13,7 @@ import {
   EventType,
   PoliticalParty
 } from '@arb/core';
-import { BaseExchange } from '../base/BaseExchange.js';
+import { BaseExchange, GetMarketsOptions } from '../base/BaseExchange.js';
 
 interface PolymarketMarket {
   condition_id: string;
@@ -128,20 +128,23 @@ export class PolymarketAdapter extends BaseExchange {
     });
   }
 
-  async getMarkets(): Promise<Market[]> {
-    const cacheKey = this.getCacheKey('markets');
+  async getMarkets(options?: GetMarketsOptions): Promise<Market[]> {
+    const cacheKey = this.getCacheKey('markets', options ? JSON.stringify(options) : undefined);
     const cached = this.cache.get<Market[]>(cacheKey);
     if (cached) return cached;
 
     try {
-      // Fetch ALL markets from Gamma API using pagination
-      const allEvents: any[] = [];
-      const pageSize = 500; // Max per request
+      const filteredMarkets: Market[] = [];
+      const pageSize = 500;
       let offset = 0;
+      let totalFetched = 0;
+      const maxMarkets = options?.maxMarkets || 30000;
+      const now = new Date();
+
+      const hasFilters = options?.keywords?.length || options?.categories?.length;
+      console.log(`[${this.name}] Fetching markets from Gamma API${hasFilters ? ' with pre-filtering' : ''}${options?.maxMarkets ? ` (limit: ${options.maxMarkets})` : ''}...`);
+
       let hasMore = true;
-
-      console.log(`[${this.name}] Fetching all markets from Gamma API (no limit)...`);
-
       while (hasMore) {
         const response = await this.queue.add(async () => {
           const { data } = await this.gammaClient.get('/events', {
@@ -158,13 +161,38 @@ export class PolymarketAdapter extends BaseExchange {
         });
 
         const events = Array.isArray(response) ? response : [];
-        allEvents.push(...events);
+        totalFetched += events.length;
+
+        for (const event of events) {
+          if (!event.active || event.closed || event.archived) continue;
+          if (event.end_date_iso) {
+            const endDate = new Date(event.end_date_iso);
+            if (endDate < now) continue;
+          }
+
+          const eventMarkets = event.markets || [];
+          for (const m of eventMarkets) {
+            const market = this.enhanceMarketWithCategories(this.transformGammaMarket(m, event));
+
+            if (this.shouldIncludeMarket(market, options)) {
+              filteredMarkets.push(market);
+            }
+
+            if (filteredMarkets.length >= maxMarkets) {
+              console.log(`[${this.name}] Reached target of ${maxMarkets} matching markets`);
+              break;
+            }
+          }
+
+          if (filteredMarkets.length >= maxMarkets) break;
+        }
+
+        if (filteredMarkets.length >= maxMarkets) break;
 
         if (events.length < pageSize) {
           hasMore = false;
         } else {
           offset += pageSize;
-          // Safety limit to prevent infinite loops
           if (offset > 10000) {
             console.warn(`[${this.name}] Reached safety limit of 10000 events`);
             hasMore = false;
@@ -172,36 +200,10 @@ export class PolymarketAdapter extends BaseExchange {
         }
       }
 
-      console.log(`[${this.name}] Fetched ${allEvents.length} total events`);
+      console.log(`[${this.name}] Fetched ${totalFetched} events, kept ${filteredMarkets.length} matching markets`);
 
-      // Apply data quality filtering
-      const now = new Date();
-
-      const markets = allEvents
-        .filter((event: any) => {
-          // Basic status checks
-          if (!event.active || event.closed || event.archived) {
-            return false;
-          }
-
-          // Date-based filtering: remove markets with past end dates
-          if (event.end_date_iso) {
-            const endDate = new Date(event.end_date_iso);
-            if (endDate < now) {
-              return false; // Event already closed/expired
-            }
-          }
-
-          return true;
-        })
-        .flatMap((event: any) =>
-          event.markets?.map((m: any) => this.transformGammaMarket(m, event)) || []
-        );
-
-      console.log(`[${this.name}] Filtered to ${markets.length} active markets from Gamma API`);
-
-      this.cache.set(cacheKey, markets, 30);
-      return markets;
+      this.cache.set(cacheKey, filteredMarkets, 30);
+      return filteredMarkets;
     } catch (error) {
       console.error(`[${this.name}] Failed to fetch markets from Gamma API:`, error);
       throw error;

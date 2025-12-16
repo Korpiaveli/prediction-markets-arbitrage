@@ -1,4 +1,5 @@
 export { BaseExchange } from './base/BaseExchange.js';
+export type { GetMarketsOptions } from './base/BaseExchange.js';
 export { KalshiAdapter } from './kalshi/KalshiAdapter.js';
 export { PolymarketAdapter } from './polymarket/PolymarketAdapter.js';
 export { PredictItAdapter } from './predictit/PredictItAdapter.js';

@@ -1,4 +1,4 @@
-import { Market, MarketPair, CrossExchangePair, IExchange, MarketCategory, ExchangeName, categoryDetector } from '@arb/core';
+import { Market, MarketPair, CrossExchangePair, IExchange, MarketCategory, ExchangeName, categoryDetector, GetMarketsOptions } from '@arb/core';
 import {
   EmbeddingService,
   getEmbeddingService,
@@ -40,6 +40,8 @@ export interface MatcherConfig {
   allowedCategories?: MarketCategory[];
   excludedCategories?: MarketCategory[];
   maxMarketsPerExchange?: number;
+  keywords?: string[];
+  progressInterval?: number;
 }
 
 export class MarketMatcher {
@@ -54,6 +56,7 @@ export class MarketMatcher {
 
   constructor(config: MatcherConfig = {}) {
     this.config = {
+      ...config,
       minConfidence: config.minConfidence ?? 55,
       includeLowConfidence: config.includeLowConfidence ?? true,
       includeUncertain: config.includeUncertain ?? false,
@@ -173,64 +176,44 @@ export class MarketMatcher {
     const exchangeStrategy = getStrategy(exchange1.name, exchange2.name);
     console.log(`[MarketMatcher] Using strategy: ${exchangeStrategy.name} for ${exchange1.name}-${exchange2.name}`);
 
+    const fetchOptions: GetMarketsOptions = {
+      maxMarkets: this.config.maxMarketsPerExchange,
+      keywords: this.config.keywords,
+      categories: this.config.allowedCategories
+    };
+
     console.log('[MarketMatcher] Fetching markets from both exchanges...');
+    const startFetch = Date.now();
     let [markets1, markets2] = await Promise.all([
-      exchange1.getMarkets(),
-      exchange2.getMarkets()
+      exchange1.getMarkets(fetchOptions),
+      exchange2.getMarkets(fetchOptions)
     ]);
+    const fetchTime = ((Date.now() - startFetch) / 1000).toFixed(1);
 
     console.log(`[MarketMatcher] ${exchange1.name}: ${markets1.length} markets`);
     console.log(`[MarketMatcher] ${exchange2.name}: ${markets2.length} markets`);
-
-    // Apply category filtering if configured
-    if (this.config.allowedCategories || this.config.excludedCategories) {
-      const before1 = markets1.length;
-      const before2 = markets2.length;
-
-      markets1 = categoryDetector.filterByCategory(
-        markets1,
-        this.config.allowedCategories,
-        this.config.excludedCategories
-      ) as Market[];
-
-      markets2 = categoryDetector.filterByCategory(
-        markets2,
-        this.config.allowedCategories,
-        this.config.excludedCategories
-      ) as Market[];
-
-      console.log(`[MarketMatcher] Category filtering applied:`);
-      console.log(`  ${exchange1.name}: ${before1} → ${markets1.length} markets`);
-      console.log(`  ${exchange2.name}: ${before2} → ${markets2.length} markets`);
-      if (this.config.allowedCategories) {
-        console.log(`  Allowed: ${this.config.allowedCategories.join(', ')}`);
-      }
-      if (this.config.excludedCategories) {
-        console.log(`  Excluded: ${this.config.excludedCategories.join(', ')}`);
-      }
-    }
-
-    // Apply market limit if configured (for testing/memory management)
-    if (this.config.maxMarketsPerExchange) {
-      const limit = this.config.maxMarketsPerExchange;
-      if (markets1.length > limit) {
-        console.log(`[MarketMatcher] Limiting ${exchange1.name}: ${markets1.length} → ${limit} markets`);
-        markets1 = markets1.slice(0, limit);
-      }
-      if (markets2.length > limit) {
-        console.log(`[MarketMatcher] Limiting ${exchange2.name}: ${markets2.length} → ${limit} markets`);
-        markets2 = markets2.slice(0, limit);
-      }
-    }
+    console.log(`[MarketMatcher] Fetch completed in ${fetchTime}s`);
 
     await this.initializeEmbeddings();
 
-    console.log('[MarketMatcher] Analyzing matches...');
+    const totalComparisons = markets1.length * markets2.length;
+    const progressInterval = this.config.progressInterval || 50;
+    console.log(`[MarketMatcher] Analyzing ${markets1.length} × ${markets2.length} = ${totalComparisons} potential pairs...`);
 
     const pairs: CrossExchangePair[] = [];
     const allMatches: Array<{ pair: CrossExchangePair; analysis: MatchAnalysis }> = [];
+    const startMatch = Date.now();
 
-    for (const market1 of markets1) {
+    for (let i = 0; i < markets1.length; i++) {
+      const market1 = markets1[i];
+
+      if ((i + 1) % progressInterval === 0 || i === markets1.length - 1) {
+        const elapsed = ((Date.now() - startMatch) / 1000).toFixed(1);
+        const rate = ((i + 1) / parseFloat(elapsed)).toFixed(1);
+        const eta = (((markets1.length - i - 1) / parseFloat(rate))).toFixed(0);
+        console.log(`[MarketMatcher] Progress: ${i + 1}/${markets1.length} (${elapsed}s elapsed, ~${eta}s remaining, ${allMatches.length} matches found)`);
+      }
+
       const match = await this.findBestMatch(market1, markets2, exchangeStrategy);
 
       if (match && this.shouldIncludeMatch(match.analysis)) {
@@ -251,6 +234,9 @@ export class MarketMatcher {
         allMatches.push({ pair, analysis: match.analysis });
       }
     }
+
+    const totalTime = ((Date.now() - startMatch) / 1000).toFixed(1);
+    console.log(`[MarketMatcher] Matching completed in ${totalTime}s`);
 
     this.logCrossExchangeMatchResults(allMatches);
     return pairs;

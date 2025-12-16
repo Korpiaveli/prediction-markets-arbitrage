@@ -1,5 +1,11 @@
-import { Market, Quote, ExchangeName } from '../types/market.js';
+import { Market, Quote, ExchangeName, MarketCategory } from '../types/market.js';
 import { OrderRequest, OrderResult, OrderStatus, Balance } from '../types/trading.js';
+
+export interface GetMarketsOptions {
+  maxMarkets?: number;
+  keywords?: string[];
+  categories?: MarketCategory[];
+}
 
 export interface IExchange {
   readonly name: ExchangeName;
@@ -11,7 +17,7 @@ export interface IExchange {
   disconnect(): Promise<void>;
   isConnected(): boolean;
 
-  getMarkets(): Promise<Market[]>;
+  getMarkets(options?: GetMarketsOptions): Promise<Market[]>;
   getMarket(marketId: string): Promise<Market | null>;
   getQuote(marketId: string): Promise<Quote>;
   getBulkQuotes(marketIds: string[]): Promise<Quote[]>;

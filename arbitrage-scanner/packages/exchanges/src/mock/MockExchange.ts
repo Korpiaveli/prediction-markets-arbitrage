@@ -8,7 +8,7 @@ import {
   OrderStatus,
   Balance
 } from '@arb/core';
-import { BaseExchange } from '../base/BaseExchange.js';
+import { BaseExchange, GetMarketsOptions } from '../base/BaseExchange.js';
 
 export class MockExchange extends BaseExchange {
   readonly name: ExchangeName = 'MOCK';
@@ -41,7 +41,7 @@ export class MockExchange extends BaseExchange {
     super(config);
   }
 
-  async getMarkets(): Promise<Market[]> {
+  async getMarkets(_options?: GetMarketsOptions): Promise<Market[]> {
     await this.delay(100); // Simulate network delay
     return this.mockMarkets;
   }
