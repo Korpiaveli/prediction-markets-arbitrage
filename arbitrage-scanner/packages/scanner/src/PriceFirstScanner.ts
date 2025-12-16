@@ -216,7 +216,44 @@ export class PriceFirstScanner {
       if (!entityOverlap) return false;
     }
 
+    const titleSimilarity = this.calculateTitleSimilarity(m1.title, m2.title);
+    if (titleSimilarity < 0.25) {
+      return false;
+    }
+
     return true;
+  }
+
+  private calculateTitleSimilarity(title1: string, title2: string): number {
+    const stopWords = new Set([
+      'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'and', 'or', 'is',
+      'be', 'will', 'by', 'with', 'as', 'from', 'this', 'that', 'what', 'who',
+      'which', 'when', 'where', 'how', 'if', 'than', 'then', 'so', 'no', 'not',
+      'yes', 'any', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other',
+      'some', 'such', 'only', 'own', 'same', 'too', 'very', 'just', 'can', 'could',
+      'may', 'might', 'must', 'shall', 'should', 'would', 'have', 'has', 'had',
+      'do', 'does', 'did', 'being', 'been', 'was', 'were', 'are', 'am',
+      'his', 'her', 'its', 'their', 'our', 'your', 'my', 'before', 'after'
+    ]);
+
+    const tokenize = (text: string): Set<string> => {
+      return new Set(
+        text.toLowerCase()
+          .replace(/[^a-z0-9\s]/g, ' ')
+          .split(/\s+/)
+          .filter(w => w.length > 2 && !stopWords.has(w))
+      );
+    };
+
+    const words1 = tokenize(title1);
+    const words2 = tokenize(title2);
+
+    if (words1.size === 0 || words2.size === 0) return 0;
+
+    const intersection = new Set([...words1].filter(w => words2.has(w)));
+    const union = new Set([...words1, ...words2]);
+
+    return intersection.size / union.size;
   }
 
   private extractKeyEntities(title: string): string[] {
