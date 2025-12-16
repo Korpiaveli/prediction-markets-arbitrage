@@ -1,0 +1,26 @@
+{
+  "conservative": {
+    "scenario": "Conservative",
+    "avgProfit": 3334,
+    "median": 3327,
+    "p5": 3056,
+    "p95": 3645,
+    "probLoss": 0
+  },
+  "moderate": {
+    "scenario": "Moderate",
+    "avgProfit": 3348,
+    "median": 3338,
+    "p5": 3072,
+    "p95": 3658,
+    "probLoss": 0
+  },
+  "aggressive": {
+    "scenario": "Aggressive",
+    "avgProfit": 3087,
+    "median": 3078,
+    "p5": 2810,
+    "p95": 3406,
+    "probLoss": 0
+  }
+}

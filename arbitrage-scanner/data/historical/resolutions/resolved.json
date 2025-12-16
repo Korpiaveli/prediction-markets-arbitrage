@@ -1,0 +1,97 @@
+[
+  {
+    "marketPairId": "pair-1",
+    "exchange1": {
+      "marketId": "KXPRES24-DEM",
+      "exchange": "KALSHI",
+      "outcome": "NO",
+      "resolvedAt": "2024-11-06T08:00:00.000Z",
+      "resolutionSource": "Official Election Results"
+    },
+    "exchange2": {
+      "marketId": "poly-pres-2024",
+      "exchange": "POLYMARKET",
+      "outcome": "NO",
+      "resolvedAt": "2024-11-06T08:00:00.000Z",
+      "resolutionSource": "AP Called Race"
+    },
+    "sameOutcome": true,
+    "verifiedAt": "2024-11-06T12:00:00.000Z"
+  },
+  {
+    "marketPairId": "pair-2",
+    "exchange1": {
+      "marketId": "KXFED-DEC24",
+      "exchange": "KALSHI",
+      "outcome": "YES",
+      "resolvedAt": "2024-12-18T19:00:00.000Z",
+      "resolutionSource": "Federal Reserve Press Release"
+    },
+    "exchange2": {
+      "marketId": "poly-fed-dec",
+      "exchange": "POLYMARKET",
+      "outcome": "YES",
+      "resolvedAt": "2024-12-18T19:00:00.000Z",
+      "resolutionSource": "FOMC Statement"
+    },
+    "sameOutcome": true,
+    "verifiedAt": "2024-12-18T20:00:00.000Z"
+  },
+  {
+    "marketPairId": "pair-3",
+    "exchange1": {
+      "marketId": "KXBTC-100K",
+      "exchange": "KALSHI",
+      "outcome": "YES",
+      "resolvedAt": "2024-12-05T04:00:00.000Z",
+      "resolutionSource": "Coinbase Price Feed"
+    },
+    "exchange2": {
+      "marketId": "poly-btc-100k",
+      "exchange": "POLYMARKET",
+      "outcome": "YES",
+      "resolvedAt": "2024-12-05T04:00:00.000Z",
+      "resolutionSource": "Binance Price Feed"
+    },
+    "sameOutcome": true,
+    "verifiedAt": "2024-12-05T05:00:00.000Z"
+  },
+  {
+    "marketPairId": "pair-4",
+    "exchange1": {
+      "marketId": "KXCABINET-MUSK",
+      "exchange": "KALSHI",
+      "outcome": "YES",
+      "resolvedAt": "2024-11-12T20:00:00.000Z",
+      "resolutionSource": "Official Announcement"
+    },
+    "exchange2": {
+      "marketId": "poly-musk-cabinet",
+      "exchange": "POLYMARKET",
+      "outcome": "YES",
+      "resolvedAt": "2024-11-12T20:00:00.000Z",
+      "resolutionSource": "Trump Statement"
+    },
+    "sameOutcome": true,
+    "verifiedAt": "2024-11-12T21:00:00.000Z"
+  },
+  {
+    "marketPairId": "pair-5",
+    "exchange1": {
+      "marketId": "KXSP500-6000",
+      "exchange": "KALSHI",
+      "outcome": "YES",
+      "resolvedAt": "2024-11-11T16:00:00.000Z",
+      "resolutionSource": "S&P Global"
+    },
+    "exchange2": {
+      "marketId": "poly-sp500-6k",
+      "exchange": "POLYMARKET",
+      "outcome": "YES",
+      "resolvedAt": "2024-11-11T16:00:00.000Z",
+      "resolutionSource": "Market Close Data"
+    },
+    "sameOutcome": true,
+    "verifiedAt": "2024-11-11T17:00:00.000Z"
+  }
+]

@@ -1,0 +1,4 @@
+[
+  {"timestamp": "2024-11-07T00:00:00.000Z", "marketPairId": "pair-3", "exchange1": {"marketId": "KXBTC-100K", "yesPrice": 0.38, "noPrice": 0.62}, "exchange2": {"marketId": "poly-btc-100k", "yesPrice": 0.45, "noPrice": 0.53}, "arbitrage": {"exists": true, "profitPercent": 9.9, "direction": "EXCHANGE1_YES_EXCHANGE2_NO", "totalCost": 0.91}, "source": "SYNTHETIC", "fetchedAt": "2024-11-07T00:00:00.000Z"},
+  {"timestamp": "2024-11-07T12:00:00.000Z", "marketPairId": "pair-5", "exchange1": {"marketId": "KXSP500-6000", "yesPrice": 0.65, "noPrice": 0.35}, "exchange2": {"marketId": "poly-sp500-6k", "yesPrice": 0.70, "noPrice": 0.28}, "arbitrage": {"exists": true, "profitPercent": 7.5, "direction": "EXCHANGE1_YES_EXCHANGE2_NO", "totalCost": 0.93}, "source": "SYNTHETIC", "fetchedAt": "2024-11-07T12:00:00.000Z"}
+]

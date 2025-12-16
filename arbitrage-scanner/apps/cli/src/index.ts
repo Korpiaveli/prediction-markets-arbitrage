@@ -17,6 +17,8 @@ import { createFetchHistoricalCommand } from './commands/fetch-historical';
 import { createFetchHistoricalPairsCommand } from './commands/fetch-historical-pairs';
 import { createBacktestHistoricalCommand } from './commands/backtest-historical';
 import { createRecommendCommand } from './commands/recommend';
+import { createBacktestRealCommand } from './commands/backtest-real';
+import { createCollectHistoricalCommand } from './commands/collect-historical';
 import { createExchanges as createExchangesFromFactory, parseExchangeList, getAvailableExchanges } from './utils/exchanges';
 
 const program = new Command();
@@ -640,6 +642,26 @@ recommendCmd.options.forEach((opt: any) => {
   program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
 });
 program.commands[program.commands.length - 1].action(recommendCmd.action);
+
+// Backtest Real Data command
+const backtestRealCmd = createBacktestRealCommand();
+program
+  .command(backtestRealCmd.command)
+  .description(backtestRealCmd.description);
+backtestRealCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(backtestRealCmd.action);
+
+// Collect Historical Data command
+const collectHistCmd = createCollectHistoricalCommand();
+program
+  .command(collectHistCmd.command)
+  .description(collectHistCmd.description);
+collectHistCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(collectHistCmd.action);
 
 // Error handling
 process.on('unhandledRejection', (reason) => {

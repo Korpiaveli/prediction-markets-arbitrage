@@ -66,3 +66,7 @@ config/*.secret.json
 output/
 data/*.json
 !data/market_map.example.json
+# Large output files
+*.txt
+!README.txt
+arbitrage-scanner/data/*.txt

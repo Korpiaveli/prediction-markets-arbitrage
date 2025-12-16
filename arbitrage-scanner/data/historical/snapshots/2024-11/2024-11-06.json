@@ -1,0 +1,3 @@
+[
+  {"timestamp": "2024-11-06T00:00:00.000Z", "marketPairId": "pair-2", "exchange1": {"marketId": "KXFED-DEC24", "yesPrice": 0.78, "noPrice": 0.22}, "exchange2": {"marketId": "poly-fed-dec", "yesPrice": 0.82, "noPrice": 0.16}, "arbitrage": {"exists": true, "profitPercent": 6.4, "direction": "EXCHANGE1_YES_EXCHANGE2_NO", "totalCost": 0.94}, "source": "SYNTHETIC", "fetchedAt": "2024-11-06T00:00:00.000Z"}
+]

@@ -1,0 +1,28 @@
+{
+  "config": {
+    "simulations": 1000,
+    "weeks": 50,
+    "capitalPerWeek": 1000
+  },
+  "profitDistribution": {
+    "percentile1": 942,
+    "percentile5": 1474,
+    "percentile25": 2316,
+    "median": 2852,
+    "percentile75": 3334,
+    "percentile95": 4054,
+    "percentile99": 4536,
+    "mean": 2817,
+    "stdDev": 775,
+    "min": 216,
+    "max": 5097
+  },
+  "riskMetrics": {
+    "probabilityOfLoss": "0.0%",
+    "probabilityPositive": "100.0%",
+    "probability2KPlus": "86.3%",
+    "probability5KPlus": "0.1%",
+    "medianMaxDrawdown": 370,
+    "worstDrawdown": 1663
+  }
+}

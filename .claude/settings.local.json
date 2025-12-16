@@ -57,7 +57,10 @@
       "Bash(cmd /c scriptsfetch-all-k-p-pairs.bat 7)",
       "Bash(powershell -ExecutionPolicy Bypass -File scripts/fetch-all-historical.ps1 -Days 30)",
       "WebFetch(domain:docs.manifold.markets)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 90 node:*)",
+      "Bash(npx vitest:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,317 @@
+{
+  "generatedAt": "2025-12-08T03:37:52.299Z",
+  "totalOpportunities": 334,
+  "totalRecommended": 3,
+  "recommendations": [
+    {
+      "id": "rec-1765165072254-2",
+      "rank": 1,
+      "opportunityId": "KXPRESNOMD-28-JBP_8153-31938_1765149432575",
+      "timestamp": "2025-12-08T03:37:52.254Z",
+      "score": {
+        "overall": 56,
+        "timeScore": 0,
+        "profitScore": 100,
+        "confidenceScore": 70,
+        "weights": {
+          "time": 0.35,
+          "profit": 0.35,
+          "confidence": 0.3
+        }
+      },
+      "market1Title": "Will J.B. Pritzker be the Democratic Presidential nominee in 2028?",
+      "market2Title": "Democratic presidential nominee in 2028?: Pritzker",
+      "exchange1": "Kalshi",
+      "exchange2": "Polymarket",
+      "profitPercent": 91.12,
+      "hoursUntilResolution": 25571.368818333332,
+      "resolutionDate": "2028-11-07T15:00:00.000Z",
+      "capitalTurnoverDays": 1065.473700763889,
+      "resolutionConfidence": 70,
+      "riskLevel": "high",
+      "riskFactors": [
+        "Different resolution sources",
+        "Low alignment score",
+        "Shallow liquidity"
+      ],
+      "category": "unknown",
+      "categoryPerformance": {
+        "category": "unknown",
+        "historicalWinRate": 1,
+        "avgProfit": 76.12365269461094,
+        "avgDurationHours": 32260.76632387868,
+        "totalOpportunities": 334,
+        "recentTrend": "stable"
+      },
+      "similarPastOpportunities": [
+        {
+          "id": "KXPRESNOMD-28-PB_8153-31935_1765149433431",
+          "title": "Will Pete Buttigieg be the Democratic Presidential nominee in 2028?",
+          "profitPercent": 91.12,
+          "outcome": "win",
+          "durationHours": 25571.368818333332,
+          "similarity": 100
+        },
+        {
+          "id": "KXPOLANDSEJM-27-CONFED_8360-32918_1765149420781",
+          "title": "Who will win the next Polish general election?",
+          "profitPercent": 91.12,
+          "outcome": "win",
+          "durationHours": 25643.368818333332,
+          "similarity": 100
+        },
+        {
+          "id": "KXPOLANDSEJM-27-LEFT_8360-32918_1765149420750",
+          "title": "Who will win the next Polish general election?",
+          "profitPercent": 91.12,
+          "outcome": "win",
+          "durationHours": 25643.368818333332,
+          "similarity": 100
+        },
+        {
+          "id": "KXPOLANDSEJM-27-THIRD_8360-32918_1765149420748",
+          "title": "Who will win the next Polish general election?",
+          "profitPercent": 91.12,
+          "outcome": "win",
+          "durationHours": 25643.368818333332,
+          "similarity": 100
+        },
+        {
+          "id": "KXPOLANDSEJM-27-KO_8360-32918_1765149420745",
+          "title": "Who will win the next Polish general election?",
+          "profitPercent": 91.12,
+          "outcome": "win",
+          "durationHours": 25643.368818333332,
+          "similarity": 100
+        }
+      ],
+      "reasoning": [
+        "High profit (91.1%) with excellent potential",
+        "Longer resolution time (~1065d)",
+        "Good resolution confidence",
+        "unknown category has 100% historical win rate"
+      ],
+      "actionItems": [
+        "Lower priority - consider if other opportunities scarce",
+        "Max position: $150",
+        "Manual review required before execution"
+      ]
+    },
+    {
+      "id": "rec-1765165072259-25",
+      "rank": 2,
+      "opportunityId": "KXPRESNOMR-28-JDV_8152-31925_1765149430065",
+      "timestamp": "2025-12-08T03:37:52.259Z",
+      "score": {
+        "overall": 56,
+        "timeScore": 0,
+        "profitScore": 100,
+        "confidenceScore": 70,
+        "weights": {
+          "time": 0.35,
+          "profit": 0.35,
+          "confidence": 0.3
+        }
+      },
+      "market1Title": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+      "market2Title": "Republican presidential nominee in 2028?: Vance",
+      "exchange1": "Kalshi",
+      "exchange2": "Polymarket",
+      "profitPercent": 48.98,
+      "hoursUntilResolution": 25571.368816944443,
+      "resolutionDate": "2028-11-07T15:00:00.000Z",
+      "capitalTurnoverDays": 1065.4737007060185,
+      "resolutionConfidence": 70,
+      "riskLevel": "high",
+      "riskFactors": [
+        "Different resolution sources",
+        "Low alignment score",
+        "Shallow liquidity"
+      ],
+      "category": "unknown",
+      "categoryPerformance": {
+        "category": "unknown",
+        "historicalWinRate": 1,
+        "avgProfit": 76.12365269461094,
+        "avgDurationHours": 32260.76632387868,
+        "totalOpportunities": 334,
+        "recentTrend": "stable"
+      },
+      "similarPastOpportunities": [
+        {
+          "id": "KXVPRESNOMR-28-JDV_8152-31925_1765149422645",
+          "title": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+          "profitPercent": 48.98,
+          "outcome": "win",
+          "durationHours": 25571.368816944443,
+          "similarity": 100
+        },
+        {
+          "id": "SENATEPA-28-R_8195-32103_1765149395471",
+          "title": "Will Republicans win the Senate race in Pennsylvania?",
+          "profitPercent": 48.98,
+          "outcome": "win",
+          "durationHours": 34331.36881694444,
+          "similarity": 100
+        },
+        {
+          "id": "KXPRESNOMR-28-BD_8181-32067_1765149430789",
+          "title": "Will Byron Donalds be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.368816944443,
+          "similarity": 70.59999999999995
+        },
+        {
+          "id": "KXPRESNOMR-28-EKIR_8181-32067_1765149430651",
+          "title": "Will Erika Kirk be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.368816944443,
+          "similarity": 70.59999999999995
+        },
+        {
+          "id": "KXPRESNOMR-28-EM_8181-32067_1765149430643",
+          "title": "Will Elon Musk be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.368816944443,
+          "similarity": 70.59999999999995
+        }
+      ],
+      "reasoning": [
+        "High profit (49.0%) with excellent potential",
+        "Longer resolution time (~1065d)",
+        "Good resolution confidence",
+        "unknown category has 100% historical win rate"
+      ],
+      "actionItems": [
+        "Lower priority - consider if other opportunities scarce",
+        "Max position: $150",
+        "Manual review required before execution"
+      ]
+    },
+    {
+      "id": "rec-1765165072262-44",
+      "rank": 3,
+      "opportunityId": "KXVPRESNOMR-28-JDV_8152-31925_1765149422645",
+      "timestamp": "2025-12-08T03:37:52.262Z",
+      "score": {
+        "overall": 56,
+        "timeScore": 0,
+        "profitScore": 100,
+        "confidenceScore": 70,
+        "weights": {
+          "time": 0.35,
+          "profit": 0.35,
+          "confidence": 0.3
+        }
+      },
+      "market1Title": "Will J.D. Vance be the nominee for the Vice Presidency for the Republican party?",
+      "market2Title": "Republican presidential nominee in 2028?: Vance",
+      "exchange1": "Kalshi",
+      "exchange2": "Polymarket",
+      "profitPercent": 48.98,
+      "hoursUntilResolution": 25571.36881611111,
+      "resolutionDate": "2028-11-07T15:00:00.000Z",
+      "capitalTurnoverDays": 1065.4737006712962,
+      "resolutionConfidence": 70,
+      "riskLevel": "high",
+      "riskFactors": [
+        "Different resolution sources",
+        "Low alignment score",
+        "Shallow liquidity"
+      ],
+      "category": "unknown",
+      "categoryPerformance": {
+        "category": "unknown",
+        "historicalWinRate": 1,
+        "avgProfit": 76.12365269461094,
+        "avgDurationHours": 32260.76632387868,
+        "totalOpportunities": 334,
+        "recentTrend": "stable"
+      },
+      "similarPastOpportunities": [
+        {
+          "id": "KXPRESNOMR-28-JDV_8152-31925_1765149430065",
+          "title": "Will J.D. Vance be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 48.98,
+          "outcome": "win",
+          "durationHours": 25571.36881611111,
+          "similarity": 100
+        },
+        {
+          "id": "SENATEPA-28-R_8195-32103_1765149395471",
+          "title": "Will Republicans win the Senate race in Pennsylvania?",
+          "profitPercent": 48.98,
+          "outcome": "win",
+          "durationHours": 34331.36881611111,
+          "similarity": 100
+        },
+        {
+          "id": "KXPRESNOMR-28-BD_8181-32067_1765149430789",
+          "title": "Will Byron Donalds be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.36881611111,
+          "similarity": 70.59999999999995
+        },
+        {
+          "id": "KXPRESNOMR-28-EKIR_8181-32067_1765149430651",
+          "title": "Will Erika Kirk be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.36881611111,
+          "similarity": 70.59999999999995
+        },
+        {
+          "id": "KXPRESNOMR-28-EM_8181-32067_1765149430643",
+          "title": "Will Elon Musk be the nominee for the Presidency for the Republican party?",
+          "profitPercent": 51.92,
+          "outcome": "win",
+          "durationHours": 25571.36881611111,
+          "similarity": 70.59999999999995
+        }
+      ],
+      "reasoning": [
+        "High profit (49.0%) with excellent potential",
+        "Longer resolution time (~1065d)",
+        "Good resolution confidence",
+        "unknown category has 100% historical win rate"
+      ],
+      "actionItems": [
+        "Lower priority - consider if other opportunities scarce",
+        "Max position: $150",
+        "Manual review required before execution"
+      ]
+    }
+  ],
+  "summary": {
+    "avgScore": 56,
+    "avgProfit": 63.03,
+    "avgHoursToResolution": 25571.4,
+    "categoryBreakdown": {
+      "unknown": 3
+    },
+    "riskDistribution": {
+      "low": 0,
+      "medium": 0,
+      "high": 3,
+      "critical": 0
+    },
+    "topCategory": "unknown",
+    "totalPotentialProfit": 189.08
+  },
+  "filters": {},
+  "config": {
+    "weights": {
+      "time": 0.35,
+      "profit": 0.35,
+      "confidence": 0.3
+    },
+    "filters": {},
+    "topN": 3,
+    "includeHistoricalContext": true,
+    "includeReasoning": true
+  }
+}

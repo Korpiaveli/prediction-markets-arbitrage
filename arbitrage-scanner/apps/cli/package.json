@@ -18,6 +18,8 @@
     "@arb/exchanges": "^1.0.0",
     "@arb/scanner": "^1.0.0",
     "@arb/storage": "^1.0.0",
+    "@arb/ml": "^1.0.0",
+    "@arb/historical": "^1.0.0",
     "chalk": "^5.3.0",
     "cli-table3": "^0.6.3",
     "commander": "^11.1.0",

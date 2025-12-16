@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2025-12-08T02:47:15.983Z",
+  "config": {
+    "initialCapital": 1000,
+    "maxExposure": 1000,
+    "cooldownMs": 60000,
+    "humanDelayMs": [
+      1000,
+      3000
+    ],
+    "minProfitPercent": 1,
+    "slippageModel": "realistic",
+    "maxPositionPercent": 0.5
+  },
+  "period": {
+    "start": "2024-11-01T00:00:00.000Z",
+    "end": "2024-11-30T00:00:00.000Z"
+  },
+  "totalSnapshots": 38,
+  "aggregate": {
+    "avgWeeklyReturn": 0,
+    "stdDevReturn": 0,
+    "annualizedReturn": 0,
+    "overallWinRate": 0,
+    "avgSharpe": 0,
+    "avgMaxDrawdown": 0,
+    "totalTrades": 0,
+    "confidence95": [
+      0,
+      0
+    ]
+  },
+  "weeks": [
+    {
+      "weekStart": "2024-11-04T01:42:50.499Z",
+      "weekEnd": "2024-11-11T01:42:50.499Z",
+      "tradesAttempted": 7,
+      "tradesExecuted": 0,
+      "wins": 0,
+      "losses": 0,
+      "totalReturn": 0,
+      "returnPercent": 0,
+      "sharpeRatio": 0,
+      "maxDrawdown": 0,
+      "tradeCount": 7
+    },
+    {
+      "weekStart": "2024-11-05T16:05:32.816Z",
+      "weekEnd": "2024-11-12T16:05:32.816Z",
+      "tradesAttempted": 7,
+      "tradesExecuted": 0,
+      "wins": 0,
+      "losses": 0,
+      "totalReturn": 0,
+      "returnPercent": 0,
+      "sharpeRatio": 0,
+      "maxDrawdown": 0,
+      "tradeCount": 7
+    },
+    {
+      "weekStart": "2024-11-08T06:53:20.108Z",
+      "weekEnd": "2024-11-15T06:53:20.108Z",
+      "tradesAttempted": 7,
+      "tradesExecuted": 0,
+      "wins": 0,
+      "losses": 0,
+      "totalReturn": 0,
+      "returnPercent": 0,
+      "sharpeRatio": 0,
+      "maxDrawdown": 0,
+      "tradeCount": 7
+    },
+    {
+      "weekStart": "2024-11-17T21:05:09.776Z",
+      "weekEnd": "2024-11-24T21:05:09.776Z",
+      "tradesAttempted": 7,
+      "tradesExecuted": 0,
+      "wins": 0,
+      "losses": 0,
+      "totalReturn": 0,
+      "returnPercent": 0,
+      "sharpeRatio": 0,
+      "maxDrawdown": 0,
+      "tradeCount": 7
+    },
+    {
+      "weekStart": "2024-11-20T00:29:20.037Z",
+      "weekEnd": "2024-11-27T00:29:20.037Z",
+      "tradesAttempted": 7,
+      "tradesExecuted": 0,
+      "wins": 0,
+      "losses": 0,
+      "totalReturn": 0,
+      "returnPercent": 0,
+      "sharpeRatio": 0,
+      "maxDrawdown": 0,
+      "tradeCount": 7
+    }
+  ],
+  "insights": [
+    "Analyzed 5 random weeks",
+    "Average weekly return: 0.00% (+/- 0.00%)",
+    "Annualized return (theoretical): 0.0%",
+    "Overall win rate: 0.0%",
+    "Average Sharpe ratio: 0.00",
+    "⚠️ Low win rate - consider stricter entry criteria",
+    "Best week: +0.00%",
+    "Worst week: 0.00%"
+  ]
+}

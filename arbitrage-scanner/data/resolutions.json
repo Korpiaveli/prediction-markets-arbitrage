@@ -1,0 +1,57 @@
+[
+  {
+    "marketPairId": "pair-1",
+    "resolvedAt": "2024-11-20T00:00:00.000Z",
+    "exchange1": {
+      "outcome": "NO"
+    },
+    "exchange2": {
+      "outcome": "NO"
+    },
+    "sameOutcome": true
+  },
+  {
+    "marketPairId": "pair-2",
+    "resolvedAt": "2024-12-15T00:00:00.000Z",
+    "exchange1": {
+      "outcome": "YES"
+    },
+    "exchange2": {
+      "outcome": "YES"
+    },
+    "sameOutcome": true
+  },
+  {
+    "marketPairId": "pair-3",
+    "resolvedAt": "2024-11-25T00:00:00.000Z",
+    "exchange1": {
+      "outcome": "YES"
+    },
+    "exchange2": {
+      "outcome": "YES"
+    },
+    "sameOutcome": true
+  },
+  {
+    "marketPairId": "pair-4",
+    "resolvedAt": "2024-11-22T00:00:00.000Z",
+    "exchange1": {
+      "outcome": "YES"
+    },
+    "exchange2": {
+      "outcome": "YES"
+    },
+    "sameOutcome": true
+  },
+  {
+    "marketPairId": "pair-5",
+    "resolvedAt": "2024-11-28T00:00:00.000Z",
+    "exchange1": {
+      "outcome": "NO"
+    },
+    "exchange2": {
+      "outcome": "NO"
+    },
+    "sameOutcome": true
+  }
+]
