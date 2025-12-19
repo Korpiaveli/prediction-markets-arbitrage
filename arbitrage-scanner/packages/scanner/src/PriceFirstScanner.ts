@@ -231,6 +231,10 @@ export class PriceFirstScanner {
       return false;
     }
 
+    if (this.candidateNamesConflict(m1, m2)) {
+      return false;
+    }
+
     return true;
   }
 
@@ -299,6 +303,65 @@ export class PriceFirstScanner {
     }
 
     return entities;
+  }
+
+  private extractCandidateName(title: string): string | null {
+    const patterns = [
+      /nominate\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s*\([^)]+\))?)\s+as/i,
+      /nominee\s*:\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i,
+      /will\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(?:win|be|become)/i,
+      /\?\s*:\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*$/,
+      /:\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s*$/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = title.match(pattern);
+      if (match && match[1]) {
+        let candidate = match[1].trim().toLowerCase();
+        candidate = candidate.replace(/\s*\([^)]+\)\s*/g, ' ').trim();
+        const skipWords = ['yes', 'no', 'other', 'none', 'republican', 'democratic', 'democrat', 'party', 'trump', 'biden'];
+        if (!skipWords.includes(candidate) && !skipWords.includes(candidate.split(/\s+/)[0])) {
+          return candidate;
+        }
+      }
+    }
+
+    const colonMatch = title.match(/:\s*([^:?]+?)\s*$/);
+    if (colonMatch) {
+      const afterColon = colonMatch[1].trim();
+      if (afterColon.length >= 3 && afterColon.length <= 30) {
+        const words = afterColon.split(/\s+/);
+        if (words.length <= 3 && /^[A-Z]/.test(afterColon)) {
+          const candidate = afterColon.toLowerCase();
+          const skipWords = ['yes', 'no', 'other', 'none', 'republican', 'democratic', 'democrat', 'party', 'more', 'fewer', 'trump', 'biden'];
+          if (!skipWords.includes(candidate) && !/^\d/.test(candidate)) {
+            return candidate;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private candidateNamesConflict(m1: Market, m2: Market): boolean {
+    const c1 = this.extractCandidateName(m1.title);
+    const c2 = this.extractCandidateName(m2.title);
+
+    if (c1 && c2) {
+      const c1Words = c1.split(/\s+/);
+      const c2Words = c2.split(/\s+/);
+
+      const hasOverlap = c1Words.some(w1 =>
+        c2Words.some(w2 => w1 === w2 || w1.includes(w2) || w2.includes(w1))
+      );
+
+      if (!hasOverlap) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private calculateOpportunities(validated: PriceCandidate[]): ArbitrageOpportunity[] {
