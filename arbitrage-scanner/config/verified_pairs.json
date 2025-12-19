@@ -48,5 +48,65 @@
     "verifiedBy": "manual",
     "confidence": 90,
     "notes": "Trump Fed Chair Nominee - Jefferson"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-MSUM",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32284",
+    "verifiedAt": "2024-12-16T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Sumerlin"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-LLOG",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32260",
+    "verifiedAt": "2024-12-19T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Logan"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-LLIN",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32282",
+    "verifiedAt": "2024-12-19T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Lindsey"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-MBOW",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32114",
+    "verifiedAt": "2024-12-19T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Bowman"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-KW",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32110",
+    "verifiedAt": "2024-12-19T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Warsh"
+  },
+  {
+    "exchange1": "KALSHI",
+    "market1Id": "KXFEDCHAIRNOM-29-KH",
+    "exchange2": "PREDICTIT",
+    "market2Id": "8198-32111",
+    "verifiedAt": "2024-12-19T00:00:00Z",
+    "verifiedBy": "manual",
+    "confidence": 90,
+    "notes": "Trump Fed Chair Nominee - Hassett"
   }
 ]
