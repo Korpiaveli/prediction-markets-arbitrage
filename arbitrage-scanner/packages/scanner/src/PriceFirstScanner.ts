@@ -216,6 +216,22 @@ export class PriceFirstScanner {
       return false;
     }
 
+    if (this.statesConflict(m1.title, m2.title)) {
+      return false;
+    }
+
+    if (this.districtsConflict(m1.title, m2.title)) {
+      return false;
+    }
+
+    if (this.specificVsAggregateConflict(m1.title, m2.title)) {
+      return false;
+    }
+
+    if (this.eventTypeConflict(m1.title, m2.title)) {
+      return false;
+    }
+
     const entities1 = this.extractKeyEntities(m1.title);
     const entities2 = this.extractKeyEntities(m2.title);
 
@@ -236,6 +252,141 @@ export class PriceFirstScanner {
     }
 
     return true;
+  }
+
+  private readonly US_STATES: Record<string, string> = {
+    'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+    'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+    'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+    'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+    'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+    'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+    'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+    'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+    'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+    'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
+  };
+
+  private extractStates(title: string): string[] {
+    const states: string[] = [];
+    const lower = title.toLowerCase();
+
+    for (const [name, abbr] of Object.entries(this.US_STATES)) {
+      if (lower.includes(name)) states.push(abbr);
+    }
+
+    const abbrPattern = /\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)(?:-\d+)?\b/g;
+    const matches = title.match(abbrPattern);
+    if (matches) {
+      for (const m of matches) {
+        const abbr = m.replace(/-\d+$/, '');
+        if (!states.includes(abbr)) states.push(abbr);
+      }
+    }
+
+    return states;
+  }
+
+  private statesConflict(title1: string, title2: string): boolean {
+    const states1 = this.extractStates(title1);
+    const states2 = this.extractStates(title2);
+
+    if (states1.length > 0 && states2.length > 0) {
+      const overlap = states1.some(s => states2.includes(s));
+      if (!overlap) return true;
+    }
+
+    return false;
+  }
+
+  private extractDistrict(title: string): string | null {
+    const match = title.match(/\b([A-Z]{2})-(\d{1,2})\b/);
+    return match ? match[0] : null;
+  }
+
+  private districtsConflict(title1: string, title2: string): boolean {
+    const d1 = this.extractDistrict(title1);
+    const d2 = this.extractDistrict(title2);
+
+    if (d1 && d2 && d1 !== d2) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private specificVsAggregateConflict(title1: string, title2: string): boolean {
+    const isSpecificRace = (t: string): boolean => {
+      return /\b[A-Z]{2}-\d{1,2}\b/.test(t) ||
+             /\brace\s+(?:in|for)\b/i.test(t) ||
+             /gubernatorial/i.test(t) ||
+             /senate\s+(?:race|seat)\s+in/i.test(t);
+    };
+
+    const isAggregate = (t: string): boolean => {
+      return /which\s+party\s+will\s+win\s+the\s+house/i.test(t) ||
+             /win\s+the\s+senate\b(?!\s+race|\s+seat)/i.test(t) ||
+             /control\s+of\s+(?:the\s+)?(?:house|senate)/i.test(t);
+    };
+
+    const t1Specific = isSpecificRace(title1);
+    const t2Specific = isSpecificRace(title2);
+    const t1Agg = isAggregate(title1);
+    const t2Agg = isAggregate(title2);
+
+    if ((t1Specific && t2Agg) || (t1Agg && t2Specific)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private eventTypeConflict(title1: string, title2: string): boolean {
+    const isOccurrence = (t: string): boolean => {
+      return /will\s+(?:the\s+)?.*\s+(?:occur|happen|take\s+place)/i.test(t) ||
+             /(?:occur|happen)\s*\?/i.test(t);
+    };
+
+    const isWinner = (t: string): boolean => {
+      return /(?:who|which)\s+.*\s+(?:win|winner|elected)/i.test(t) ||
+             /winner\s*[?:]/i.test(t) ||
+             /will\s+.*\s+(?:win|be\s+elected)/i.test(t);
+    };
+
+    const isRunning = (t: string): boolean => {
+      return /will\s+.*\s+run\b/i.test(t) ||
+             /who\s+will\s+run/i.test(t) ||
+             /running\s+for/i.test(t);
+    };
+
+    const isNominee = (t: string): boolean => {
+      return /nominee\s*[?:]/i.test(t) ||
+             /who\s+will\s+.*\s+nominate/i.test(t) ||
+             /nomination\s+winner/i.test(t);
+    };
+
+    const t1Occur = isOccurrence(title1);
+    const t2Occur = isOccurrence(title2);
+    const t1Win = isWinner(title1);
+    const t2Win = isWinner(title2);
+    const t1Run = isRunning(title1);
+    const t2Run = isRunning(title2);
+    const t1Nom = isNominee(title1);
+    const t2Nom = isNominee(title2);
+
+    if ((t1Occur && t2Win) || (t1Win && t2Occur)) {
+      return true;
+    }
+
+    if ((t1Run && t2Nom) || (t1Nom && t2Run)) {
+      return true;
+    }
+
+    if ((t1Run && t2Win) || (t1Win && t2Run)) {
+      return true;
+    }
+
+    return false;
   }
 
   private calculateTitleSimilarity(title1: string, title2: string): number {

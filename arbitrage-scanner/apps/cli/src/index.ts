@@ -19,6 +19,7 @@ import { createBacktestHistoricalCommand } from './commands/backtest-historical'
 import { createRecommendCommand } from './commands/recommend';
 import { createBacktestRealCommand } from './commands/backtest-real';
 import { createCollectHistoricalCommand } from './commands/collect-historical';
+import { createMonitorCommand } from './commands/monitor';
 import { createExchanges as createExchangesFromFactory, parseExchangeList, getAvailableExchanges } from './utils/exchanges';
 
 const program = new Command();
@@ -846,6 +847,16 @@ collectHistCmd.options.forEach((opt: any) => {
   program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
 });
 program.commands[program.commands.length - 1].action(collectHistCmd.action);
+
+// Monitor command (continuous arbitrage monitoring)
+const monitorCmd = createMonitorCommand();
+program
+  .command(monitorCmd.command)
+  .description(monitorCmd.description);
+monitorCmd.options.forEach((opt: any) => {
+  program.commands[program.commands.length - 1].option(opt.flags, opt.description, opt.defaultValue);
+});
+program.commands[program.commands.length - 1].action(monitorCmd.action);
 
 // Error handling
 process.on('unhandledRejection', (reason) => {
