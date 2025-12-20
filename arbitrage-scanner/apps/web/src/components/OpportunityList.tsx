@@ -3,7 +3,8 @@ import { formatDistanceToNow, differenceInDays, format } from 'date-fns';
 import { ResolutionRiskBadge } from './ResolutionRiskBadge';
 import { PaginationControl } from './PaginationControl';
 import { OpportunityDetailModal } from './OpportunityDetailModal';
-import { TableSkeleton } from './ui/skeleton';
+import { MobileOpportunityCard } from './MobileOpportunityCard';
+import { TableSkeleton, CardSkeleton } from './ui/skeleton';
 import type { ArbitrageOpportunity, ExchangeName, ResolutionAlignment } from '@/types';
 
 interface OpportunityListProps {
@@ -52,7 +53,20 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
   const [modalOpen, setModalOpen] = useState(false);
 
   if (loading) {
-    return <TableSkeleton rows={10} columns={8} />;
+    return (
+      <>
+        {/* Mobile skeleton */}
+        <div className="md:hidden space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+        {/* Desktop skeleton */}
+        <div className="hidden md:block">
+          <TableSkeleton rows={10} columns={8} />
+        </div>
+      </>
+    );
   }
 
   if (opportunities.length === 0) {
@@ -128,37 +142,49 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
 
   return (
     <>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      {/* Mobile view - cards */}
+      <div className="md:hidden space-y-4">
+        {paginatedOpportunities.map((opp, index) => (
+          <MobileOpportunityCard
+            key={opp.id || index}
+            opportunity={opp}
+            onClick={() => handleRowClick(opp)}
+          />
+        ))}
+      </div>
+
+      {/* Desktop view - table */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-800">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Market Pair
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Direction
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Profit
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 $10 Profit
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Resolves
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Resolution
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Confidence
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                 Status
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedOpportunities.map((opp, index) => {
               const exchanges = getExchanges(opp);
               const resolutionScore = getResolutionScore(opp);
@@ -169,26 +195,26 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
               return (
                 <tr
                   key={opp.id || index}
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                   onClick={() => handleRowClick(opp)}
                 >
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900 hover:text-primary-600">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600">
                       {getMarketTitle(opp)}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       {exchanges.ex1} ↔ {exchanges.ex2}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1 text-xs">
                       <span className={`px-1.5 py-0.5 rounded font-medium ${
-                        direction.leg1 === 'YES' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        direction.leg1 === 'YES' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
                         {exchanges.ex1.substring(0, 1)}: {direction.leg1}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded font-medium ${
-                        direction.leg2 === 'YES' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        direction.leg2 === 'YES' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
                         {exchanges.ex2.substring(0, 1)}: {direction.leg2}
                       </span>
@@ -198,17 +224,17 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
                     <span className={`text-sm font-semibold ${
                       opp.profitPercent >= 5 ? 'text-green-600' :
                       opp.profitPercent >= 2 ? 'text-green-500' :
-                      'text-gray-600'
+                      'text-gray-600 dark:text-gray-300'
                     }`}>
                       {opp.profitPercent?.toFixed(2)}%
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-green-600">
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
                       {calculateProfit10(opp.totalCost, opp.profitPercent)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                     {resolveInfo.days !== null ? (
                       <span title={resolveInfo.date ? format(resolveInfo.date, 'MMM d, yyyy') : ''}>
                         {resolveInfo.days}d
@@ -222,13 +248,13 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
                     />
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-gray-900 dark:text-white">
                       {(opp.confidence || 0).toFixed(0)}%
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      opp.valid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      opp.valid ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                     }`}>
                       {opp.valid ? 'Valid' : 'Invalid'}
                     </span>
@@ -248,7 +274,7 @@ export function OpportunityList({ opportunities, loading = false, pageSize = 25 
           pageSize={itemsPerPage}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          className="border-t"
+          className="border-t dark:border-gray-700"
         />
       )}
 

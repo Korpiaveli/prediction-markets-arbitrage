@@ -2,19 +2,23 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { differenceInDays } from 'date-fns';
-import { OpportunityList } from '@/components/OpportunityList';
 import { OpportunityFilters } from '@/components/OpportunityFilters';
-import { StatsCards } from '@/components/StatsCards';
 import { ScannerStatus } from '@/components/ScannerStatus';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { RiskDashboard } from '@/components/RiskDashboard';
-import { ForecastPanel } from '@/components/ForecastPanel';
 import { AlertSettings } from '@/components/AlertSettings';
+import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { useWebSocket } from '@/lib/useWebSocket';
 import { apiClient } from '@/lib/api';
 import { showOpportunityNotification } from '@/lib/notifications';
+import { DashboardSkeleton } from '@/components/ui/skeleton';
 import type { ArbitrageOpportunity, StatsData, RiskMetrics, ForecastData, ForecastTiming, WebSocketMessage, FilterState, SortState, ExchangeName } from '@/types';
+
+const StatsCards = dynamic(() => import('@/components/StatsCards').then(mod => ({ default: mod.StatsCards })), { ssr: false });
+const OpportunityList = dynamic(() => import('@/components/OpportunityList').then(mod => ({ default: mod.OpportunityList })), { ssr: false });
+const RiskDashboard = dynamic(() => import('@/components/RiskDashboard').then(mod => ({ default: mod.RiskDashboard })), { ssr: false });
+const ForecastPanel = dynamic(() => import('@/components/ForecastPanel').then(mod => ({ default: mod.ForecastPanel })), { ssr: false });
 
 const DEFAULT_FILTERS: FilterState = {
   minProfit: 0,
@@ -176,27 +180,28 @@ export default function DashboardPage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-8">
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Arbitrage Scanner
                 </h1>
                 <nav className="hidden md:flex space-x-4">
-                  <Link href="/" className="text-primary-600 font-medium">Dashboard</Link>
-                  <Link href="/monitor" className="text-gray-600 hover:text-gray-900">Monitor</Link>
-                  <Link href="/positions" className="text-gray-600 hover:text-gray-900">Positions</Link>
-                  <Link href="/analytics" className="text-gray-600 hover:text-gray-900">Analytics</Link>
-                  <Link href="/settings" className="text-gray-600 hover:text-gray-900">Settings</Link>
+                  <Link href="/" className="text-primary-600 dark:text-primary-400 font-medium">Dashboard</Link>
+                  <Link href="/monitor" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Monitor</Link>
+                  <Link href="/positions" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Positions</Link>
+                  <Link href="/analytics" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Analytics</Link>
+                  <Link href="/settings" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Settings</Link>
                 </nav>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <DarkModeToggle />
                 <div className="relative">
                   <button
                     onClick={() => setShowAlertSettings(!showAlertSettings)}
-                    className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
+                    className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
                     title="Alert Settings"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,17 +222,17 @@ export default function DashboardPage() {
 
         <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           <div className="space-y-8">
-            {stats && <StatsCards stats={stats} />}
+            <StatsCards stats={stats} loading={loading} />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="bg-white shadow rounded-lg p-6">
+                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                   <div className="flex justify-between items-center mb-4">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-900">
+                      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                         Opportunities
                       </h2>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         Showing {filteredAndSortedOpportunities.length} of {opportunities.length}
                       </p>
                     </div>

@@ -6,7 +6,7 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
+      className={cn("animate-pulse rounded-md bg-gray-200 dark:bg-gray-700", className)}
       {...props}
     />
   )
@@ -29,7 +29,7 @@ function TableSkeleton({ rows = 5, columns = 8 }: { rows?: number; columns?: num
     <div className="overflow-x-auto">
       <table className="min-w-full">
         <thead>
-          <tr className="border-b bg-gray-50">
+          <tr className="border-b bg-gray-50 dark:bg-gray-800">
             {Array.from({ length: columns }).map((_, i) => (
               <th key={i} className="p-3 text-left">
                 <Skeleton className="h-4 w-20" />
@@ -49,7 +49,7 @@ function TableSkeleton({ rows = 5, columns = 8 }: { rows?: number; columns?: num
 
 function CardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <Skeleton className="h-4 w-24 mb-2" />
       <Skeleton className="h-8 w-32" />
     </div>
