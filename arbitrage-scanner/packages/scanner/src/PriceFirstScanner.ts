@@ -251,7 +251,68 @@ export class PriceFirstScanner {
       return false;
     }
 
+    if (this.questionTypeConflict(m1.title, m2.title)) {
+      return false;
+    }
+
     return true;
+  }
+
+  /**
+   * Detects question-type mismatches:
+   * - COUNT: "20 times", "how many", "number of"
+   * - THRESHOLD: "above 4.5%", "at least X", "more than Y"
+   * - SINGLE_EVENT: "by June 2026", "at meeting", "will X happen"
+   * - CUMULATIVE: "total X in 2025", "throughout the year"
+   */
+  private questionTypeConflict(title1: string, title2: string): boolean {
+    const t1Type = this.detectQuestionType(title1);
+    const t2Type = this.detectQuestionType(title2);
+
+    // If both have detected types and they differ, it's a conflict
+    if (t1Type && t2Type && t1Type !== t2Type) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private detectQuestionType(title: string): string | null {
+    const lower = title.toLowerCase();
+
+    // COUNT patterns: "X times", "how many times", "number of [events]"
+    if (/\d+\s*times\b/i.test(title) ||
+        /how\s+many\s+times/i.test(lower) ||
+        /number\s+of\s+(?:rate\s+)?cuts/i.test(lower) ||
+        /\d+\s+(?:rate\s+)?cuts?\b/i.test(title)) {
+      return 'COUNT';
+    }
+
+    // THRESHOLD patterns: "above X%", "at least X", "more/fewer than Y"
+    if (/(?:above|below|over|under)\s+[\d.]+%?/i.test(lower) ||
+        /(?:at\s+least|no\s+more\s+than|no\s+fewer\s+than)\s+\d+/i.test(lower) ||
+        /(?:more|fewer|less)\s+than\s+\d+/i.test(lower) ||
+        /\d+%?\s+or\s+(?:more|higher|lower|less)/i.test(lower)) {
+      return 'THRESHOLD';
+    }
+
+    // SINGLE_EVENT patterns: "by [date]", "at [meeting]", specific event occurrence
+    if (/\bby\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{1,2}\/\d{1,2}|end\s+of)/i.test(lower) ||
+        /\bat\s+(?:the\s+)?(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|next|fomc|meeting)/i.test(lower) ||
+        /(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{4}\s+meeting/i.test(lower) ||
+        /will\s+(?:the\s+)?fed\s+cut.*\bby\b/i.test(lower) ||
+        /next\s+(?:rate\s+)?(?:cut|hike|decision)/i.test(lower)) {
+      return 'SINGLE_EVENT';
+    }
+
+    // CUMULATIVE patterns: "total in 2025", "throughout", "during 2025"
+    if (/total\s+(?:\w+\s+)?(?:in|for|during)\s+20\d{2}/i.test(lower) ||
+        /throughout\s+20\d{2}/i.test(lower) ||
+        /in\s+20\d{2}\s*\?/i.test(lower) && /how\s+many/i.test(lower)) {
+      return 'CUMULATIVE';
+    }
+
+    return null;
   }
 
   private readonly US_STATES: Record<string, string> = {
