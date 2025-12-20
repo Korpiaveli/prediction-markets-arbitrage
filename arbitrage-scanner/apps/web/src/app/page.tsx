@@ -189,6 +189,7 @@ export default function DashboardPage() {
                   <Link href="/monitor" className="text-gray-600 hover:text-gray-900">Monitor</Link>
                   <Link href="/positions" className="text-gray-600 hover:text-gray-900">Positions</Link>
                   <Link href="/analytics" className="text-gray-600 hover:text-gray-900">Analytics</Link>
+                  <Link href="/settings" className="text-gray-600 hover:text-gray-900">Settings</Link>
                 </nav>
               </div>
               <div className="flex items-center gap-4">
@@ -256,13 +257,10 @@ export default function DashboardPage() {
                     onSortChange={setSort}
                   />
 
-                  {loading ? (
-                    <div className="text-center py-12 text-gray-500">
-                      Loading opportunities...
-                    </div>
-                  ) : (
-                    <OpportunityList opportunities={filteredAndSortedOpportunities} />
-                  )}
+                  <OpportunityList
+                    opportunities={filteredAndSortedOpportunities}
+                    loading={loading}
+                  />
                 </div>
               </div>
 
