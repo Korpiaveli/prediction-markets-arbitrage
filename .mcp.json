@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "vercel-v0": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/v0",
+      "headers": {
+        "Authorization": "Bearer v1:B0iodBsk4ZWVPJXWQDRQWocU:axsRBTIU5c5lzTBPwiYLKHgi"
+      }
+    }
+  }
+}
