@@ -432,6 +432,13 @@ export class PriceFirstScanner {
              /will\s+(?:be|become)\s+(?:the\s+)?nominee/i.test(t);
     };
 
+    const isVoteBehavior = (t: string): boolean => {
+      return /will\s+.*\s+vote\s+(?:for|against|yes|no)/i.test(t) ||
+             /\bvote\s+for\s+.*\s+nominee/i.test(t) ||
+             /senator.*vote/i.test(t) ||
+             /\bvoting\s+(?:for|against)/i.test(t);
+    };
+
     const t1Occur = isOccurrence(title1);
     const t2Occur = isOccurrence(title2);
     const t1Win = isWinner(title1);
@@ -440,6 +447,8 @@ export class PriceFirstScanner {
     const t2Run = isRunning(title2);
     const t1Nom = isNominee(title1);
     const t2Nom = isNominee(title2);
+    const t1Vote = isVoteBehavior(title1);
+    const t2Vote = isVoteBehavior(title2);
 
     if ((t1Occur && t2Win) || (t1Win && t2Occur)) {
       return true;
@@ -455,6 +464,11 @@ export class PriceFirstScanner {
 
     // Nominee vs winner conflict (being nominated != winning general election)
     if ((t1Nom && t2Win) || (t1Win && t2Nom)) {
+      return true;
+    }
+
+    // Vote behavior vs identity conflict (voting for X != who is X)
+    if ((t1Vote && !t2Vote) || (t2Vote && !t1Vote)) {
       return true;
     }
 
