@@ -3,12 +3,14 @@ export type { GetMarketsOptions } from './base/BaseExchange.js';
 export { KalshiAdapter } from './kalshi/KalshiAdapter.js';
 export { PolymarketAdapter } from './polymarket/PolymarketAdapter.js';
 export { PredictItAdapter } from './predictit/PredictItAdapter.js';
+export { DraftKingsAdapter } from './draftkings/DraftKingsAdapter.js';
 export { MockExchange } from './mock/MockExchange.js';
 
 // Re-import for factory functions
 import { KalshiAdapter } from './kalshi/KalshiAdapter.js';
 import { PolymarketAdapter } from './polymarket/PolymarketAdapter.js';
 import { PredictItAdapter } from './predictit/PredictItAdapter.js';
+import { DraftKingsAdapter } from './draftkings/DraftKingsAdapter.js';
 import { MockExchange } from './mock/MockExchange.js';
 import { ExchangeConfig } from '@arb/core';
 
@@ -27,4 +29,8 @@ export function createPredictItAdapter(config?: ExchangeConfig) {
 
 export function createMockExchange(config?: ExchangeConfig) {
   return new MockExchange(config);
+}
+
+export function createDraftKingsAdapter(config?: ExchangeConfig) {
+  return new DraftKingsAdapter(config);
 }

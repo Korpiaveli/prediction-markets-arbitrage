@@ -324,6 +324,13 @@ export const DEFAULT_RATE_LIMITS: Record<ExchangeName, RateLimitConfig> = {
     maxRetries: 3,
     backoffMultiplier: 2
   },
+  DRAFTKINGS: {
+    maxRequestsPerMinute: 180,
+    maxConcurrent: 5,
+    retryOnRateLimit: true,
+    maxRetries: 3,
+    backoffMultiplier: 2
+  },
   MOCK: {
     maxRequestsPerMinute: 1000,
     maxConcurrent: 10,

@@ -1,5 +1,5 @@
 import { IExchange } from '@arb/core';
-import { KalshiAdapter, PolymarketAdapter, PredictItAdapter } from '@arb/exchanges';
+import { KalshiAdapter, PolymarketAdapter, PredictItAdapter, DraftKingsAdapter } from '@arb/exchanges';
 
 export interface ExchangeFactoryOptions {
   exchanges?: string[];
@@ -7,7 +7,7 @@ export interface ExchangeFactoryOptions {
   testMode?: boolean;
 }
 
-export type ExchangeName = 'kalshi' | 'polymarket' | 'predictit';
+export type ExchangeName = 'kalshi' | 'polymarket' | 'predictit' | 'draftkings';
 
 export class ExchangeFactory {
   private static readonly AVAILABLE_EXCHANGES: Record<ExchangeName, {
@@ -31,6 +31,12 @@ export class ExchangeFactory {
     predictit: {
       name: 'PredictIt',
       description: 'CFTC-approved political prediction market (US politics only)',
+      supportsHistorical: false,
+      usAccessible: true
+    },
+    draftkings: {
+      name: 'DraftKings Predictions',
+      description: 'CFTC-regulated prediction market (sports, politics, economics) - API coming Q1 2026',
       supportsHistorical: false,
       usAccessible: true
     }
@@ -86,6 +92,12 @@ export class ExchangeFactory {
 
       case 'predictit':
         return new PredictItAdapter({
+          testMode
+        });
+
+      case 'draftkings':
+        return new DraftKingsAdapter({
+          filterSports,
           testMode
         });
 
