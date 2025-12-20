@@ -411,19 +411,25 @@ export class PriceFirstScanner {
     const isWinner = (t: string): boolean => {
       return /(?:who|which)\s+.*\s+(?:win|winner|elected)/i.test(t) ||
              /winner\s*[?:]/i.test(t) ||
-             /will\s+.*\s+(?:win|be\s+elected)/i.test(t);
+             /will\s+.*\s+(?:win|be\s+elected)/i.test(t) ||
+             /party\s+winner/i.test(t) ||
+             /\bwinner\b.*\?/i.test(t);
     };
 
     const isRunning = (t: string): boolean => {
       return /will\s+.*\s+run\b/i.test(t) ||
              /who\s+will\s+run/i.test(t) ||
-             /running\s+for/i.test(t);
+             /running\s+for/i.test(t) ||
+             /run\s+for\s+.*\s+(?:nomination|president)/i.test(t);
     };
 
     const isNominee = (t: string): boolean => {
-      return /nominee\s*[?:]/i.test(t) ||
+      return /\bnominee\b.*\?/i.test(t) ||
+             /\bnominee\s*:/i.test(t) ||
              /who\s+will\s+.*\s+nominate/i.test(t) ||
-             /nomination\s+winner/i.test(t);
+             /nomination\s+winner/i.test(t) ||
+             /(?:presidential|democratic|republican)\s+nominee\b/i.test(t) ||
+             /will\s+(?:be|become)\s+(?:the\s+)?nominee/i.test(t);
     };
 
     const t1Occur = isOccurrence(title1);
@@ -444,6 +450,11 @@ export class PriceFirstScanner {
     }
 
     if ((t1Run && t2Win) || (t1Win && t2Run)) {
+      return true;
+    }
+
+    // Nominee vs winner conflict (being nominated != winning general election)
+    if ((t1Nom && t2Win) || (t1Win && t2Nom)) {
       return true;
     }
 
