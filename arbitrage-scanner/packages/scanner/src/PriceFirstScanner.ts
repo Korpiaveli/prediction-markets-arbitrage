@@ -255,7 +255,99 @@ export class PriceFirstScanner {
       return false;
     }
 
+    if (this.thresholdValueConflict(m1.title, m2.title)) {
+      return false;
+    }
+
+    if (this.unrelatedEventConflict(m1.title, m2.title)) {
+      return false;
+    }
+
     return true;
+  }
+
+  /**
+   * Detects threshold value conflicts where same metric has different thresholds.
+   * E.g., "approval below 41%" vs "approval 44.4% to 44.6%"
+   */
+  private thresholdValueConflict(title1: string, title2: string): boolean {
+    const nums1 = this.extractThresholdNumbers(title1);
+    const nums2 = this.extractThresholdNumbers(title2);
+
+    // If both have numeric thresholds, check if they're compatible
+    if (nums1.length > 0 && nums2.length > 0) {
+      // Check if any numbers are close enough to be the same threshold
+      const hasOverlap = nums1.some(n1 =>
+        nums2.some(n2 => Math.abs(n1 - n2) < 2) // Within 2 points
+      );
+
+      if (!hasOverlap) {
+        // Check if titles share threshold-related keywords
+        const thresholdKeywords = /\b(approval|rating|poll|percent|%)\b/i;
+        if (thresholdKeywords.test(title1) && thresholdKeywords.test(title2)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private extractThresholdNumbers(title: string): number[] {
+    const numbers: number[] = [];
+
+    // Match percentages and standalone numbers in threshold context
+    const patterns = [
+      /(\d+\.?\d*)\s*%/g,           // 41%, 44.4%
+      /(?:above|below|over|under)\s+(\d+\.?\d*)/gi,  // above 41
+      /(\d+\.?\d*)\s+to\s+(\d+\.?\d*)/g,  // 44.4 to 44.6
+    ];
+
+    for (const pattern of patterns) {
+      let match;
+      while ((match = pattern.exec(title)) !== null) {
+        for (let i = 1; i < match.length; i++) {
+          if (match[i]) {
+            numbers.push(parseFloat(match[i]));
+          }
+        }
+      }
+    }
+
+    return numbers;
+  }
+
+  /**
+   * Detects unrelated events that share keywords but are fundamentally different.
+   * E.g., "Trump visit Switzerland" vs "House impeach Trump"
+   */
+  private unrelatedEventConflict(title1: string, title2: string): boolean {
+    // Define mutually exclusive event categories
+    const eventCategories = [
+      { name: 'travel', pattern: /\b(visit|travel|trip\s+to|go\s+to)\s+\w+/i },
+      { name: 'impeachment', pattern: /\b(impeach|impeachment|articles\s+of\s+impeachment)/i },
+      { name: 'resignation', pattern: /\b(resign|resignation|step\s+down)/i },
+      { name: 'death', pattern: /\b(die|death|pass\s+away|deceased)/i },
+      { name: 'indictment', pattern: /\b(indict|indictment|charged|criminal\s+charges)/i },
+      { name: 'pardon', pattern: /\b(pardon|clemency|commute)/i },
+      { name: 'debate', pattern: /\b(debate|debating)/i },
+      { name: 'endorsement', pattern: /\b(endorse|endorsement|back|backing)/i },
+    ];
+
+    let cat1: string | null = null;
+    let cat2: string | null = null;
+
+    for (const cat of eventCategories) {
+      if (cat.pattern.test(title1)) cat1 = cat.name;
+      if (cat.pattern.test(title2)) cat2 = cat.name;
+    }
+
+    // If both have different categories, they're unrelated
+    if (cat1 && cat2 && cat1 !== cat2) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -328,14 +420,31 @@ export class PriceFirstScanner {
     'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
   };
 
+  private readonly STATE_ALIASES: Record<string, string> = {
+    'mass': 'MA', 'mass.': 'MA', 'calif': 'CA', 'calif.': 'CA', 'penn': 'PA', 'penn.': 'PA',
+    'wash': 'WA', 'wash.': 'WA', 'mich': 'MI', 'mich.': 'MI', 'minn': 'MN', 'minn.': 'MN',
+    'wisc': 'WI', 'wisc.': 'WI', 'ariz': 'AZ', 'ariz.': 'AZ', 'colo': 'CO', 'colo.': 'CO',
+    'conn': 'CT', 'conn.': 'CT', 'tenn': 'TN', 'tenn.': 'TN', 'okla': 'OK', 'okla.': 'OK',
+    'ore': 'OR', 'ore.': 'OR', 'tex': 'TX', 'tex.': 'TX', 'fla': 'FL', 'fla.': 'FL',
+  };
+
   private extractStates(title: string): string[] {
     const states: string[] = [];
     const lower = title.toLowerCase();
 
+    // Check full state names
     for (const [name, abbr] of Object.entries(this.US_STATES)) {
       if (lower.includes(name)) states.push(abbr);
     }
 
+    // Check common aliases (Mass., Calif., etc.)
+    for (const [alias, abbr] of Object.entries(this.STATE_ALIASES)) {
+      if (lower.includes(alias) && !states.includes(abbr)) {
+        states.push(abbr);
+      }
+    }
+
+    // Check standard two-letter abbreviations
     const abbrPattern = /\b(AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY)(?:-\d+)?\b/g;
     const matches = title.match(abbrPattern);
     if (matches) {
@@ -381,13 +490,19 @@ export class PriceFirstScanner {
       return /\b[A-Z]{2}-\d{1,2}\b/.test(t) ||
              /\brace\s+(?:in|for)\b/i.test(t) ||
              /gubernatorial/i.test(t) ||
-             /senate\s+(?:race|seat)\s+in/i.test(t);
+             /senate\s+(?:race|seat)\s+in/i.test(t) ||
+             /\bmayoral\b/i.test(t) ||
+             /\bmayor\b/i.test(t) ||
+             /\bD\.?C\.?\b.*(?:primary|election|race)/i.test(t) ||
+             /\b(?:city|county)\s+(?:council|election)/i.test(t) ||
+             /primary\s+in\s+\w+/i.test(t);
     };
 
     const isAggregate = (t: string): boolean => {
       return /which\s+party\s+will\s+win\s+the\s+house/i.test(t) ||
              /win\s+the\s+senate\b(?!\s+race|\s+seat)/i.test(t) ||
-             /control\s+of\s+(?:the\s+)?(?:house|senate)/i.test(t);
+             /control\s+of\s+(?:the\s+)?(?:house|senate)/i.test(t) ||
+             /party\s+will\s+win\s+the\s+(?:house|senate)/i.test(t);
     };
 
     const t1Specific = isSpecificRace(title1);
@@ -582,20 +697,59 @@ export class PriceFirstScanner {
   }
 
   private candidateNamesConflict(m1: Market, m2: Market): boolean {
-    const c1 = this.extractCandidateName(m1.title);
-    const c2 = this.extractCandidateName(m2.title);
+    const c1Title = this.extractCandidateName(m1.title);
+    const c2Title = this.extractCandidateName(m2.title);
+    const c1Id = this.extractCandidateFromId(m1.id);
+    const c2Id = this.extractCandidateFromId(m2.id);
+
+    // Get best candidate identifier for each market
+    const c1 = c1Title || c1Id;
+    const c2 = c2Title || c2Id;
 
     if (c1 && c2) {
-      const c1Words = c1.split(/\s+/);
-      const c2Words = c2.split(/\s+/);
-
-      const hasOverlap = c1Words.some(w1 =>
-        c2Words.some(w2 => w1 === w2 || w1.includes(w2) || w2.includes(w1))
-      );
-
-      if (!hasOverlap) {
+      // Check if candidate codes/names are compatible
+      if (!this.candidatesMatch(c1, c2)) {
         return true;
       }
+    }
+
+    // If one has a candidate and the other doesn't, check if it's a multi-outcome vs specific
+    if ((c1Title || c2Title) && (c1Id || c2Id)) {
+      const titleCandidate = c1Title || c2Title;
+      const idCandidate = c1Id || c2Id;
+
+      if (titleCandidate && idCandidate && !this.candidatesMatch(titleCandidate, idCandidate)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private extractCandidateFromId(marketId: string): string | null {
+    // Kalshi pattern: KXMARKET-YY-CODE where CODE is candidate abbreviation
+    const kalshiMatch = marketId.match(/^KX\w+-\d+-([A-Z]{3,5})$/);
+    if (kalshiMatch) {
+      return kalshiMatch[1].toLowerCase();
+    }
+    return null;
+  }
+
+  private candidatesMatch(c1: string, c2: string): boolean {
+    const n1 = c1.toLowerCase().replace(/[^a-z]/g, '');
+    const n2 = c2.toLowerCase().replace(/[^a-z]/g, '');
+
+    // Exact match
+    if (n1 === n2) return true;
+
+    // One contains the other
+    if (n1.includes(n2) || n2.includes(n1)) return true;
+
+    // First 3-4 letters match (for abbreviations like NASF → Nasralla)
+    if (n1.length >= 3 && n2.length >= 3) {
+      const prefix1 = n1.slice(0, 4);
+      const prefix2 = n2.slice(0, 4);
+      if (n2.startsWith(prefix1) || n1.startsWith(prefix2)) return true;
     }
 
     return false;
