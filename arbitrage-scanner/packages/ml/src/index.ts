@@ -31,8 +31,33 @@ export { ConfidenceTracker } from './ConfidenceTracker';
 export { MonteCarloSimulator } from './MonteCarloSimulator';
 export { KalshiTickerParser, kalshiTickerParser, PredictItParser, predictItParser } from './parsers';
 export type { ParsedKalshiTicker, ParsedPredictItMarket } from './parsers';
-export { HardBlockerValidator, hardBlockerValidator, ManualWhitelist, manualWhitelist } from './validators';
-export type { HardBlockerResult, BlockerSeverity, WhitelistEntry } from './validators';
+export { HardBlockerValidator, hardBlockerValidator, ManualWhitelist, manualWhitelist, TieredValidator, tieredValidator } from './validators';
+export type { HardBlockerResult, BlockerSeverity, WhitelistEntry, TieredValidationResult, TierResult, ValidationTier, TieredValidatorConfig } from './validators';
+export { EntityExtractor, entityExtractor } from './ner';
+export type {
+  ExtractedEntities,
+  PersonEntity,
+  LocationEntity,
+  DateEntity,
+  NumericEntity,
+  OrganizationEntity,
+  EntityMatchResult,
+  EntityConflict
+} from './ner';
+export { SemanticFramer, semanticFramer } from './frames';
+export type {
+  SemanticFrame,
+  FrameMatchResult,
+  FrameConflict,
+  QuestionType
+} from './frames';
+export { LLMValidator, llmValidator } from './llm';
+export type {
+  LLMValidationRequest,
+  LLMValidationResponse,
+  LLMValidatorConfig,
+  LLMValidatorStats
+} from './llm';
 export { ChromaVectorStore, getVectorStore, resetVectorStore } from './vector';
 export type { SimilarMarket, VectorFilters, ChromaVectorStoreConfig } from './vector';
 

@@ -4,7 +4,7 @@ import {
   IExchange,
   FeeStructure
 } from '@arb/core';
-import { HardBlockerValidator, ManualWhitelist } from '@arb/ml';
+import { HardBlockerValidator, ManualWhitelist, EntityExtractor, SemanticFramer } from '@arb/ml';
 import {
   PriceCandidate,
   PriceScreenConfig,
@@ -29,11 +29,15 @@ const DEFAULT_FEES: FeeStructure = {
 export class PriceFirstScanner {
   private validator: HardBlockerValidator;
   private whitelist: ManualWhitelist;
+  private entityExtractor: EntityExtractor;
+  private semanticFramer: SemanticFramer;
   private fees: FeeStructure;
 
   constructor(fees: FeeStructure = DEFAULT_FEES) {
     this.validator = new HardBlockerValidator();
     this.whitelist = new ManualWhitelist();
+    this.entityExtractor = new EntityExtractor();
+    this.semanticFramer = new SemanticFramer();
     this.fees = fees;
   }
 
@@ -263,7 +267,53 @@ export class PriceFirstScanner {
       return false;
     }
 
+    if (this.entityConflict(m1.title, m2.title)) {
+      return false;
+    }
+
+    if (this.frameConflict(m1.title, m2.title)) {
+      return false;
+    }
+
     return true;
+  }
+
+  private frameConflict(title1: string, title2: string): boolean {
+    try {
+      const frame1 = this.semanticFramer.extractFrame(title1);
+      const frame2 = this.semanticFramer.extractFrame(title2);
+      const result = this.semanticFramer.compareFrames(frame1, frame2);
+
+      if (!result.framesMatch) {
+        const criticalConflict = result.conflicts.find(c => c.severity === 'critical');
+        if (criticalConflict) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
+  private entityConflict(title1: string, title2: string): boolean {
+    try {
+      const entities1 = this.entityExtractor.extract(title1);
+      const entities2 = this.entityExtractor.extract(title2);
+      const result = this.entityExtractor.compareEntities(entities1, entities2);
+
+      if (!result.entitiesMatch) {
+        const criticalConflict = result.conflicts.find(c => c.severity === 'critical');
+        if (criticalConflict) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch {
+      return false;
+    }
   }
 
   /**
